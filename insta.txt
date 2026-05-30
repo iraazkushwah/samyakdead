@@ -1,0 +1,1205 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>लोकबंधु मैगज़ीन - राजस्थान समसामयिकी (11-20 मई 2026)</title>
+    <!-- आवश्यक गूगल फ़ॉन्ट्स इम्पोर्ट -->
+    <link href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700&family=Yatra+One&display=swap" rel="stylesheet">
+    
+    <style>
+        /* CSS वेरिएबल्स एवं डिज़ाइन टोकन्स */
+        :root {
+            --primary-color: #8b0000;      /* राजसी गहरा लाल (Maroon) */
+            --secondary-color: #0e4b5e;    /* रॉयल टील (Teal) */
+            --accent-color: #c5a059;       /* विंटेज गोल्ड (Gold) */
+            --border-gold: #d8c29d;        /* हल्का गोल्ड बॉर्डर */
+            --text-dark: #1e1e1e;          /* मुख्य कोयला रंग का टेक्स्ट */
+            --text-light: #4e4e4e;         /* हल्का ग्रे टेक्स्ट */
+            --bg-cream: #fcfaf5;           /* हल्का क्रीम बैकग्राउंड (थैंक यू कार्ड हेतु) */
+        }
+
+        /* बुनियादी रीसेट */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #f0f0f0;
+            font-family: 'Mukta', 'Poppins', sans-serif;
+            color: var(--text-dark);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 0;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        /* मैगज़ीन कंटेनर */
+        .magazine-container {
+            width: 210mm;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        /* मानक A4 पेज */
+        .page {
+            width: 210mm;
+            height: 297mm;
+            background-color: #ffffff;
+            position: relative;
+            padding: 22mm 20mm; /* उचित पैडिंग ताकि सामग्री बॉर्डर को न छुए */
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            page-break-after: always;
+        }
+
+        /* विंटेज डबल-बॉर्डर */
+        /* बाहरी मरून बॉर्डर */
+        .page::before {
+            content: '';
+            position: absolute;
+            top: 10mm;
+            bottom: 10mm;
+            left: 10mm;
+            right: 10mm;
+            border: 2px solid var(--primary-color);
+            pointer-events: none;
+            z-index: 5;
+        }
+        /* आंतरिक गोल्ड बॉर्डर */
+        .page::after {
+            content: '';
+            position: absolute;
+            top: 12mm;
+            bottom: 12mm;
+            left: 12mm;
+            right: 12mm;
+            border: 1px solid var(--accent-color);
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        /* अलंकृत विंटेज सोने के कोने (Ornamental Corners) */
+        .corner-decor {
+            position: absolute;
+            width: 22px;
+            height: 22px;
+            border-color: var(--accent-color);
+            border-style: solid;
+            border-width: 0;
+            pointer-events: none;
+            z-index: 10;
+        }
+        .top-left {
+            top: 11mm;
+            left: 11mm;
+            border-top-width: 3px;
+            border-left-width: 3px;
+        }
+        .top-right {
+            top: 11mm;
+            right: 11mm;
+            border-top-width: 3px;
+            border-right-width: 3px;
+        }
+        .bottom-left {
+            bottom: 11mm;
+            left: 11mm;
+            border-bottom-width: 3px;
+            border-left-width: 3px;
+        }
+        .bottom-right {
+            bottom: 11mm;
+            right: 11mm;
+            border-bottom-width: 3px;
+            border-right-width: 3px;
+        }
+
+        /* शिरोरेखा टूटने से बचाने के नियम (No Letter Spacing) */
+        h1, h2, h3, h4, h5, p, li, span, td, th {
+            letter-spacing: 0 !important;
+        }
+
+        /* ==================== COVER PAGE STYLING ==================== */
+        .cover-page {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            text-align: center;
+            padding: 25mm 20mm;
+        }
+
+        .cover-header {
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .cover-title {
+            font-family: 'Yatra One', cursive;
+            font-size: 72px;
+            color: var(--primary-color);
+            line-height: 1.1;
+            margin-bottom: 5px;
+            text-shadow: 2px 2px 0px rgba(197, 160, 89, 0.3);
+        }
+
+        .cover-tagline {
+            font-size: 22px;
+            color: var(--secondary-color);
+            font-weight: 700;
+            border-top: 2px double var(--accent-color);
+            border-bottom: 2px double var(--accent-color);
+            padding: 4px 25px;
+            display: inline-block;
+            margin-top: 10px;
+        }
+
+        .cover-subtitle {
+            font-size: 24px;
+            color: var(--primary-color);
+            font-weight: 800;
+            margin-top: 30px;
+            background: rgba(197, 160, 89, 0.1);
+            padding: 8px 30px;
+            border-radius: 4px;
+            border: 1px dashed var(--accent-color);
+        }
+
+        /* विषयसूची बॉक्स */
+        .cover-index-box {
+            width: 100%;
+            margin: 30px 0;
+            background: #fffdf9;
+            border: 1px solid var(--border-gold);
+            padding: 20px;
+            border-radius: 6px;
+            box-shadow: inset 0 0 10px rgba(197, 160, 89, 0.1);
+        }
+
+        .index-title {
+            font-size: 20px;
+            color: var(--primary-color);
+            font-weight: 800;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .index-title::before, .index-title::after {
+            content: '✿';
+            color: var(--accent-color);
+        }
+
+        .magazine-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .magazine-table th {
+            background-color: var(--primary-color);
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 16px;
+            padding: 8px 12px;
+            text-align: left;
+            border: 1px solid var(--border-gold);
+        }
+
+        .magazine-table td {
+            padding: 7px 12px;
+            font-size: 15px;
+            font-weight: 600;
+            border: 1px solid var(--border-gold);
+            text-align: left;
+        }
+
+        .magazine-table tr:nth-child(even) {
+            background-color: rgba(197, 160, 89, 0.05);
+        }
+
+        .cover-footer-tag {
+            font-size: 18px;
+            color: var(--primary-color);
+            font-weight: 700;
+            margin-top: auto;
+        }
+
+
+        /* ==================== INNER PAGES STYLING ==================== */
+        /* पेज हेडर */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px double var(--primary-color);
+            padding-bottom: 6px;
+            margin-bottom: 12px;
+            width: 100%;
+        }
+
+        .header-left {
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--primary-color);
+        }
+
+        .header-right {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--secondary-color);
+            background: rgba(14, 75, 94, 0.08);
+            padding: 2px 10px;
+            border-radius: 12px;
+            border: 1px solid rgba(14, 75, 94, 0.2);
+        }
+
+        /* मुख्य कंटेंट ब्लॉक */
+        .page-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            overflow: hidden;
+        }
+
+        /* श्रेणी शीर्षक (Section Header) */
+        .section-title {
+            background-color: var(--primary-color);
+            color: #ffffff;
+            font-size: 18px;
+            font-weight: 700;
+            padding: 6px 15px;
+            border-left: 6px solid var(--secondary-color);
+            border-radius: 0 4px 4px 0;
+            margin: 6px 0;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+            display: inline-block;
+            width: max-content;
+            max-width: 100%;
+        }
+
+        /* समाचार टॉपिक शीर्षक */
+        .topic-title {
+            font-size: 15px;
+            font-weight: 800;
+            color: var(--secondary-color);
+            margin-top: 6px;
+            padding-bottom: 3px;
+            border-bottom: 1.5px dashed var(--accent-color);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            line-height: 1.3;
+        }
+
+        .topic-title::before {
+            content: "🔶";
+            font-size: 12px;
+        }
+
+        /* बुलेट लिस्ट */
+        .points-list {
+            list-style: none;
+            padding-left: 5px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .points-list li {
+            font-size: 13.5px;
+            line-height: 1.45;
+            font-weight: 500; /* थोड़ा मोटा और स्पष्ट */
+            color: var(--text-dark);
+            position: relative;
+            padding-left: 15px;
+            text-align: justify;
+        }
+
+        .points-list li::before {
+            content: "•";
+            color: var(--primary-color);
+            font-size: 18px;
+            position: absolute;
+            left: 2px;
+            top: -1px;
+        }
+
+        .points-list li strong {
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+
+        /* विशेष हाइलाइट बॉक्स */
+        .highlight-box {
+            background: rgba(197, 160, 89, 0.08);
+            border: 1px solid var(--border-gold);
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin: 4px 0;
+        }
+
+        /* पेज फुटर */
+        .page-footer {
+            margin-top: auto;
+            border-top: 1px solid var(--accent-color);
+            padding-top: 6px;
+            text-align: center;
+            width: 100%;
+        }
+
+        .page-num {
+            font-size: 13px;
+            font-weight: 800;
+            color: var(--primary-color);
+        }
+
+        /* ==================== THANK YOU BLOCK STYLING ==================== */
+        .thankyou-card {
+            background-color: var(--bg-cream);
+            border: 3px double var(--accent-color);
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            margin-top: auto;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            width: 100%;
+        }
+
+        .thankyou-title {
+            font-family: 'Yatra One', cursive;
+            font-size: 26px;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+
+        .thankyou-brand {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--secondary-color);
+        }
+
+        .thankyou-tagline {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-top: 2px;
+        }
+
+        /* ==========================================
+           THEME & SHAPE-MORPHING OVERRIDES
+           ========================================== */
+
+        /* 1. ROYAL NAVY THEME OVERRIDES */
+        body.theme-royal-navy {
+            --primary-color: #0e2743;
+            --secondary-color: #c49429;
+            --accent-color: #be2e2e;
+        }
+        body.theme-royal-navy .section-title {
+            background-color: transparent !important;
+            background: transparent !important;
+            color: var(--primary-color) !important;
+            border-left: none !important;
+            border-right: none !important;
+            border-top: 3px double var(--secondary-color) !important;
+            border-bottom: 3px double var(--secondary-color) !important;
+            border-radius: 0 !important;
+            text-align: center !important;
+            margin: 12px auto !important;
+            display: block !important;
+            width: max-content !important;
+            padding: 8px 25px !important;
+            box-shadow: none !important;
+        }
+        body.theme-royal-navy .topic-title {
+            color: var(--primary-color) !important;
+            border-bottom: 2px double var(--secondary-color) !important;
+            justify-content: center !important;
+            width: max-content !important;
+            margin: 8px auto !important;
+        }
+        body.theme-royal-navy .topic-title::before {
+            display: none !important;
+        }
+
+        /* 2. EMERALD FOREST THEME OVERRIDES */
+        body.theme-emerald-cream {
+            --primary-color: #083c2a;
+            --secondary-color: #b77a20;
+            --accent-color: #2b6cb0;
+        }
+        body.theme-emerald-cream .section-title {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #0d5f43 100%) !important;
+            background-color: var(--primary-color) !important;
+            color: #ffffff !important;
+            border-left: none !important;
+            border-right: none !important;
+            border: 2px solid var(--secondary-color) !important;
+            border-radius: 50px !important;
+            padding: 6px 24px !important;
+            display: inline-block !important;
+            width: max-content !important;
+            box-shadow: 0 4px 10px rgba(8, 60, 42, 0.15) !important;
+        }
+        body.theme-emerald-cream .topic-title {
+            color: var(--primary-color) !important;
+            background-color: rgba(8, 60, 42, 0.04) !important;
+            border-left: 4px solid var(--secondary-color) !important;
+            border-bottom: none !important;
+            padding: 5px 12px !important;
+            border-radius: 0 8px 8px 0 !important;
+            width: 100% !important;
+            justify-content: flex-start !important;
+        }
+
+        /* 3. MIDNIGHT GOLD THEME OVERRIDES */
+        body.theme-midnight-gold {
+            --primary-color: #151b26;
+            --secondary-color: #c99324;
+            --accent-color: #2b8c8a;
+        }
+        body.theme-midnight-gold .section-title {
+            background: linear-gradient(to right, var(--primary-color), rgba(21, 27, 38, 0.05)) !important;
+            color: #ffffff !important;
+            border-left: 6px solid var(--accent-color) !important;
+            border-bottom: 2px solid var(--secondary-color) !important;
+            border-radius: 4px 0 0 4px !important;
+            border-right: none !important;
+            border-top: none !important;
+            padding: 6px 20px !important;
+            display: block !important;
+            width: 100% !important;
+            box-shadow: none !important;
+        }
+        body.theme-midnight-gold .topic-title {
+            color: var(--accent-color) !important;
+            border-left: 3px solid var(--secondary-color) !important;
+            border-bottom: 2px solid var(--primary-color) !important;
+            padding-left: 8px !important;
+            border-right: none !important;
+            border-top: none !important;
+            width: 100% !important;
+            justify-content: flex-start !important;
+        }
+
+        /* PREMIUM COMPONENTS CSS */
+        .personality-feature-card {
+            display: flex;
+            gap: 20px;
+            background: rgba(197, 163, 83, 0.04);
+            border: 1.5px solid var(--accent-color);
+            border-radius: 10px;
+            padding: 16px;
+            margin: 12px 0;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+        }
+        .personality-avatar-wrapper {
+            flex-shrink: 0;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 3px solid var(--accent-color);
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-size: 32px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        .personality-info {
+            flex-grow: 1;
+        }
+        .personality-name {
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--primary-color);
+            margin-bottom: 4px;
+        }
+        .personality-title {
+            font-size: 11.5px;
+            font-weight: 600;
+            color: var(--secondary-color);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+        .personality-description {
+            font-size: 12.5px;
+            line-height: 1.4;
+            color: #333333;
+        }
+
+        .stats-callout-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 12px;
+            margin: 12px 0;
+        }
+        .stat-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.8), rgba(250, 250, 250, 0.9));
+            border: 1px solid var(--accent-color);
+            border-radius: 6px;
+            padding: 12px;
+            text-align: center;
+            transition: transform 0.2s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+        }
+        .stat-number {
+            font-size: 26px;
+            font-weight: 900;
+            color: var(--primary-color);
+            margin-bottom: 2px;
+        }
+        .stat-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--secondary-color);
+            text-transform: uppercase;
+        }
+        .stat-desc {
+            font-size: 11px;
+            color: #64748b;
+            margin-top: 4px;
+        }
+
+        .quick-facts-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin: 12px 0;
+        }
+        .fact-card {
+            background: #ffffff;
+            border-left: 4.5px solid var(--secondary-color);
+            border-top: 1px solid rgba(0, 0, 0, 0.06);
+            border-right: 1px solid rgba(0, 0, 0, 0.06);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+            border-radius: 4px;
+            padding: 10px 12px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+        }
+        .fact-title {
+            font-size: 12px;
+            font-weight: 800;
+            color: var(--secondary-color);
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .fact-desc {
+            font-size: 11.5px;
+            color: #475569;
+            line-height: 1.35;
+        }
+
+        .announcement-alert-box {
+            background: linear-gradient(135deg, rgba(197, 163, 83, 0.05), rgba(29, 110, 165, 0.02));
+            border-left: 6px solid var(--primary-color);
+            border-top: 1px solid rgba(197, 163, 83, 0.2);
+            border-right: 1px solid rgba(197, 163, 83, 0.2);
+            border-bottom: 1px solid rgba(197, 163, 83, 0.2);
+            border-radius: 6px;
+            padding: 15px;
+            margin: 15px 0;
+            position: relative;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+        }
+        .announcement-title {
+            font-size: 14.5px;
+            font-weight: 800;
+            color: var(--primary-color);
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .announcement-content {
+            font-size: 12.5px;
+            line-height: 1.45;
+            color: #334155;
+        }
+
+        /* प्रिंट मीडिया क्वेरी */
+        @media print {
+            body {
+                background-color: #ffffff;
+                padding: 0;
+            }
+            .page {
+                box-shadow: none;
+                margin-bottom: 0;
+            }
+            .magazine-container {
+                gap: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="magazine-container">
+
+        <!-- ==================== PAGE 1: COVER PAGE ==================== -->
+        <div class="page cover-page">
+            <div class="corner-decor top-left"></div>
+            <div class="corner-decor top-right"></div>
+            <div class="corner-decor bottom-left"></div>
+            <div class="corner-decor bottom-right"></div>
+
+            <div class="cover-header">
+                <div class="cover-title">लोकबंधु</div>
+                <div class="cover-tagline">कोचिंग नहीं क्रांति</div>
+                <div class="cover-subtitle">राजस्थान समसामयिकी : 11-20 MAY 2026</div>
+            </div>
+
+            <div class="cover-index-box">
+                <div class="index-title">विषयसूची (Index)</div>
+                <table class="magazine-table">
+                    <thead>
+                        <tr>
+                            <th>विषयवस्तु</th>
+                            <th>पेज नं.</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>📚 योजनाएँ एवं नीतियाँ</td>
+                            <td>2 - 3</td>
+                        </tr>
+                        <tr>
+                            <td>🎪 महोत्सव / मेले / कार्यक्रम</td>
+                            <td>3 - 4</td>
+                        </tr>
+                        <tr>
+                            <td>🤝 आर्थिक विकास व समझौते</td>
+                            <td>4 - 5</td>
+                        </tr>
+                        <tr>
+                            <td>👤 चर्चित व्यक्तित्व</td>
+                            <td>5 - 6</td>
+                        </tr>
+                        <tr>
+                            <td>🏆 पुरस्कार</td>
+                            <td>6 - 7</td>
+                        </tr>
+                        <tr>
+                            <td>📢 प्रमुख अभियान</td>
+                            <td>7</td>
+                        </tr>
+                        <tr>
+                            <td>🏅 खेल समाचार</td>
+                            <td>7 - 9</td>
+                        </tr>
+                        <tr>
+                            <td>🔮 विविध घटनाक्रम</td>
+                            <td>9 - 10</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="cover-footer-tag">
+                टैगलाइनः कोचिंग नहीं क्रांति
+            </div>
+            
+            <div class="page-footer">
+                <div class="page-num">पेज - 1</div>
+            </div>
+        </div>
+
+
+        <!-- ==================== PAGE 2 ==================== -->
+        <div class="page">
+            <div class="corner-decor top-left"></div>
+            <div class="corner-decor top-right"></div>
+            <div class="corner-decor bottom-left"></div>
+            <div class="corner-decor bottom-right"></div>
+
+            <div class="page-header">
+                <div class="header-left">लोकबंधु | राजस्थान समसामयिकी</div>
+                <div class="header-right">कोचिंग नहीं क्रांति</div>
+            </div>
+
+            <div class="page-content">
+                <div class="section-title">योजनाएँ एवं नीतियाँ</div>
+
+                <div class="topic-title">पीएम सूर्यघर योजना में 2 लाख वां सोलर रूफटॉप स्थापित</div>
+                <ul class="points-list">
+                    <li><strong>उपलब्धि:</strong> पीएम सूर्य घर योजना के तहत जयपुर की तारा देवी के घर पर राज्य का 2 लाख वां सोलर रूफटॉप स्थापित किया गया।</li>
+                    <li><strong>लक्ष्य पूर्ण:</strong> इसी के साथ केंद्रीय ऊर्जा मंत्रालय की ओर से पीएम सूर्य घर योजना के तहत राज्य में 2 लाख रूफटॉप लगाने का लक्ष्य पूरा हुआ।</li>
+                </ul>
+
+                <div class="topic-title">प्रधानमंत्री ग्राम सड़क योजना में राजस्थान दूसरे स्थान पर</div>
+                <ul class="points-list">
+                    <li><strong>रजत जयंती समारोह:</strong> केंद्रीय कृषि एवं किसान कल्याण मंत्री शिवराज सिंह चौहान ने 12 मई 2026 को मध्यप्रदेश के सीहोर जिले के भैरूंडा गांव में प्रधानमंत्री ग्राम सड़क योजना के 25 वर्ष पूर्ण होने पर आयोजित रजत जयंती समारोह में इस परियोजना के चौथे चरण की शुरुआत की।</li>
+                    <li><strong>राज्यों का सम्मान:</strong> इस दौरान PMJSY के तहत पिछले 25 वर्षों में उत्कृष्ट प्रदर्शन करने वाले राज्यों को विभिन्न श्रेणियों में सम्मानित किया गया।</li>
+                    <li><strong>सड़क लंबाई में स्थान:</strong> इसमें सर्वाधिक सड़क लंबाई पूर्ण करने की श्रेणी में राजस्थान (75,868 किलोमीटर) को द्वितीय स्थान मिला।</li>
+                    <li><strong>गुणवत्ता नियंत्रण:</strong> गुणवत्ता नियंत्रण तंत्र में उत्कृष्ट प्रदर्शन के लिए राजस्थान एवं तमिलनाडु ने संयुक्त रूप से द्वितीय स्थान प्राप्त किया।</li>
+                </ul>
+
+                <div class="topic-title">"School Education System in India-Temporal Analysis..." रिपोर्ट</div>
+                <ul class="points-list">
+                    <li><strong>जारीकर्ता:</strong> यह रिपोर्ट नीति आयोग द्वारा जारी की गई।</li>
+                    <li><strong>एकीकृत शिक्षा में अग्रणी:</strong> इस रिपोर्ट के अनुसार राजस्थान कक्षा 1 से 12 तक की एकीकृत शिक्षा उपलब्ध करवाने में देश में अव्वल रहा है।</li>
+                    <li><strong>राष्ट्रीय स्तर पर तुलना:</strong> रिपोर्ट के अनुसार वर्ष 2024-25 में पूरे देश में केवल 5.4% विद्यालयों में 1 से 12 कक्षा तक एकीकृत शिक्षा सीमित रही।</li>
+                </ul>
+            </div>
+
+            <div class="page-footer">
+                <div class="page-num">पेज - 2</div>
+            </div>
+        </div>
+
+
+        <!-- ==================== PAGE 3 ==================== -->
+        <div class="page">
+            <div class="corner-decor top-left"></div>
+            <div class="corner-decor top-right"></div>
+            <div class="corner-decor bottom-left"></div>
+            <div class="corner-decor bottom-right"></div>
+
+            <div class="page-header">
+                <div class="header-left">लोकबंधु | राजस्थान समसामयिकी</div>
+                <div class="header-right">कोचिंग नहीं क्रांति</div>
+            </div>
+
+            <div class="page-content">
+                <div class="topic-title">"School Education System in India..." (आगे का भाग)</div>
+                <ul class="points-list">
+                    <li><strong>राजस्थान का योगदान:</strong> जबकि अकेले राजस्थान में ही यह आंकड़ा पूरे देश का लगभग 35% तक है।</li>
+                    <li><strong>हर तीसरा विद्यालय:</strong> देश का 1 से 12वीं तक की एकीकृत शिक्षा उपलब्ध कराने वाला हर तीसरा विद्यालय राजस्थान में संचालित है।</li>
+                    <li><strong>प्रदेश के आंकड़े:</strong> इस प्रकार प्रदेश के 27,889 विद्यालय प्राथमिक, उच्च प्राथमिक, माध्यमिक और उच्च माध्यमिक स्तर की शिक्षा उपलब्ध करवा रहे हैं।</li>
+                </ul>
+
+                <div class="section-title">महोत्सव/मेले/कार्यक्रम</div>
+
+                <div class="topic-title">29th JGS-2026 (ज्वैलरी एसोसिएशन जेमस्टोन शो)</div>
+                <ul class="points-list">
+                    <li><strong>आयोजन:</strong> 18 मई 2026 से, राजस्थान इंटरनेशनल सेंटर, जयपुर।</li>
+                    <li><strong>मुख्य अतिथि:</strong> सहकारिता एवं नागरिक उड्डयन मंत्री गौतम कुमार दक।</li>
+                    <li><strong>पोस्टर विमोचन:</strong> उपमुख्यमंत्री दिया कुमारी ने शो का पोस्टर लॉन्च किया।</li>
+                </ul>
+
+                <div class="topic-title">अंतर्राष्ट्रीय नर्सेज दिवस-2026 का राज्य स्तरीय समारोह</div>
+                <ul class="points-list">
+                    <li><strong>आयोजन:</strong> 12 मई 2026, SMS मेडिकल कॉलेज, जयपुर।</li>
+                    <li><strong>सम्मान:</strong> समारोह में प्रदेशभर से चयनित 18 नर्सेज को सम्मानित किया गया।</li>
+                    <li><strong>विशेष पुरस्कार:</strong> SMS में कार्यरत नर्सिंग ऑफिसर भरत लाल जाटव को फ्लोरेंस नाइटंगल अवार्ड 2026 प्रदान किया गया।</li>
+                </ul>
+
+                <div class="topic-title">राष्ट्रीय प्रौद्योगिकी दिवस का राज्य स्तरीय सम्मेलन</div>
+                <ul class="points-list">
+                    <li><strong>आयोजन:</strong> 11 मई 2026, बिरला ऑडिटोरियम, जयपुर।</li>
+                    <li><strong>मुख्य अतिथि:</strong> मुख्यमंत्री भजनलाल शर्मा।</li>
+                    <li><strong>नया पुरस्कार:</strong> मुख्यमंत्री ने इस अवसर पर महान गणितज्ञ एवं खगोलशास्त्री ब्रह्म गुप्त के नाम पर राजस्थान में "ब्रह्म गुप्त पुरस्कार" शुरू करने की घोषणा की।</li>
+                    <li><strong>पुरस्कार का क्षेत्र:</strong> यह पुरस्कार विज्ञान, गणित, नवाचार, एवं अनुसंधान के क्षेत्र में उत्कृष्ट योगदान देने वाले प्रतिभाशाली व्यक्तियों, वैज्ञानिकों और विद्यार्थियों को दिया जाएगा।</li>
+                </ul>
+            </div>
+
+            <div class="page-footer">
+                <div class="page-num">पेज - 3</div>
+            </div>
+        </div>
+
+
+        <!-- ==================== PAGE 4 ==================== -->
+        <div class="page">
+            <div class="corner-decor top-left"></div>
+            <div class="corner-decor top-right"></div>
+            <div class="corner-decor bottom-left"></div>
+            <div class="corner-decor bottom-right"></div>
+
+            <div class="page-header">
+                <div class="header-left">लोकबंधु | राजस्थान समसामयिकी</div>
+                <div class="header-right">कोचिंग नहीं क्रांति</div>
+            </div>
+
+            <div class="page-content">
+                <div class="topic-title">राष्ट्रीय प्रौद्योगिकी दिवस का सम्मेलन (आगे का भाग)</div>
+                <ul class="points-list">
+                    <li><strong>इन्नोवेशन सेंटर:</strong> इसके अलावा मुख्यमंत्री ने युवाओं के लिए जयपुर के कोचिंग हब में इन्नोवेशन सेंटर स्थापित करने की घोषणा भी की।</li>
+                    <li><strong>विज्ञान क्लब:</strong> विज्ञान के प्रति रुचि बढ़ाने के लिए मॉडल स्कूलों एवं पीएम श्री विद्यालयों सहित 820 विज्ञान क्लब प्रारंभ किए जा रहे हैं।</li>
+                    <li><strong>रोबोटिक्स लैब:</strong> 500 से अधिक विद्यालयों में रोबोटिक्स लैब भी शुरू की गई है।</li>
+                </ul>
+
+                <div class="section-title">आर्थिक विकास व समझौते</div>
+
+                <div class="topic-title">राजस्थान का पहला सेमीकंडक्टर प्लांट</div>
+                <ul class="points-list">
+                    <li><strong>स्थान व तिथि:</strong> खुशखेरा, भिवाड़ी (राजस्थान), 15 मई 2026 को।</li>
+                    <li><strong>उद्घाटनकर्ता:</strong> केंद्रीय इलेक्ट्रॉनिक्स और सूचना प्रौद्योगिकी मंत्री अश्विनी वैष्णव ने वर्चुअल माध्यम से उद्घाटन किया।</li>
+                    <li><strong>विवरण:</strong> सलारपुर में ELCINA द्वारा विकसित इलेक्ट्रॉनिक्स मैन्युफैक्चरिंग क्लस्टर और सहस्त्रा सेमीकंडक्टर प्राइवेट लिमिटेड के सेमीकंडक्टर प्लांट का उद्घाटन किया गया।</li>
+                    <li><strong>निवेश और उत्पादन:</strong> 1200 करोड़ रुपए के निवेश वाले इस इलेक्ट्रॉनिक मैन्युफैक्चरिंग क्लस्टर में हर साल 6 करोड़ चिप का उत्पादन होगा।</li>
+                    <li><strong>देश में स्थिति:</strong> अब देश में सेमीकंडक्टर प्लांट की संख्या बढ़कर 12 हो गई है।</li>
+                </ul>
+
+                <div class="topic-title">डेयरी इंफ्रास्ट्रक्चर की मजबूती के लिए 1500 करोड़ की सहायता</div>
+                <ul class="points-list">
+                    <li><strong>उद्देश्य:</strong> भारत सरकार ने राज्य में डेयरी क्षेत्र के विस्तार और सरस ब्रांड को राष्ट्रीय स्तर पर स्थापित करने के लिए 1500 करोड़ की सहायता देने की सैद्धांतिक मंजूरी दी।</li>
+                </ul>
+            </div>
+
+            <div class="page-footer">
+                <div class="page-num">पेज - 4</div>
+            </div>
+        </div>
+
+
+        <!-- ==================== PAGE 5 ==================== -->
+        <div class="page">
+            <div class="corner-decor top-left"></div>
+            <div class="corner-decor top-right"></div>
+            <div class="corner-decor bottom-left"></div>
+            <div class="corner-decor bottom-right"></div>
+
+            <div class="page-header">
+                <div class="header-left">लोकबंधु | राजस्थान समसामयिकी</div>
+                <div class="header-right">कोचिंग नहीं क्रांति</div>
+            </div>
+
+            <div class="page-content">
+                <div class="topic-title">डेयरी इंफ्रास्ट्रक्चर सहायता (आगे का भाग)</div>
+                <ul class="points-list">
+                    <li><strong>वित्तीय सहयोग:</strong> केंद्र सरकार ने जापान इंटरनेशनल कॉरपोरेशन एजेंसी (जीका) परियोजना के तहत 1000 करोड़ रुपए और नेशनल प्रोग्राम फॉर डेयरी डेवलपमेंट के तहत 500 करोड़ की सहायता देने पर सहमति व्यक्त की है।</li>
+                    <li><strong>दूध संग्रहण क्षमता:</strong> इस राशि से राजस्थान को ऑपरेटिव डेयरी फेडरेशन के तहत वर्तमान 45 लाख लीटर प्रतिदिन दूध संग्रहण क्षमता को बढ़ाकर 65 लाख लीटर प्रतिदिन किया जाएगा।</li>
+                </ul>
+
+                <div class="topic-title">"TELL 14C व्हाट्सएप चैटबॉट" & पिंक-गार्ड एप</div>
+                <ul class="points-list">
+                    <li><strong>TELL 14C चैटबॉट:</strong> भारत सरकार के गृह मंत्रालय द्वारा साइबर अपराधों पर प्रभावी नियंत्रण और आमजन को डिजिटल सुरक्षा के प्रति जागरूक बनाने हेतु चैटबॉट (हेल्पलाइन: 93193-01930) लॉन्च किया गया है।</li>
+                    <li><strong>पिंक-गार्ड एप:</strong> जयपुर पुलिस द्वारा एआई (AI) युक्त एप को "टूरिस्ट फर्स्ट" थीम के साथ लॉन्च किया गया है।</li>
+                </ul>
+
+                <div class="topic-title">त्रिनिदाद एवं टोबैगो के पोर्ट ऑफ स्पेन में जयपुर फुट केंद्र</div>
+                <ul class="points-list">
+                    <li><strong>उद्घाटन:</strong> विदेश मंत्री डॉ. एस जयशंकर ने 9 मई 2026 को पोर्ट ऑफ स्पेन में जयपुर फुट के स्थाई कृत्रिम अंग केंद्र का उद्घाटन किया, जिसकी सह-अध्यक्षता त्रिनिदाद एवं टोबैगो की प्रधानमंत्री कमला प्रसाद बिसेसर ने की।</li>
+                    <li><strong>सहयोग व दर्जा:</strong> यह केंद्र जयपुर फुट USA, भगवान महावीर विकलांग सहायता समिति और स्थानीय सरकार की साझा पहल से शुरू हुआ है। इसे "नेशनल प्रोस्थेटिक सेंटर" का दर्जा दिया गया है। इसकी नींव सितंबर 2025 में न्यूयॉर्क में रखी गई थी।</li>
+                </ul>
+
+                <div class="topic-title">देश का पहला पंचगव्य चिकित्सा पाठ्यक्रम</div>
+                <ul class="points-list">
+                    <li><strong>विवरण:</strong> मोकलावास (जोधपुर) में इसका उद्घाटन पशुपालन मंत्री जोराराम कुमावत द्वारा किया गया। यह डॉ. सर्वपल्ली राधाकृष्णन राजस्थान आयुर्वेद विश्वविद्यालय जोधपुर और लक्ष्य पर्यावरण व्यंजन कल्याण संस्था के संयुक्त तत्वाधान में संचालित है।</li>
+                </ul>
+
+                <div class="section-title">चर्चित व्यक्तित्व</div>
+
+                <div class="topic-title">दो विश्वविद्यालय में कुलगुरु की नियुक्ति</div>
+                <ul class="points-list">
+                    <li><strong>MLSU उदयपुर:</strong> प्रो. कैलाश डागा को नया कुलगुरु नियुक्त किया गया है।</li>
+                    <li><strong>MSBU भरतपुर:</strong> प्रो. मदन सिंह राठौड़ को कुलगुरु नियुक्त किया गया है।</li>
+                    <li><strong>आदेशकर्ता:</strong> राज्यपाल एवं कुलाधिपति हरिभाऊ बागडे ने आदेश जारी किए। इनका कार्यकाल 3 वर्ष या 70 वर्ष की आयु प्राप्त करने तक (जो भी पहले हो) होगा।</li>
+                </ul>
+            </div>
+
+            <div class="page-footer">
+                <div class="page-num">पेज - 5</div>
+            </div>
+        </div>
+
+
+        <!-- ==================== PAGE 6 ==================== -->
+        <div class="page">
+            <div class="corner-decor top-left"></div>
+            <div class="corner-decor top-right"></div>
+            <div class="corner-decor bottom-left"></div>
+            <div class="corner-decor bottom-right"></div>
+
+            <div class="page-header">
+                <div class="header-left">लोकबंधु | राजस्थान समसामयिकी</div>
+                <div class="header-right">कोचिंग नहीं क्रांति</div>
+            </div>
+
+            <div class="page-content">
+                <div class="section-title">पुरस्कार</div>
+
+                <div class="topic-title">तंबाकू नियंत्रण में राजस्थान को WHO का प्रथम अवार्ड</div>
+                <ul class="points-list">
+                    <li><strong>सम्मान:</strong> राजस्थान ने तंबाकू नियंत्रण में विश्व स्वास्थ्य संगठन (WHO) का 2026 के लिए प्रतिष्ठित "वर्ल्ड नो टोबैको डे अवार्ड" प्राप्त किया।</li>
+                    <li><strong>चिकित्सा विभाग को गौरव:</strong> चिकित्सा एवं स्वास्थ्य विभाग को तंबाकू नियंत्रण कार्यक्रम में उत्कृष्ट कार्य के लिए यह विश्व स्तरीय सम्मान प्रदान किया गया।</li>
+                    <li><strong>चयन का आधार:</strong> दक्षिण-पूर्व एशिया क्षेत्र में राजस्थान को यह सम्मान WHO द्वारा वर्ष 2025-26 में तंबाकू नियंत्रण के क्षेत्र में किए गए उल्लेखनीय कार्यों के आधार पर दिया गया।</li>
+                </ul>
+
+                <div class="topic-title">आइकॉनिक विमेन ऑफ इंडिया 2026 अवार्ड</div>
+                <ul class="points-list">
+                    <li><strong>सम्मानित व्यक्तित्व:</strong> नई दिल्ली स्थित एनडीएमसी (NDMC) कन्वेंशन सेंटर में आयोजित भव्य सेरेमनी में जयपुर की शिखा शर्मा को "100 आइकॉनिक विमेन ऑफ इंडिया 2026 अवार्ड" से सम्मानित किया गया।</li>
+                </ul>
+
+                <div class="topic-title">ग्लोबल एस्ट्रोलॉजी आइकन अवार्ड 2026</div>
+                <ul class="points-list">
+                    <li><strong>सम्मानित व्यक्तित्व:</strong> जयपुर के प्रसिद्ध पं. विष्णु तिवारी को गोरखपुर (उत्तरप्रदेश) में आयोजित समारोह में "आध्यात्मिक ज्योतिषी एकता मंच फाउंडेशन" की ओर से "ग्लोबल एस्ट्रोलॉजी आइकन अवार्ड 2026" से सम्मानित किया गया।</li>
+                </ul>
+            </div>
+
+            <div class="page-footer">
+                <div class="page-num">पेज - 6</div>
+            </div>
+        </div>
+
+
+        <!-- ==================== PAGE 7 ==================== -->
+        <div class="page">
+            <div class="corner-decor top-left"></div>
+            <div class="corner-decor top-right"></div>
+            <div class="corner-decor bottom-left"></div>
+            <div class="corner-decor bottom-right"></div>
+
+            <div class="page-header">
+                <div class="header-left">लोकबंधु | राजस्थान समसामयिकी</div>
+                <div class="header-right">कोचिंग नहीं क्रांति</div>
+            </div>
+
+            <div class="page-content">
+                <div class="topic-title">ग्रीन एयरपोर्ट सम्मान (जयपुर इंटरनेशनल एयरपोर्ट)</div>
+                <ul class="points-list">
+                    <li><strong>सिल्वर सम्मान:</strong> जयपुर इंटरनेशनल एयरपोर्ट को एसीआइ (ACI) एशिया पैसिफिक एवं मिडल ईस्ट ग्रीन एयरपोर्ट्स रिकॉग्रिशन 2026 में सिल्वर सम्मान से सम्मानित किया गया।</li>
+                    <li><strong>अन्य कीर्तिमान:</strong> इसके साथ ही एयरपोर्ट को 'जीरो वेस्ट टू लैंडफिल' और 'लेवल 3 एक्रीडिटेशन' भी हासिल हुआ है।</li>
+                </ul>
+
+                <div class="section-title">प्रमुख अभियान</div>
+
+                <div class="topic-title">प्रदेश का पहला "बकरी बैंक" अभियान</div>
+                <ul class="points-list">
+                    <li><strong>शुरुआत:</strong> जैसलमेर जिले से।</li>
+                    <li><strong>उद्देश्य:</strong> दुर्लभ वन्य जीव कैराकल (सियागोश) का संरक्षण एवं मानव और वन्यजीव संघर्ष को कम करना।</li>
+                    <li><strong>संयुक्त पहल:</strong> यह वन विभाग और वाइल्डलाइफ बच्चन ट्रस्ट ऑफ इंडिया की एक अभिनव संयुक्त पहल है।</li>
+                    <li><strong>योजना का लाभ:</strong> योजना के तहत यदि कैराकल किसी पशुपालक की बकरी का शिकार करता है, तो लंबी सरकारी मुआवजा प्रक्रिया के बजाय प्रभावित परिवार को तुरंत नई बकरी उपलब्ध करवाई जाएगी।</li>
+                </ul>
+
+                <div class="section-title">खेल समाचार</div>
+
+                <div class="topic-title">रोबोफेस्ट विश्व चैंपियनशिप 2026</div>
+                <ul class="points-list">
+                    <li><strong>विश्व चैंपियन:</strong> जयपुर की इनाया खान ने अमेरिका के मिशिगन राज्य के साउथफील्ड स्थित लॉरेंस टेक्नोलॉजिकल यूनिवर्सिटी में आयोजित प्रतिष्ठित रोबोफेस्ट विश्व चैंपियनशिप 2026 में जूनियर बिल्डिंग ब्रिज श्रेणी में प्रथम स्थान प्राप्त कर वर्ल्ड चैंपियन बनने का गौरव हासिल किया।</li>
+                    <li><strong>प्रतिनिधित्व:</strong> इनाया ने अंतरराष्ट्रीय मंच पर घाना का प्रतिनिधित्व करते हुए अपनी टीम को चैंपियन बनाया।</li>
+                    <li><strong>ब्रांड एंबेसडर:</strong> इनाया खान राजस्थान सरकार के 'बेटी बचाओ बेटी पढ़ाओ' अभियान की ब्रांड एंबेसडर भी हैं।</li>
+                </ul>
+            </div>
+
+            <div class="page-footer">
+                <div class="page-num">पेज - 7</div>
+            </div>
+        </div>
+
+
+        <!-- ==================== PAGE 8 ==================== -->
+        <div class="page">
+            <div class="corner-decor top-left"></div>
+            <div class="corner-decor top-right"></div>
+            <div class="corner-decor bottom-left"></div>
+            <div class="corner-decor bottom-right"></div>
+
+            <div class="page-header">
+                <div class="header-left">लोकबंधु | राजस्थान समसामयिकी</div>
+                <div class="header-right">कोचिंग नहीं क्रांति</div>
+            </div>
+
+            <div class="page-content">
+                <div class="topic-title">इंडिया Open शूटिंग & एशियाई जूनियर स्क्वैश चैंपियनशिप</div>
+                <ul class="points-list">
+                    <li><strong>इंडिया Open शूटिंग:</strong> राजस्थान की राजश्री ने उत्तराखंड के देहरादून में आयोजित इंडिया ओपन शूटिंग चैंपियनशिप में 10 मीटर एयर राइफल सीनियर महिला वर्ग में रजत पदक जीता है।</li>
+                    <li><strong>एशियाई जूनियर स्क्वैश:</strong> जयपुर की स्क्वैश खिलाड़ी दिव्यांशी जैन और धैर्य गोगिया का 33वीं एशियाई जूनियर स्क्वैश चैंपियनशिप हेतु भारतीय टीम में चयन हुआ है, जिसका आयोजन 20 से 24 मई तक चीन के पेंझीहुआ में होगा।</li>
+                </ul>
+
+                <div class="topic-title">जूनियर एशियन बॉक्सिंग चैंपियनशिप में ऐतिहासिक गोल्ड</div>
+                <ul class="points-list">
+                    <li><strong>स्वर्ण पदक:</strong> भरतपुर के 14 वर्षीय मुक्केबाज यश कुमार ने उज्बेकिस्तान के ताशकंद में आयोजित जूनियर एशियन बॉक्सिंग चैंपियनशिप में कजाकिस्तान के बॉक्सर को 33 किलोग्राम वर्ग के फाइनल में हराकर स्वर्ण पदक जीता।</li>
+                    <li><strong>कीर्तिमान:</strong> यश जूनियर वर्ग में एशियन बॉक्सिंग चैंपियनशिप का स्वर्ण पदक जीतने वाले राजस्थान के पहले मुक्केबाज बन गए हैं।</li>
+                </ul>
+
+                <div class="topic-title">45 वीं सब जूनियर राष्ट्रीय शूटिंग चैंपियनशिप</div>
+                <ul class="points-list">
+                    <li><strong>आयोजन व नेतृत्व:</strong> महबूबाबाद (तेलंगाना) में आयोजित। राजस्थान बालक टीम के कप्तान खुशाल सिंह शेरावत एवं बालिका टीम की कप्तान चंचल जांगिड़ थीं।</li>
+                    <li><strong>परिणाम:</strong> राजस्थान की अंडर-17 बालिका टीम ने फाइनल में हरियाणा के खिलाफ हार के बाद शानदार रजत पदक हासिल किया।</li>
+                </ul>
+
+                <div class="topic-title">राज्य स्तरीय तलवारबाजी प्रतियोगिता</div>
+                <ul class="points-list">
+                    <li><strong>आयोजन:</strong> केकड़ी (अजमेर) में राजस्थान स्टेट फेंसिंग एसोसिएशन के तत्वाधान में आयोजित। इसमें सीनियर, जूनियर अंडर-20, कैडेट अंडर-17 और सब जूनियर अंडर-14 वर्गों के खिलाड़ियों ने हिस्सा लिया।</li>
+                </ul>
+            </div>
+
+            <div class="page-footer">
+                <div class="page-num">पेज - 8</div>
+            </div>
+        </div>
+
+
+        <!-- ==================== PAGE 9 ==================== -->
+        <div class="page">
+            <div class="corner-decor top-left"></div>
+            <div class="corner-decor top-right"></div>
+            <div class="corner-decor bottom-left"></div>
+            <div class="corner-decor bottom-right"></div>
+
+            <div class="page-header">
+                <div class="header-left">लोकबंधु | राजस्थान समसामयिकी</div>
+                <div class="header-right">कोचिंग नहीं क्रांति</div>
+            </div>
+
+            <div class="page-content">
+                <div class="topic-title">राज्य स्तरीय तलवारबाजी प्रतियोगिता (आगे का भाग)</div>
+                <ul class="points-list">
+                    <li><strong>उत्साहजनक प्रदर्शन:</strong> प्रतियोगिता में विभिन्न श्रेणियों के राज्य भर से आए तलवारबाजों ने असाधारण खेल प्रतिभा का परिचय दिया।</li>
+                </ul>
+
+                <div class="topic-title">राष्ट्रीय स्केटिंग, ट्रायथलॉन एवं नर्स दिवस</div>
+                <ul class="points-list">
+                    <li><strong>ओपन रोलर स्केटिंग चैंपियनशिप:</strong> जयपुर के शौर्य माहेश्वरी ने शिमला (हिमाचल प्रदेश) में आयोजित 18वीं अखिल भारतीय ओपन रोलर स्केटिंग चैंपियनशिप के अंडर-6 आयु वर्ग की प्रोफेशनल इनर लाइन श्रेणी में स्वर्ण पदक जीता।</li>
+                    <li><strong>आयरनमैन 70.3 प्रतियोगिता:</strong> जयपुर के एथलीट आशीष ने चीन के शंघाई में आयोजित अंतरराष्ट्रीय ट्रायथलॉन को 17 मई 2026 को रिकॉर्ड 6 घंटे 39 मिनट में सफलतापूर्वक पूरा किया।</li>
+                    <li><strong>अंतर्राष्ट्रीय नर्स दिवस:</strong> प्रतिवर्ष 12 मई को मनाया जाता है। वर्ष 2026 की थीम: "हमारी नर्से, हमारा भविष्य" रखी गई है।</li>
+                </ul>
+
+                <div class="section-title">विविध घटनाक्रम</div>
+
+                <div class="topic-title">राज्य के स्कूलों में राजस्थानी भाषा पढ़ाना जरूरी</div>
+                <ul class="points-list">
+                    <li><strong>सुप्रीम कोर्ट का ऐतिहासिक निर्देश:</strong> सुप्रीम कोर्ट ने राज्य सरकार को चरणबद्ध तरीके से सभी शैक्षणिक संस्थानों में राजस्थानी भाषा को पढ़ाने और लागू करने के लिए नीति तैयार करने का निर्देश दिया है।</li>
+                    <li><strong>खंडपीठ व सुनवाई:</strong> जस्टिस विक्रमनाथ और जस्टिस संदीप मेहता की खंडपीठ ने पद्म मेहता व अन्य की एसएलपी (SLP) पर सुनवाई करते हुए यह आदेश पारित किया।</li>
+                </ul>
+            </div>
+
+            <div class="page-footer">
+                <div class="page-num">पेज - 9</div>
+            </div>
+        </div>
+
+
+        <!-- ==================== PAGE 10 ==================== -->
+        <div class="page">
+            <div class="corner-decor top-left"></div>
+            <div class="corner-decor top-right"></div>
+            <div class="corner-decor bottom-left"></div>
+            <div class="corner-decor bottom-right"></div>
+
+            <div class="page-header">
+                <div class="header-left">लोकबंधु | राजस्थान समसामयिकी</div>
+                <div class="header-right">कोचिंग नहीं क्रांति</div>
+            </div>
+
+            <div class="page-content">
+                <div class="topic-title">राजस्थानी भाषा नीति निर्देश (आगे का भाग)</div>
+                <ul class="points-list">
+                    <li><strong>ऐतिहासिक टिप्पणी:</strong> कोर्ट ने कहा कि राजस्थानी केवल एक बोली नहीं बल्कि अत्यंत समृद्ध ऐतिहासिक, साहित्यिक और सांस्कृतिक विरासत वाली भाषा है, जिसे प्राथमिक से उच्च शिक्षा स्तर तक शामिल किया जाना चाहिए।</li>
+                </ul>
+
+                <div class="topic-title">राव दूदाजी की प्रतिमा व नए पैनोरमा निर्माण</div>
+                <ul class="points-list">
+                    <li><strong>प्रतिमा अनावरण:</strong> रक्षा मंत्री राजनाथ सिंह और मुख्यमंत्री भजनलाल शर्मा ने 14 मई 2026 को मेड़ता सिटी (नागौर) के राव दूदागढ़ में मेड़ता के संस्थापक राव दूदा की अश्वारूढ़ प्रतिमा का अनावरण किया।</li>
+                    <li><strong>स्वीकृत विभिन्न पैनोरमा सूची:</strong>
+                        <div class="highlight-box">
+                            • महावीर जी पैनोरमा: करौली | • करमाबाई पैनोरमा: डीडवाना | • खेमाबाबा पैनोरमा: बालोतरा<br>
+                            • राव चंद्रसेन पैनोरमा: जोधपुर | • विद्यासागर महाराज पैनोरमा: अजमेर | • जसनाथ जी पैनोरमा: बीकानेर<br>
+                            • भामाशाह पैनोरमा: चित्तौड़गढ़ | • संत दुर्लभ नाथ पैनोरमा: बांदीकुई (दौसा)<br>
+                            • वीर दुर्गादास पैनोरमा: सिवाना (बालोतरा) | • हाड़ी रानी पैनोरमा: सलूंबर<br>
+                            • वीर तेजाजी पैनोरमा: खरनाल (नागौर) | • महर्षि दयानंद सरस्वती पैनोरमा: अजमेर
+                        </div>
+                    </li>
+                </ul>
+
+                <div class="topic-title">जयपुर दुनिया के टॉप-5 टूरिस्ट सिटीज में & नया विधानसभा लोगो</div>
+                <ul class="points-list">
+                    <li><strong>जयपुर टूरिज्म रिकॉर्ड:</strong> प्रतिष्ठित ग्लोबल ट्रैवल सर्वे 2025 में जयपुर (राजस्थान) को दुनिया के टॉप 5 टूरिस्ट सिटी में शामिल किया गया है।</li>
+                    <li><strong>विधानसभा का नया लोगो:</strong> राजस्थान विधानसभा का नया प्रतीक चिह्न जारी किया गया है, जिसका आदर्श वाक्य "राष्ट्राय धर्म निष्ठा विधायिका" है। इसमें राज्य पशु ऊंट और राज्य वृक्ष खेजड़ी को चित्रित किया गया है।</li>
+                </ul>
+
+                <!-- थैंक यू ब्लॉक -->
+                <div class="thankyou-card">
+                    <div class="thankyou-title">THANK YOU</div>
+                    <div class="thankyou-brand">लोकबंधु</div>
+                    <div class="thankyou-tagline">कोचिंग नहीं क्रांति</div>
+                </div>
+            </div>
+
+            <div class="page-footer">
+                <div class="page-num">पेज - 10</div>
+            </div>
+        </div>
+
+
+    <!-- 
+    ==========================================================================
+    SAMYAK DYNAMIC COMPONENT TEMPLATE DRAFTS (COPY-PASTE LAYOUTS FOR EDITOR)
+    ==========================================================================
+    
+    Coaching notes or publications standard copy-paste drafts to create gorgeous environments.
+    Simply copy any block below and paste directly in active page content editor:
+
+    DRAFT 1: चर्चित व्यक्तित्व (Personality Profile Environment)
+    ----------------------------------------------------------
+    # चर्चित व्यक्तित्व
+
+    <!-- personality|name=ऋषभ पारेख|title=संस्कृत व्याकरण विशेषज्ञ|desc=जयपुर के ऋषभ पारेख को गुजरात के शंखेश्वर जैन तीर्थ में 'सिद्धहेमव्याकरण रत्न' से सम्मानित किया गया है। उन्हें स्वर्ण मुद्रिका और 1 लाख रुपये का नकद पुरस्कार मिला।|avatar=👤 -->
+
+    ## 🔶 डॉ. राजानन्द शास्त्री
+    • प्रसिद्ध ज्योतिषाचार्य और उनके अद्भुत शोध कार्य।
+    • ज्योतिष के क्षेत्र में 'पितृ दोष निवारण अभियान' के उल्लेखनीय कार्यों के लिए इनका नाम **'WORLD BOOK OF RECORDS'** में दर्ज किया गया है।
+
+
+    DRAFT 2: तुलना व आँकड़े (Comparison & Infographics Stats Grid)
+    ----------------------------------------------------------
+    # तुलना व आँकड़े
+
+    <!-- stats|num1=15.5 Lakh|lbl1=Total Beneficiaries|desc1=Active under Lado Protsahan|num2=₹200 Crore|lbl2=MoU Signed|desc2=For Agritech expansion in Jaipur -->
+
+    ## 🔶 ग्राम-2026 की इन्वेस्टर मीट
+    • मुख्यमंत्री ने मीट के दौरान राजस्थान फाउंडेशन के अहमदाबाद चैप्टर का शुभारंभ किया।
+    • इन्वेस्टर मीट में राजस्थान के कई स्थानों पर फूड पार्क, सीड प्रोसेसिंग, फूड प्रोसेसिंग के विकास के लिए **200 करोड़ रुपए** से अधिक के एमओयू का आदान प्रदान किया गया।
+
+
+    DRAFT 3: त्वरित तथ्य ग्रिड (2x2 Quick Facts Grid Component)
+    ----------------------------------------------------------
+    # त्वरित तथ्य ग्रिड
+
+    <!-- facts-grid|t1=फसल बीमा|d1=राजस्थान फसल बीमा में पहले स्थान पर है।|t2=पोषण पखवाड़ा|d2=राजस्थान गतिविधियों में देश में प्रथम स्थान पर।|t3=परमाणु संयंत्र|d3=रावतभाटा 700 MW क्षमता की इकाइयां शुरू।|t4=विदेशी भाषा|d4=पांच भाषाएं सिखाने के लिए 41 कॉलेज में केंद्र। -->
+
+    ## 🔶 रावतभाटा परमाणु संयंत्र: ईंधन में आत्मनिर्भरता
+    • एशिया के सबसे बड़े न्यूक्लियर फ्यूल कॉम्प्लेक्स (NFC) ने 140 यूरेनियम बंडल रावतभाटा बिजलीघर को सौंपे हैं।
+    • अब रावतभाटा को ईंधन के लिए हैदराबाद पर निर्भर नहीं रहना पड़ेगा।
+
+
+    DRAFT 4: विशेष घोषणा एवं सूचना (Highlights & Alert Card)
+    ----------------------------------------------------------
+    # विशेष घोषणा
+
+    <!-- announcement|title=विशेष सूचना / Alert|content=राजस्थान सरकार द्वारा युवाओं को पांच विदेशी भाषाएं (जर्मन, फ्रेंच, कोरियन, जापानी, स्पेनिश) सिखाई जाएंगी। इसके लिए 41 राजकीय कॉलेजों में सेंटर्स बनाए जाएंगे। नोडल विभाग उच्च एवं तकनीकी शिक्षा विभाग होगा। -->
+
+    ## 🔶 विदेशी भाषा संचार कौशल कार्यक्रम
+    • **समझौता** :- राजस्थान सरकार का इंग्लिश एंड फॉरेन लीग यूनिवर्सिटी, हैदराबाद और नेशनल स्किल डेवलपमेंट कॉरपोरेशन के साथ MoU।
+    • ये कोर्स 16 सप्ताह के होंगे। सरकारी और प्राइवेट कॉलेज के साथ 12 वीं पास कोई भी विद्यार्थी प्रवेश ले सकेगा।
+
+
+    DRAFT 5: सामान्य लेख विन्यास (Standard Document Layout)
+    ----------------------------------------------------------
+    # योजनाएँ एवं नीतियाँ
+
+    ## 🔶 प्रधानमंत्री फसल बीमा योजना
+    • **प्रधानमंत्री फसल बीमा योजना** के तहत पॉलिसी जारी करने में राजस्थान देश में प्रथम स्थान पर।
+    • प्रधानमंत्री फसल बीमा योजना के तहत राजस्थान में देश में सबसे ज्यादा **2 करोड़ 19 लाख पॉलिसी** जारी की गई।
+
+    ## 🔶 लाडो प्रोत्साहन योजना
+    • **मुख्य उद्देश्य**:- बालिकाओं के प्रति सकारात्मक सोच विकसित करना और उनके स्वास्थ्य एवं शिक्षा के स्तर में सुधार लाना।
+    • बालिका के जन्म पर **₹1.50 लाख** की राशि का संकल्प पत्र प्रदान किया जाता है।
+    • माता का राजस्थान का मूल निवासी होना आवश्यक है।
+    
+    ==========================================================================
+    -->
+
+</body>
+</html>

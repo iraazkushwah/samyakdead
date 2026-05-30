@@ -1,0 +1,24 @@
+{
+  "name": "Samyak",
+  "short_name": "Samyak",
+  "description": "Progressive Web App for compiling and compiling monthly current affairs magazines and educational notes.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#09090b",
+  "theme_color": "#09090b",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "luka.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "luka.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

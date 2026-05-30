@@ -1,0 +1,1383 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content">
+    <title>Samyak - by Raaz Kushwah</title>
+    <!-- Google Fonts: Poppins (modern UI), Noto Sans Devanagari (Hindi Body), Rozha One (Calligraphy/Display Serif), Martel (Traditional serif) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Martel:wght@400;700;900&family=Mukta:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700;800&family=Noto+Serif+Devanagari:wght@400;600;700;900&family=Poppins:wght@300;400;500;600;700&family=Rozha+One&family=Yatra+One&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- Favicon & PWA Headers -->
+    <link rel="icon" type="image/png" href="luka.png">
+    <link rel="apple-touch-icon" href="luka.png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#09090b">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Samyak">
+</head>
+<body>
+    <!-- App Container -->
+    <div class="app-container">
+        
+        <!-- Left Panel: Page Manager & Active Editor -->
+        <aside class="editor-panel">
+            <header class="editor-header">
+                <div class="logo-area">
+                    <img src="luka.png" alt="Samyak Logo" class="logo-icon-img">
+                    <div class="logo-text">
+                        <h1>Samyak</h1>
+                    </div>
+                </div>
+                <div class="header-global-actions">
+                    <div class="header-theme-container" title="Visual Theme">
+                        <button id="theme-menu-trigger" class="header-action-btn" type="button" tabindex="-1">🎨</button>
+                        <select id="doc-theme" class="header-theme-select" style="display: none;">
+                            <option value="maroon-gold">Samyak Maroon & Gold</option>
+                            <option value="midnight-gold">Midnight Slate & Gold</option>
+                            <option value="coaching-utkarsh">🏫 Coaching: Utkarsh Classes (Green & Saffron)</option>
+                            <option value="royal-durbar" selected>👑 Lokbandhu Official</option>
+                            <option value="lokbandhu-surya">🌅 Lokbandhu Surya Sandhya (Sunset Premium)</option>
+                            <option value="emerald-empire">🔱 Morphing Emerald Empire</option>
+                            <option value="gothic-royal">🏰 Gothic Royal Black</option>
+                            <option value="kyoto-ink">⛩️ Zen Kyoto & Ink</option>
+                            <option value="maharaja-gold">👑 Maharaja Palace Gold</option>
+                            <option value="lokbandhu-jaipur">🏯 Lokbandhu JAIPUR</option>
+                        </select>
+                    </div>
+                    
+                    <button id="import-project-btn" class="header-action-btn" title="Import Project (.raaz)">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: block;">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                            <polyline points="7 10 12 15 17 10" />
+                            <line x1="12" y1="15" x2="12" y2="3" />
+                        </svg>
+                    </button>
+                    <button id="export-project-btn" class="header-action-btn" title="Export Project (.raaz)">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: block;">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                            <polyline points="17 8 12 3 7 8" />
+                            <line x1="12" y1="3" x2="12" y2="15" />
+                        </svg>
+                    </button>
+                    <button id="compile-magazines-btn" class="header-action-btn" title="Compile Monthly Magazine">🛠️</button>
+                    <input type="file" id="import-project-file" accept=".raaz" style="display: none;">
+                </div>
+                <div class="author-credit" id="author-name-btn" title="View Raaz's Profile">
+                    <span class="author-by">by</span>
+                    <img src="raaz_profile.png" alt="Raaz Kushwah" class="author-avatar-mini">
+                    <span class="author-name">Raaz</span>
+                </div>
+                
+                <!-- Custom Pinnable Searchable Dropdown Panel -->
+                <div id="custom-theme-dropdown" class="custom-theme-dropdown-panel" style="display: none;">
+                    <div class="theme-search-wrapper">
+                        <input type="text" id="theme-search-input" placeholder="Search themes..." autocomplete="off">
+                    </div>
+                    <div class="theme-list-container">
+                        <!-- Dynamic Category Groups & Items go here via JS IIFE -->
+                    </div>
+                </div>
+            </header>
+
+            <!-- Sidebar Tab Navigation (Premium Header Slider) -->
+            <nav class="sidebar-tabs-nav">
+                <button id="tab-ocr-btn" class="sidebar-tab-btn" data-target="panel-ocr">
+                    <span class="tab-icon">🧠</span> OCR
+                </button>
+                <button id="tab-editor-btn" class="sidebar-tab-btn active" data-target="panel-editor">
+                    <span class="tab-icon">✍️</span> Editor
+                </button>
+                <button id="tab-design-btn" class="sidebar-tab-btn" data-target="panel-design">
+                    <span class="tab-icon">🎨</span> Design
+                </button>
+            </nav>
+
+            <!-- Dynamic Sidebar Panels Container -->
+            <div class="sidebar-panels-container">
+
+                <!-- Tab Panel 2: Editor (Active Content Editing Area) -->
+                <div id="panel-editor" class="sidebar-panel active">
+                    <!-- Sleek Quick Page Navigation Bar -->
+                    <div class="quick-page-navigation-bar" style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: rgba(255,255,255,0.02); border-bottom: 1px solid var(--ui-border, rgba(255,255,255,0.08)); gap: 8px;">
+                        <button type="button" id="quick-prev-page-btn" class="search-action-btn" style="padding: 6px 10px; font-size: 11px; margin: 0; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--ui-border); color: #fff; cursor: pointer; border-radius: 4px;" title="Previous Page">◀</button>
+                        
+                        <div style="flex: 1; display: flex; align-items: center; gap: 4px; min-width: 0;">
+                            <select id="quick-page-select" class="opt-select" style="width: 100%; padding: 5px 8px; font-size: 12px; margin: 0; min-width: 0; background-color: #16161e; border: 1px solid var(--ui-border); color: #fff; border-radius: 4px; outline: none; cursor: pointer;">
+                                <!-- Dynamic page list injected here via JS -->
+                            </select>
+                        </div>
+                        
+                        <button type="button" id="quick-next-page-btn" class="search-action-btn" style="padding: 6px 10px; font-size: 11px; margin: 0; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--ui-border); color: #fff; cursor: pointer; border-radius: 4px;" title="Next Page">▶</button>
+
+                        <!-- Vertical divider separator -->
+                        <div style="height: 16px; width: 1px; background: var(--ui-border, rgba(255,255,255,0.08)); margin: 0 2px;"></div>
+
+                        <!-- Action Icons -->
+                        <button type="button" id="quick-add-page-btn" class="search-action-btn" style="padding: 6px 10px; font-size: 11px; margin: 0; background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.2); color: #4ade80; border-radius: 4px; cursor: pointer; transition: all 0.2s;" title="Add Blank Page">➕</button>
+                        <button type="button" id="quick-delete-page-btn" class="search-action-btn" style="padding: 6px 10px; font-size: 11px; margin: 0; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); color: #fca5a5; border-radius: 4px; cursor: pointer; transition: all 0.2s;" title="Delete Active Page">🗑️</button>
+                        
+                        <div style="height: 16px; width: 1px; background: var(--ui-border, rgba(255,255,255,0.08)); margin: 0 2px;"></div>
+                        <button type="button" id="toggle-toolbar-btn" class="search-action-btn" style="padding: 6px 10px; font-size: 11px; margin: 0; background: rgba(79, 70, 229, 0.1); border: 1px solid rgba(79, 70, 229, 0.25); color: #c7d2fe; border-radius: 4px; cursor: pointer; transition: all 0.2s;" title="Hide Toolbar (Ctrl+/)">🛠️</button>
+                    </div>
+
+                    <section class="editor-core">
+                        <!-- Zone 1: Metadata settings (Visible only when Cover Page is selected) -->
+                        <div id="cover-editor-zone" class="editor-zone">
+                            <h3 class="section-title">Cover Page Settings</h3>
+                            <div class="settings-grid">
+                                <div class="input-group full-width">
+                                    <label for="doc-title">Main Banner Title</label>
+                                    <input type="text" id="doc-title" value="">
+                                </div>
+                                <div class="input-group full-width">
+                                    <label for="doc-tagline">Tagline Banner</label>
+                                    <input type="text" id="doc-tagline" value="">
+                                </div>
+                                <div class="input-group full-width">
+                                    <label for="doc-subtitle">Subtitle / Date</label>
+                                    <input type="text" id="doc-subtitle" value="">
+                                </div>
+                                <div class="input-group full-width">
+                                    <label for="doc-classification">Magazine Classification (पत्रिका वर्गीकरण)</label>
+                                    <input type="text" id="doc-classification" value="">
+                                </div>
+                                <div class="input-group full-width" style="margin-top: 10px; margin-bottom: 5px;">
+                                    <label style="cursor: pointer; display: flex; align-items: center; gap: 8px; user-select: none;">
+                                        <input type="checkbox" id="show-toc-toggle" checked style="width: 16px; height: 16px; accent-color: var(--ui-accent); cursor: pointer; margin: 0;">
+                                        <span>Show Table of Contents (विषयवस्तु दिखाएं)</span>
+                                    </label>
+                                </div>
+                                <div class="input-group full-width">
+                                    <label for="cover-theme-select"><span class="opt-icon">🎨</span> Premium Cover Theme</label>
+                                    <select id="cover-theme-select" class="opt-select">
+                                         <option value="default">Default Theme (Global Sync)</option>
+                                         <option value="royal-rajwadi">👑 Royal Rajwadi Gold (शाही राजवाड़ी)</option>
+                                         <option value="obsidian-gothic">🖤 Obsidian Neo-Gothic (ऑब्सिडियन नव-गॉथिक)</option>
+                                         <option value="emerald-palace">💚 Maharaja Emerald Palace (महाराजा मरकत महल)</option>
+                                         <option value="vedic-ashram">🧡 Vedic Ashram Classic (वैदिक आश्रम)</option>
+                                         <option value="modern-editorial">📰 Modern Magazine Editorial (संपादकीय पत्रिका)</option>
+                                    </select>
+                                </div>
+                                <div class="input-group full-width">
+                                    <label for="cover-border-pattern-select"><span class="opt-icon">🖼️</span> Cover Border Pattern (कवर बॉर्डर पैटर्न)</label>
+                                    <select id="cover-border-pattern-select" class="opt-select">
+                                         <option value="solid">Solid Line (साधारण रेखा)</option>
+                                         <option value="double-gold">Royal Double Gold (शाही स्वर्ण दोहरी रेखा)</option>
+                                         <option value="dots">Dotted Border (बिंदु रेखा)</option>
+                                         <option value="ornate-frame">Ornate Double Frame (अलंकृत दोहरी फ़्रेम)</option>
+                                         <option value="none">No Border (कोई सीमा रेखा नहीं)</option>
+                                    </select>
+                                </div>
+                                <div class="input-group full-width">
+                                    <label for="cover-emblem-select"><span class="opt-icon">⚜️</span> Cover Title Emblem (कवर शीर्षक राजमुद्रा)</label>
+                                    <select id="cover-emblem-select" class="opt-select">
+                                         <option value="none">No Emblem (कोई राजमुद्रा नहीं)</option>
+                                         <option value="royal-seal">Royal Gold Seal (शाही स्वर्ण राजमुद्रा)</option>
+                                         <option value="verified-badge">Verified Quality Badge (प्रमाणित योग्यता बैज)</option>
+                                         <option value="exclusive-star">Samyak Exclusive Emblem (सम्यक विशेष स्टार)</option>
+                                         <option value="vintage-emblem">Vintage Editorial Seal (विंटेज संपादकीय सील)</option>
+                                    </select>
+                                </div>
+                                <div class="cover-font-sizes-group">
+                                    <h4 class="settings-subheading">Cover Typography Sizes (कवर फ़ॉन्ट आकार)</h4>
+                                    <div class="input-grid-2">
+                                        <div class="input-group">
+                                            <label for="cover-title-size">Title Size (शीर्षक आकार)</label>
+                                            <div class="slider-with-val">
+                                                <input type="range" id="cover-title-size" min="30" max="100" value="52">
+                                                <span id="cover-title-size-val">52px</span>
+                                            </div>
+                                        </div>
+                                        <div class="input-group">
+                                            <label for="cover-classification-size">Class. Size (वर्गीकरण आकार)</label>
+                                            <div class="slider-with-val">
+                                                <input type="range" id="cover-classification-size" min="14" max="60" value="24">
+                                                <span id="cover-classification-size-val">24px</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="input-grid-2">
+                                        <div class="input-group">
+                                            <label for="cover-tagline-size">Tagline Size (टैगलाइन आकार)</label>
+                                            <div class="slider-with-val">
+                                                <input type="range" id="cover-tagline-size" min="12" max="40" value="20">
+                                                <span id="cover-tagline-size-val">20px</span>
+                                            </div>
+                                        </div>
+                                        <div class="input-group">
+                                            <label for="cover-subtitle-size">Subtitle Size (उपशीर्षक आकार)</label>
+                                            <div class="slider-with-val">
+                                                <input type="range" id="cover-subtitle-size" min="12" max="45" value="21">
+                                                <span id="cover-subtitle-size-val">21px</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="cover-editor-helper">
+                                <p>💡 <strong>Cover Page Note:</strong> Cover Page ki table of contents (विषयवस्तु) baaki pages me likhe gaye main headers (# Section) ko scan karke automatic generate and update hogi.</p>
+                            </div>
+                        </div>
+
+                        <!-- Zone 1.5: Last Page settings (Visible only when End Page is selected) -->
+                        <div id="last-editor-zone" class="editor-zone">
+                            <h3 class="section-title">End Page Settings</h3>
+                            <div class="settings-grid">
+                                <div class="input-group full-width">
+                                    <label for="last-title">Main Heading</label>
+                                    <input type="text" id="last-title" value="THANK YOU">
+                                </div>
+                                <div class="input-group full-width">
+                                    <label for="last-subtitle">Sub Heading</label>
+                                    <input type="text" id="last-subtitle" value="Samyak">
+                                </div>
+                                <div class="input-group full-width">
+                                    <label for="last-tagline">Description / Tagline</label>
+                                    <input type="text" id="last-tagline" value="कोचिंग नहीं क्रांति">
+                                </div>
+                            </div>
+                            <div class="cover-editor-helper">
+                                <p>💡 <strong>End Page Note:</strong> Yahan likha hua text document ke aakhiri page (Thank You Page) par live update hoga.</p>
+                            </div>
+                        </div>
+
+                        <!-- Zone 2: Content Page Editor (Visible for standard pages) -->
+                        <div id="content-editor-zone" class="editor-zone active">
+                            <div class="editor-toolbar">
+                                <button class="tool-btn" id="btn-section" data-prefix="# " title="Add Section Header (# Section)">#</button>
+                                <button class="tool-btn" id="btn-chapter" data-prefix="[chapter 1] मुख्य शीर्षक | उपशीर्षक" title="Add Chapter Button (चैप्टर बटन)">🔖</button>
+                                <button class="tool-btn" id="btn-topic" data-prefix="## 🔶 " title="Add Topic Title (🔶 Topic)">🔶</button>
+                                <button class="tool-btn" id="btn-bullet" data-prefix="• " title="Add Bullet Point (• Bullet)">•</button>
+                                <button class="tool-btn" id="btn-note" data-prefix="> " title="Add Highlight Box (💡 Note)">💡</button>
+
+                                <button class="tool-btn" id="toolbar-customize-trigger" title="Customize Toolbar (टूलबार कस्टमाइज़ करें)">⚙️</button>
+                                <button class="tool-btn tray-trigger-btn" id="toolbar-tray-trigger" title="Show Advanced Tools (एडवांस्ड टूल्स दिखाएं)">▶</button>
+
+                                <div class="toolbar-tray-drawer" id="toolbar-tray-drawer">
+                                    <button class="tool-btn" id="btn-pagebreak" data-prefix="&#10;[pagebreak]&#10;" title="Insert Page Break">📄</button>
+                                    <button class="tool-btn" id="insert-table-btn" title="Insert Table">📊</button>
+                                    <button class="tool-btn" id="btn-search-toggle" title="Find and Replace">🔍</button>
+                                    <button class="tool-btn" id="btn-help-shortcuts" title="Shortcuts & Formatting Help">❓</button>
+                                </div>
+                                <input type="file" id="editor-image-upload" accept="image/*" style="display: none;">
+                            </div>
+                            <div id="search-replace-panel" class="search-replace-panel" style="display: none;">
+                                <div class="search-row">
+                                    <input type="text" id="find-input" placeholder="Find text...">
+                                    <input type="text" id="replace-input" placeholder="Replace with...">
+                                </div>
+                                <div class="search-row actions">
+                                    <button id="find-btn" class="search-action-btn">Find Next</button>
+                                    <button id="replace-btn" class="search-action-btn">Replace</button>
+                                    <button id="replace-all-btn" class="search-action-btn">Replace All</button>
+                                    <span id="search-status" class="search-status"></span>
+                                </div>
+                            </div>
+
+                            <div class="textarea-wrapper">
+                                <textarea id="page-content-input" spellcheck="false" placeholder="Active page ka text yahan paste karein ya likhna shuru karein..."></textarea>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- Tab Panel 4: Custom Design Panel (डिज़ाइन) - Unified and Collapsible -->
+                <div id="panel-design" class="sidebar-panel">
+                    <section class="settings-section" style="padding-top: 15px;">
+                        <div id="settings-accordion-container">
+
+                            <div class="collapsible-section" draggable="true" id="opt-sec-layout">
+                                <div class="collapsible-header">
+                                    <span class="drag-grip">☰</span>
+                                    <h4 class="options-group-title">📄 Page Layout & Template</h4>
+                                    <span class="collapse-arrow">▼</span>
+                                </div>
+                                <div class="collapsible-content" style="display: none;">
+                                    <div class="options-grid">
+                                        <div class="option-item">
+                                            <label><span class="opt-icon">📄</span> Page Template:</label>
+                                            <select id="page-template-select" class="opt-select">
+                                                <option value="" disabled selected>Select Page Template...</option>
+                                                <option value="standard">Standard Content</option>
+                                                <option value="personality">Personality Feature</option>
+                                                <option value="stats-table">Comparison & Stats</option>
+                                                <option value="facts-grid">Quick Facts Grid</option>
+                                                <option value="announcement">Highlights & Alert</option>
+                                                <option value="blank">Blank Page</option>
+                                            </select>
+                                        </div>
+                                        <div class="option-item">
+                                            <label><span class="opt-icon">📐</span> Page Layout:</label>
+                                            <div style="display: flex; gap: 4px; align-items: center; width: 100%;">
+                                                <select id="page-layout-select" class="opt-select" style="flex: 1;">
+                                                    <option value="single">Single Column</option>
+                                                    <option value="two-column">Two Columns</option>
+                                                </select>
+                                                <button id="apply-layout-all-btn" class="search-action-btn" style="font-size: 9px; padding: 6px 8px; border-radius: var(--border-radius-sm); white-space: nowrap;" title="Apply this layout to all content pages">Apply to All</button>
+                                            </div>
+                                        </div>
+                                        <div class="option-item full-width-opt" style="margin-top: 10px;">
+                                            <label style="cursor: pointer; display: flex; align-items: center; gap: 8px; user-select: none;">
+                                                <input type="checkbox" id="compact-spacing-toggle" style="width: 16px; height: 16px; accent-color: var(--ui-accent); cursor: pointer; margin: 0;">
+                                                <span>Compact Spacing (कॉम्पैक्ट लेआउट)</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 3. Page Margins & Spacing -->
+                            <div class="collapsible-section" draggable="true" id="opt-sec-margins">
+                                <div class="collapsible-header">
+                                    <span class="drag-grip">☰</span>
+                                    <h4 class="options-group-title">📐 Page Margins & Padding</h4>
+                                    <span class="collapse-arrow">▼</span>
+                                </div>
+                                <div class="collapsible-content" style="display: none;">
+                                    <div class="options-grid">
+                                        <div class="option-item">
+                                            <label><span class="opt-icon">↔️</span> Outer Margin X (<span id="margin-x-val">8mm</span>):</label>
+                                            <input type="range" id="page-margin-x" min="2" max="15" value="8" step="0.5" style="width: 100%; accent-color: var(--ui-accent);">
+                                        </div>
+                                        <div class="option-item">
+                                            <label><span class="opt-icon">↕️</span> Outer Margin Y (<span id="margin-y-val">6mm</span>):</label>
+                                            <input type="range" id="page-margin-y" min="2" max="15" value="6" step="0.5" style="width: 100%; accent-color: var(--ui-accent);">
+                                        </div>
+                                        <div class="option-item">
+                                            <label><span class="opt-icon">↔️</span> Inner Padding X (<span id="padding-x-val">6mm</span>):</label>
+                                            <input type="range" id="page-padding-x" min="2" max="15" value="6" step="0.5" style="width: 100%; accent-color: var(--ui-accent);">
+                                        </div>
+                                        <div class="option-item">
+                                            <label><span class="opt-icon">↕️</span> Inner Padding Y (<span id="padding-y-val">4mm</span>):</label>
+                                            <input type="range" id="page-padding-y" min="2" max="15" value="4" step="0.5" style="width: 100%; accent-color: var(--ui-accent);">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 4. Typography & Spacing -->
+                            <div class="collapsible-section" draggable="true" id="opt-sec-typography">
+                                <div class="collapsible-header">
+                                    <span class="drag-grip">☰</span>
+                                    <h4 class="options-group-title">✍️ Typography & Spacing</h4>
+                                    <span class="collapse-arrow">▼</span>
+                                </div>
+                                <div class="collapsible-content" style="display: none;">
+                                    <div class="options-grid">
+                                        <div class="option-item">
+                                            <label><span class="opt-icon">✍️</span> Font Style:</label>
+                                            <select id="global-font-style" class="opt-select">
+                                                <option value="modern-sans">Samyak Signature (Yatra & Mukta)</option>
+                                                <option value="poppins-sans">Modern Sans (Poppins & Noto Sans)</option>
+                                                <option value="traditional-serif">Traditional Serif (Martel & Noto Serif)</option>
+                                                <option value="hybrid-style">Hybrid (Rozha One & Noto Sans)</option>
+                                            </select>
+                                        </div>
+                                        <div class="option-item">
+                                            <label><span class="opt-icon">🔍</span> Text Size:</label>
+                                            <div class="font-adjuster">
+                                                <button id="font-decrease" class="font-btn" title="Decrease Font Size">-</button>
+                                                <span id="font-size-val">13.5px</span>
+                                                <button id="font-increase" class="font-btn" title="Increase Font Size">+</button>
+                                            </div>
+                                        </div>
+                                        <div class="option-item">
+                                            <label><span class="opt-icon">⚖️</span> Font Weight:</label>
+                                            <select id="global-font-weight" class="opt-select">
+                                                <option value="500">Normal (500)</option>
+                                                <option value="600">Medium (600)</option>
+                                                <option value="700" selected>Bold (700)</option>
+                                                <option value="800">Extra Bold (800)</option>
+                                            </select>
+                                        </div>
+                                        <div class="option-item">
+                                            <label><span class="opt-icon">↔️</span> Letter Spacing:</label>
+                                            <select id="global-letter-spacing" class="opt-select">
+                                                <option value="-0.2px">Compact (-0.2px)</option>
+                                                <option value="0px" selected>Normal (0px)</option>
+                                                <option value="0.5px">Wide (0.5px)</option>
+                                                <option value="1px">Extra Wide (1px)</option>
+                                            </select>
+                                        </div>
+                                        <div class="option-item full-width-opt">
+                                            <label><span class="opt-icon">↕️</span> Line Spacing:</label>
+                                            <select id="global-line-spacing" class="opt-select">
+                                                <option value="1.3">Compact (1.3)</option>
+                                                <option value="1.45" selected>Normal (1.45)</option>
+                                                <option value="1.6">Relaxed (1.6)</option>
+                                                <option value="1.8">Loose (1.8)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 5. Watermark Options -->
+                            <div class="collapsible-section" draggable="true" id="opt-sec-watermark">
+                                <div class="collapsible-header">
+                                    <span class="drag-grip">☰</span>
+                                    <h4 class="options-group-title">💧 Watermark Options</h4>
+                                    <span class="collapse-arrow">▼</span>
+                                </div>
+                                <div class="collapsible-content" style="display: none;">
+                                    <div class="options-grid">
+                                        <div class="option-item full-width-opt">
+                                            <label><span class="opt-icon">🏷️</span> Watermark Type:</label>
+                                            <select id="watermark-type" class="opt-select">
+                                                <option value="none" selected>None</option>
+                                                <option value="text">Text</option>
+                                                <option value="image">Image/Logo</option>
+                                            </select>
+                                        </div>
+                                        <div id="watermark-text-group" class="option-item full-width-opt" style="display: none;">
+                                            <label><span class="opt-icon">📝</span> Watermark Text:</label>
+                                            <input type="text" id="watermark-text" class="opt-select" value="Samyak" style="background-color: #16161e; border: 1px solid var(--ui-border); color: #fff;">
+                                        </div>
+                                        <div id="watermark-image-group" class="option-item full-width-opt" style="display: none;">
+                                            <label><span class="opt-icon">📷</span> Upload Logo Image:</label>
+                                            <input type="file" id="watermark-image-file" accept="image/*" class="opt-select" style="background-color: #16161e; border: 1px solid var(--ui-border); color: #fff; padding: 4px 8px;">
+                                            <p style="font-size: 9px; color: var(--ui-text-muted); margin-top: 4px;">💡 Select any image to use as a logo watermark.</p>
+                                        </div>
+                                        <div class="option-item">
+                                            <label><span class="opt-icon">📍</span> Position:</label>
+                                            <select id="watermark-position" class="opt-select">
+                                                <option value="center" selected>Center</option>
+                                                <option value="top-left">Top Left</option>
+                                                <option value="top-right">Top Right</option>
+                                                <option value="bottom-left">Bottom Left</option>
+                                                <option value="bottom-right">Bottom Right</option>
+                                            </select>
+                                        </div>
+                                        <div class="option-item">
+                                            <label><span class="opt-icon">🔄</span> Rotation:</label>
+                                            <select id="watermark-rotation" class="opt-select">
+                                                <option value="-45" selected>Diagonal (-45°)</option>
+                                                <option value="0">Straight (0°)</option>
+                                                <option value="45">Diagonal (45°)</option>
+                                                <option value="-90">Vertical (-90°)</option>
+                                            </select>
+                                        </div>
+                                        <div class="option-item">
+                                            <label><span class="opt-icon">🏁</span> Opacity (<span id="watermark-opacity-val">15%</span>):</label>
+                                            <input type="range" id="watermark-opacity" min="0" max="100" value="15" style="width: 100%; accent-color: var(--ui-accent);">
+                                        </div>
+                                        <div class="option-item">
+                                            <label><span class="opt-icon">📐</span> Size / Scale (<span id="watermark-size-val">60px</span>):</label>
+                                            <input type="range" id="watermark-size" min="10" max="200" value="60" style="width: 100%; accent-color: var(--ui-accent);">
+                                        </div>
+                                        <div id="watermark-color-group" class="option-item full-width-opt" style="display: none;">
+                                            <label><span class="opt-icon">🎨</span> Text Color:</label>
+                                            <input type="color" id="watermark-color" value="#000000" style="width: 100%; height: 32px; border: 1px solid var(--ui-border); background: none; cursor: pointer; border-radius: 4px;">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 6. Social Links Footer -->
+                            <div class="collapsible-section" draggable="true" id="opt-sec-social">
+                                <div class="collapsible-header">
+                                    <span class="drag-grip">☰</span>
+                                    <h4 class="options-group-title">📱 Social Links Footer</h4>
+                                    <span class="collapse-arrow">▼</span>
+                                </div>
+                                <div class="collapsible-content" style="display: none;">
+                                    <div class="options-grid">
+                                        <div class="option-item full-width-opt">
+                                            <label><span class="opt-icon">✈️</span> Telegram:</label>
+                                            <input type="text" id="footer-telegram" class="opt-select" value="" style="background-color: #16161e; border: 1px solid var(--ui-border); color: #fff;">
+                                        </div>
+                                        <div class="option-item full-width-opt">
+                                            <label><span class="opt-icon">▶️</span> YouTube:</label>
+                                            <input type="text" id="footer-youtube" class="opt-select" value="" style="background-color: #16161e; border: 1px solid var(--ui-border); color: #fff;">
+                                        </div>
+                                        <div class="option-item">
+                                            <label><span class="opt-icon">📐</span> Font Size (<span id="footer-social-size-val">11px</span>):</label>
+                                            <input type="range" id="footer-social-size" min="8" max="18" value="11" style="width: 100%; accent-color: var(--ui-accent);">
+                                        </div>
+                                        <div class="option-item">
+                                            <label><span class="opt-icon">📍</span> Placement:</label>
+                                            <select id="footer-social-placement" class="opt-select">
+                                                <option value="split" selected>Split (Left-Right)</option>
+                                                <option value="center">Center</option>
+                                                <option value="left">Left</option>
+                                                <option value="right">Right</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 6.5 Chapter Heading -->
+                            <div class="collapsible-section" draggable="true" id="opt-sec-chapter">
+                                <div class="collapsible-header">
+                                    <span class="drag-grip">☰</span>
+                                    <h4 class="options-group-title">🔖 Chapter Heading</h4>
+                                    <span class="collapse-arrow">▼</span>
+                                </div>
+                                <div class="collapsible-content" style="display: none;">
+                                    <div class="options-grid">
+                                        <div class="option-item full-width-opt">
+                                            <label><span class="opt-icon">📐</span> Chapter Number Size (<span id="design-chapter-num-size-val">20px</span>):</label>
+                                            <input type="range" id="design-chapter-num-size" min="10" max="40" value="20" style="width: 100%; accent-color: var(--ui-accent);">
+                                        </div>
+                                        <div class="option-item full-width-opt">
+                                            <label><span class="opt-icon">📐</span> Main Title Size (<span id="design-chapter-title-size-val">22px</span>):</label>
+                                            <input type="range" id="design-chapter-title-size" min="12" max="45" value="22" style="width: 100%; accent-color: var(--ui-accent);">
+                                        </div>
+                                        <div class="option-item full-width-opt">
+                                            <label><span class="opt-icon">📐</span> Subtitle Size (<span id="design-chapter-subtitle-size-val">14px</span>):</label>
+                                            <input type="range" id="design-chapter-subtitle-size" min="10" max="30" value="14" style="width: 100%; accent-color: var(--ui-accent);">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 7. Main Heading -->
+                            <div class="collapsible-section" draggable="true" id="opt-sec-heading">
+                                <div class="collapsible-header">
+                                    <span class="drag-grip">☰</span>
+                                    <h4 class="options-group-title">🏷️ Main Heading</h4>
+                                    <span class="collapse-arrow">▼</span>
+                                </div>
+                                <div class="collapsible-content" style="display: none;">
+                                    <div class="options-grid">
+                                        <div class="option-item">
+                                            <label><span class="opt-icon">🎨</span> BG Color:</label>
+                                            <input type="color" id="design-section-bg" value="#850f0f" style="width: 100%; height: 32px; border: 1px solid var(--ui-border); background: none; cursor: pointer; border-radius: 4px;">
+                                        </div>
+                                        <div class="option-item">
+                                            <label><span class="opt-icon">✨</span> Accent Color:</label>
+                                            <input type="color" id="design-section-accent" value="#1d6ea5" style="width: 100%; height: 32px; border: 1px solid var(--ui-border); background: none; cursor: pointer; border-radius: 4px;">
+                                        </div>
+                                        <div class="option-item full-width-opt">
+                                            <label><span class="opt-icon">🎨</span> Text Color:</label>
+                                            <input type="color" id="design-section-text" value="#ffffff" style="width: 100%; height: 32px; border: 1px solid var(--ui-border); background: none; cursor: pointer; border-radius: 4px;">
+                                        </div>
+                                        <div class="option-item full-width-opt">
+                                            <label><span class="opt-icon">📐</span> Font Size (<span id="design-section-size-val">18px</span>):</label>
+                                            <input type="range" id="design-section-size" min="12" max="32" value="18" style="width: 100%; accent-color: var(--ui-accent);">
+                                        </div>
+                                        <div class="option-item full-width-opt">
+                                            <label><span class="opt-icon">📍</span> Placement:</label>
+                                            <select id="design-section-align" class="opt-select">
+                                                <option value="left" selected>Left Align</option>
+                                                <option value="center">Center Align</option>
+                                            </select>
+                                        </div>
+                                        <div class="option-item full-width-opt">
+                                            <label><span class="opt-icon">📐</span> Heading Shape (शेप):</label>
+                                            <select id="design-section-shape" class="opt-select">
+                                                <option value="rectangle" selected>Flat Rectangle</option>
+                                                <option value="rounded">Soft Rounded</option>
+                                                <option value="pill">Pill / Stadium</option>
+                                                <option value="left-stripe">Left Accent Stripe</option>
+                                                <option value="underline">Elegant Underline</option>
+                                                <option value="ribbon-banner">Ribbon Banner 🎗️</option>
+                                                <option value="editorial-double">Editorial Double Line 📰</option>
+                                                <option value="bracket-frame">Bracket Frame ［ ］</option>
+                                                <option value="diagonal-cut">Skewed Diagonal Cut ╱</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 8. Topic Heading -->
+                            <div class="collapsible-section" draggable="true" id="opt-sec-topic">
+                                <div class="collapsible-header">
+                                    <span class="drag-grip">☰</span>
+                                    <h4 class="options-group-title">🔸 Topic Heading</h4>
+                                    <span class="collapse-arrow">▼</span>
+                                </div>
+                                <div class="collapsible-content" style="display: none;">
+                                    <div class="options-grid">
+                                        <div class="option-item">
+                                            <label><span class="opt-icon">🎨</span> Text Color:</label>
+                                            <input type="color" id="design-topic-text" value="#1d6ea5" style="width: 100%; height: 32px; border: 1px solid var(--ui-border); background: none; cursor: pointer; border-radius: 4px;">
+                                        </div>
+                                        <div class="option-item">
+                                            <label><span class="opt-icon">🎨</span> Border Color:</label>
+                                            <input type="color" id="design-topic-border" value="#c5a353" style="width: 100%; height: 32px; border: 1px solid var(--ui-border); background: none; cursor: pointer; border-radius: 4px;">
+                                        </div>
+                                        <div class="option-item">
+                                            <label><span class="opt-icon">📏</span> Border Style:</label>
+                                            <select id="design-topic-border-style" class="opt-select">
+                                                <option value="dashed" selected>Dashed</option>
+                                                <option value="solid">Solid</option>
+                                                <option value="double">Double</option>
+                                                <option value="none">None</option>
+                                            </select>
+                                        </div>
+                                        <div class="option-item">
+                                            <label><span class="opt-icon">↕️</span> Spacing (margin):</label>
+                                            <select id="design-topic-margin" class="opt-select">
+                                                <option value="12px 4px">Normal (Wide)</option>
+                                                <option value="6px 2px">Compact</option>
+                                                <option value="4px 2px" selected>Extra Compact</option>
+                                                <option value="0px 0px">Zero Spacing</option>
+                                                <option value="18px 6px">Wide</option>
+                                                <option value="24px 8px">Relaxed</option>
+                                            </select>
+                                        </div>
+                                        <div class="option-item">
+                                            <label><span class="opt-icon">📐</span> Font Size (<span id="design-topic-size-val">15px</span>):</label>
+                                            <input type="range" id="design-topic-size" min="10" max="24" value="15" style="width: 100%; accent-color: var(--ui-accent);">
+                                        </div>
+                                        <div class="option-item">
+                                            <label><span class="opt-icon">➖</span> Border Thickness (<span id="design-topic-thick-val">1.5px</span>):</label>
+                                            <input type="range" id="design-topic-thick" min="1" max="6" value="1.5" step="0.5" style="width: 100%; accent-color: var(--ui-accent);">
+                                        </div>
+                                        <div class="option-item full-width-opt">
+                                            <label><span class="opt-icon">📍</span> Placement:</label>
+                                            <select id="design-topic-align" class="opt-select">
+                                                <option value="flex-start" selected>Left Align</option>
+                                                <option value="center">Center Align</option>
+                                                <option value="flex-end">Right Align</option>
+                                            </select>
+                                        </div>
+                                        <div class="option-item full-width-opt">
+                                            <label><span class="opt-icon">🔸</span> Topic Icon Style (आइकॉन):</label>
+                                            <select id="design-topic-icon" class="opt-select">
+                                                <option value="orange-diamond" selected>Orange Diamond 🔶</option>
+                                                <option value="blue-diamond">Blue Diamond 🔷</option>
+                                                <option value="star">Golden Star ⭐</option>
+                                                <option value="pushpin">Pushpin 📌</option>
+                                                <option value="rocket">Rocket 🚀</option>
+                                                <option value="nib">Nib ✒️</option>
+                                                <option value="pencil">Pencil 📝</option>
+                                                <option value="crown">Royal Crown 👑</option>
+                                                <option value="fleur-de-lis">Premium Crest ⚜️</option>
+                                                <option value="sparkles">Sparkles ✨</option>
+                                                <option value="book">Open Book 📖</option>
+                                                <option value="jewel">Diamond Jewel 💎</option>
+                                                <option value="quill">Quill / Feather 🪶</option>
+                                                <option value="trophy">Trophy 🏆</option>
+                                                <option value="hand-right">Hand Pointing Right 👉</option>
+                                                <option value="hand-writing">Writing Hand ✍️</option>
+                                                <option value="hand-thumb">Thumbs Up 👍</option>
+                                                <option value="hand-up">Hand Pointing Up 👆</option>
+                                                <option value="none">None (No Icon)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 9. Bullet Points -->
+                            <div class="collapsible-section" draggable="true" id="opt-sec-bullets">
+                                <div class="collapsible-header">
+                                    <span class="drag-grip">☰</span>
+                                    <h4 class="options-group-title">🟢 Bullet Points</h4>
+                                    <span class="collapse-arrow">▼</span>
+                                </div>
+                                <div class="collapsible-content" style="display: none;">
+                                    <div class="options-grid">
+                                        <div class="option-item full-width-opt">
+                                            <label><span class="opt-icon">🟢</span> Bullet Style (बुलेट स्टाइल):</label>
+                                            <select id="design-bullet-style" class="opt-select">
+                                                <option value="classic" selected>Classic Dot (•)</option>
+                                                <option value="diamond">Diamond (◆)</option>
+                                                <option value="square">Square (■)</option>
+                                                <option value="arrow">Arrow (➜)</option>
+                                                <option value="checkmark">Checkmark (✔)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 10. Page Borders & Decor -->
+                            <div class="collapsible-section" draggable="true" id="opt-sec-borders">
+                                <div class="collapsible-header">
+                                    <span class="drag-grip">☰</span>
+                                    <h4 class="options-group-title">🖼️ Page Borders & Decor</h4>
+                                    <span class="collapse-arrow">▼</span>
+                                </div>
+                                <div class="collapsible-content" style="display: none;">
+                                    <div class="options-grid">
+                                        <div class="option-item">
+                                            <label><span class="opt-icon">🎨</span> Border Color:</label>
+                                            <input type="color" id="design-inner-border" value="#c5a353" style="width: 100%; height: 32px; border: 1px solid var(--ui-border); background: none; cursor: pointer; border-radius: 4px;">
+                                        </div>
+                                        <div class="option-item">
+                                            <label><span class="opt-icon">🎨</span> Corner Color:</label>
+                                            <input type="color" id="design-corner-color" value="#c5a353" style="width: 100%; height: 32px; border: 1px solid var(--ui-border); background: none; cursor: pointer; border-radius: 4px;">
+                                        </div>
+                                        <div class="option-item">
+                                            <label><span class="opt-icon">➖</span> Border Thickness (<span id="design-border-thick-val">1px</span>):</label>
+                                            <input type="range" id="design-border-thick" min="0" max="5" value="1" style="width: 100%; accent-color: var(--ui-accent);">
+                                        </div>
+                                        <div class="option-item">
+                                            <label><span class="opt-icon">📐</span> Corner Bracket Size (<span id="design-corner-size-val">22px</span>):</label>
+                                            <input type="range" id="design-corner-size" min="10" max="40" value="22" style="width: 100%; accent-color: var(--ui-accent);">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 11. Column Divider -->
+                            <div class="collapsible-section" draggable="true" id="opt-sec-divider">
+                                <div class="collapsible-header">
+                                    <span class="drag-grip">☰</span>
+                                    <h4 class="options-group-title">⚖️ Column Divider</h4>
+                                    <span class="collapse-arrow">▼</span>
+                                </div>
+                                <div class="collapsible-content" style="display: none;">
+                                    <div class="options-grid">
+                                        <div class="option-item">
+                                            <label><span class="opt-icon">🎨</span> Divider Color:</label>
+                                            <input type="color" id="design-divider-color" value="#c5a353" style="width: 100%; height: 32px; border: 1px solid var(--ui-border); background: none; cursor: pointer; border-radius: 4px;">
+                                        </div>
+                                        <div class="option-item">
+                                            <label><span class="opt-icon">📏</span> Divider Style:</label>
+                                            <select id="design-divider-style" class="opt-select">
+                                                <option value="dashed" selected>Dashed</option>
+                                                <option value="solid">Solid</option>
+                                                <option value="double">Double</option>
+                                                <option value="dotted">Dotted</option>
+                                                <option value="none">None</option>
+                                            </select>
+                                        </div>
+                                        <div class="option-item full-width-opt">
+                                            <label><span class="opt-icon">➖</span> Thickness (<span id="design-divider-thick-val">1.5px</span>):</label>
+                                            <input type="range" id="design-divider-thick" min="0" max="6" value="1.5" step="0.5" style="width: 100%; accent-color: var(--ui-accent);">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="collapsible-section" draggable="true" id="opt-sec-pagination">
+                                <div class="collapsible-header">
+                                    <span class="drag-grip">☰</span>
+                                    <h4 class="options-group-title">🔢 Pagination & Footer</h4>
+                                    <span class="collapse-arrow">▼</span>
+                                </div>
+                                <div class="collapsible-content" style="display: none;">
+                                    <div class="options-grid">
+                                        <div class="option-item">
+                                            <label><span class="opt-icon">🎨</span> Number Color:</label>
+                                            <input type="color" id="design-page-num-color" value="#850f0f" style="width: 100%; height: 32px; border: 1px solid var(--ui-border); background: none; cursor: pointer; border-radius: 4px;">
+                                        </div>
+                                        <div class="option-item" style="display: none;">
+                                            <label><span class="opt-icon">📍</span> Placement:</label>
+                                            <select id="design-page-num-place" class="opt-select">
+                                                <option value="bottom-center" selected>Bottom Center</option>
+                                                <option value="bottom-right">Bottom Right</option>
+                                                <option value="top-center">Top Center</option>
+                                                <option value="top-right">Top Right</option>
+                                            </select>
+                                        </div>
+                                        <div class="option-item full-width-opt" style="display: none;">
+                                            <label><span class="opt-icon">📝</span> Prefix Text:</label>
+                                            <input type="text" id="design-page-num-prefix" class="opt-select" value="पेज - " style="background-color: #16161e; border: 1px solid var(--ui-border); color: #fff;">
+                                        </div>
+                                        <div class="option-item full-width-opt">
+                                            <label><span class="opt-icon">📐</span> Font Size (<span id="design-page-num-size-val">15px</span>):</label>
+                                            <input type="range" id="design-page-num-size" min="10" max="24" value="15" style="width: 100%; accent-color: var(--ui-accent);">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- Tab Panel 5: OCR Handwriting Extractor -->
+                <div id="panel-ocr" class="sidebar-panel">
+                    <section class="settings-section">
+                        <!-- Document Preview & Controls Left Side -->
+                        <div class="global-page-options">
+                            <h4 class="options-group-title">📂 Document Preview & Settings</h4>
+                            
+                            <div style="display:flex; flex-direction:column; gap:12px; margin-top:10px;">
+                                <!-- Drag and Drop widget -->
+                                <div id="ocr-dash-drag-zone" class="ocr-dash-drag-zone" style="aspect-ratio:auto; height:120px; border-style:dashed; flex-direction:column; padding:15px; border-radius:8px; border-color:rgba(197, 160, 89, 0.35);">
+                                    <span class="ocr-dash-upload-icon" style="font-size:24px; color:var(--ui-accent, #c5a059);">📤</span>
+                                    <h4 style="font-size:11.5px; text-align:center; color:#cbd5e1; margin: 4px 0 0 0;">Drag & drop or select PDF / image</h4>
+                                    <p style="font-size:10px; color:#94a3b8; margin: 2px 0 0 0;">Maximum limit: 15MB • PDF / Image</p>
+                                    <input type="file" id="ocr-dash-file-input" accept="image/png, image/jpeg, image/jpg, application/pdf" style="display: none;">
+                                </div>
+                                
+                                <!-- Preview view -->
+                                <div id="ocr-dash-preview-area" class="ocr-dash-preview-area" style="display: none; flex-direction: column; gap: 8px;">
+                                    <div class="ocr-dash-file-details" style="display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.02); padding: 6px; border-radius: 6px; border: 1px solid var(--ui-border);">
+                                        <div class="ocr-file-badge" id="ocr-dash-file-badge" style="font-size: 9px; font-weight: bold; background: rgba(197,160,89,0.15); color: var(--ui-accent, #c5a059); padding: 2px 4px; border-radius: 4px;">IMG</div>
+                                        <div class="ocr-file-info" style="flex: 1; display: flex; flex-direction: column; min-width: 0;">
+                                            <span class="ocr-file-name" id="ocr-dash-file-name" style="font-size: 11px; font-weight: 600; color: #f8fafc; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">document.png</span>
+                                            <span class="ocr-file-size" id="ocr-dash-file-size" style="font-size: 9px; color: #94a3b8;">1.2 MB</span>
+                                        </div>
+                                        <button id="ocr-dash-remove-file-btn" class="ocr-dash-remove-btn" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: none; width: 20px; height: 20px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold;">&times;</button>
+                                    </div>
+                                    
+                                    <div class="ocr-dash-image-container" style="position: relative; width: 100%; height: 180px; background: #0c0c0e; border-radius: 6px; overflow: hidden; display: flex; align-items: center; justify-content: center; border: 1.5px solid var(--ui-border);">
+                                        <div id="ocr-dash-scan-overlay" class="ocr-dash-scan-overlay" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10;">
+                                            <div class="ocr-dash-scan-line" style="position: absolute; width: 100%; height: 3px; background: linear-gradient(to right, transparent, var(--ui-accent, #c5a059), transparent); box-shadow: 0 0 10px var(--ui-accent, #c5a059); animation: ocrLaserSweep 2.2s ease-in-out infinite;"></div>
+                                        </div>
+                                        <img id="ocr-dash-preview-img" style="max-height: 160px; max-width: 100%; object-fit: contain; border-radius: 4px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);" src="" alt="OCR Preview">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Settings Card -->
+                        <div class="global-page-options" style="margin-top:15px;">
+                            <h4 class="options-group-title">⚙️ OCR Settings</h4>
+                            <div style="display:flex; flex-direction:column; gap:12px; margin-top:10px;">
+                                <div class="ocr-dash-input-group" style="display:flex; flex-direction:column; gap:6px;">
+                                    <label for="ocr-dash-engine-select" style="font-size: 11px; font-weight: 700; color: #cbd5e1;">🧠 OCR Engine</label>
+                                    <select id="ocr-dash-engine-select" style="padding: 8px 10px; background: #16161f; border: 1px solid var(--ui-border); border-radius: 6px; color: #cbd5e1; font-size: 12px; outline: none;">
+                                        <option value="Google Vision API (High Precision)">Google Vision API (High Precision)</option>
+                                        <option value="Fine-tuned Tesseract">Fine-tuned Tesseract OCR</option>
+                                        <option value="Multimodal Gemini Vision OCR" selected>Gemini Pro Vision Engine</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="ocr-dash-toggle-row" style="display:flex; align-items:center; justify-content:space-between;">
+                                    <span style="font-size: 12px; font-weight: 600; color: #cbd5e1;">📐 Layout Analysis</span>
+                                    <button id="ocr-dash-layout-toggle" class="ocr-dash-switch active">
+                                        <div class="ocr-dash-switch-thumb"></div>
+                                    </button>
+                                </div>
+                                
+                                <div class="ocr-dash-toggle-row" style="display:flex; align-items:center; justify-content:space-between;">
+                                    <span style="font-size: 12px; font-weight: 600; color: #cbd5e1;">✍️ Auto-Structuring (MD)</span>
+                                    <button id="ocr-dash-struct-toggle" class="ocr-dash-switch active">
+                                        <div class="ocr-dash-switch-thumb"></div>
+                                    </button>
+                                </div>
+                                
+                                <button id="ocr-dash-process-btn" class="ocr-dash-btn-primary" style="display: none; width: 100%; padding: 12px; font-weight: 700; font-size: 13px; text-align: center; border: none; border-radius: 8px; color: white; background: linear-gradient(135deg, var(--ui-accent, #c5a059), #a68444); cursor: pointer; box-shadow: 0 4px 12px rgba(197,160,89,0.2);">
+                                    Start Process
+                                </button>
+                                
+                                <div id="ocr-dash-processing-indicator" class="ocr-dash-processing-card" style="display: none; align-items: center; gap: 12px; background: rgba(79, 70, 229, 0.1); border: 1px solid rgba(79, 70, 229, 0.2); border-radius: 8px; padding: 10px 14px;">
+                                    <span class="ocr-dash-spinner"></span>
+                                    <div class="ocr-dash-processing-text" style="display: flex; flex-direction: column; text-align: left;">
+                                        <strong style="font-size: 12px; font-weight: 700; color: #818cf8;">Scanning content...</strong>
+                                        <span style="font-size: 9px; color: #94a3b8; margin-top: 1px;">Running Gemini layout recognition</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quick Help Guide -->
+                        <div class="global-page-options" style="margin-top:15px; background: rgba(197, 160, 89, 0.03); border: 1px solid rgba(197, 160, 89, 0.1); border-radius: 8px; padding: 12px;">
+                            <h5 style="margin: 0 0 6px 0; font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--ui-accent, #c5a059);">💡 How to use:</h5>
+                            <ul style="margin: 0; padding-left: 14px; font-size: 11px; color: #cbd5e1; line-height: 1.5; display: flex; flex-direction: column; gap: 4px;">
+                                <li>Upload a handwritten notes page or PDF.</li>
+                                <li>Choose settings and click <strong>'Start Process'</strong> to trigger Gemini.</li>
+                                <li>The results will be shown on the right side workspace. Review and click <strong>'Insert'</strong> to place it onto a page!</li>
+                            </ul>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+        </aside>
+
+        <!-- Floating Editor Actions Menu (Moved outside aside to stay visible when sidebar is collapsed) -->
+        <div class="floating-editor-controls">
+            <div class="fab-container" id="editor-fab-container">
+                <!-- Speed Dial Sub-buttons -->
+                <div class="fab-menu-items">
+                    <button id="print-pdf-btn" class="fab-sub-btn btn-primary" title="Save as PDF">🖨️</button>
+                    <button id="smart-shrink-btn" class="fab-sub-btn btn-secondary" title="Smart Shrink: Auto-shrink spacing/size slightly to fit overflow content onto previous pages">🪄</button>
+                    <button id="smart-space-btn" class="fab-sub-btn btn-secondary" title="Smart Space: Automatically clean up extra spaces and blank lines across all pages">🧹</button>
+                    <button id="clear-all-btn" class="fab-sub-btn btn-clear" title="Clear Content: Clear all content and start fresh">🗑️</button>
+                </div>
+                <!-- Main FAB Trigger -->
+                <button class="fab-trigger-btn" id="editor-fab-trigger" title="Quick Actions (त्वरित विकल्प)">⚡</button>
+            </div>
+        </div>
+
+        <!-- Resize Handle Divider -->
+        <div class="resize-handle" id="sidebar-resize-handle" title="Drag to resize editor panel">
+            <button id="sidebar-toggle-btn" class="sidebar-toggle-btn" title="Collapse Sidebar">◀</button>
+        </div>
+
+        <!-- Right Panel: Live Letter Preview Canvas -->
+        <main class="preview-panel">
+            <div class="preview-header">
+                <h2>Preview</h2>
+                <div class="header-stats" title="Page / Words">
+                    <span id="active-page-label">Cover</span>, <span id="word-count">0</span>
+                </div>
+                <div class="preview-zoom-controls">
+                    <button id="zoom-out" class="zoom-btn" title="Zoom Out">-</button>
+                    <span id="zoom-level">100%</span>
+                    <button id="zoom-in" class="zoom-btn" title="Zoom In">+</button>
+                </div>
+            </div>
+            
+            <div class="canvas-wrapper">
+                <!-- Letter Pages Container -->
+                <div id="pages-container" class="pages-container">
+                    <!-- Dynamic Letter pages will be injected here by JS -->
+                </div>
+            </div>
+
+            <!-- OCR Integrated Right Workspace -->
+            <div id="ocr-integrated-workspace" class="ocr-integrated-workspace-container" style="display: none;">
+                <!-- Tab Header -->
+                <div class="ocr-dash-tab-header">
+                    <h3 class="ocr-pane-title">📝 OCR Structured Output</h3>
+                    
+                    <div class="ocr-dash-tabs">
+                        <button id="ocr-dash-tab-preview" class="ocr-dash-tab-btn active">Structured View</button>
+                        <button id="ocr-dash-tab-editor" class="ocr-dash-tab-btn">Text Editor</button>
+                        <button id="ocr-dash-tab-alerts" class="ocr-dash-tab-btn">Legibility Alerts <span class="ocr-dash-alert-badge" id="ocr-dash-alert-badge-count">0</span></button>
+                    </div>
+                </div>
+                
+                <!-- Stats Banner -->
+                <div class="ocr-dash-stats-bar" id="ocr-dash-stats-bar" style="display: none;">
+                    <div class="ocr-dash-stat-item">
+                        <span class="ocr-stat-label">Accuracy Estimate</span>
+                        <span class="ocr-stat-value text-indigo" id="ocr-dash-confidence-val">--</span>
+                    </div>
+                    <div class="ocr-dash-stat-item border-left">
+                        <span class="ocr-stat-label">Total Words</span>
+                        <span class="ocr-stat-value" id="ocr-dash-wordcount-val">--</span>
+                    </div>
+                    <div class="ocr-dash-stat-item border-left">
+                        <span class="ocr-stat-label">High Alerts</span>
+                        <span class="ocr-stat-value text-amber" id="ocr-dash-alerts-count-val">--</span>
+                    </div>
+                </div>
+                
+                <!-- Content Area -->
+                <div class="ocr-dash-content-area">
+                    <!-- Idle State -->
+                    <div id="ocr-dash-idle-state" class="ocr-dash-state-card">
+                        <span class="ocr-dash-state-icon">📄</span>
+                        <h4>No Document Processed</h4>
+                        <p>Upload a handwritten document in the OCR panel on the left and scan to begin.</p>
+                    </div>
+                    
+                    <!-- Tab Content 1: Structured View -->
+                    <div id="ocr-dash-view-structured" class="ocr-dash-tab-panel" style="display: none;">
+                        <div id="ocr-dash-rendered-html" class="ocr-dash-markdown-body">
+                            <!-- Injected structured output -->
+                        </div>
+                    </div>
+                    
+                    <!-- Tab Content 2: Text Editor -->
+                    <div id="ocr-dash-view-editor" class="ocr-dash-tab-panel" style="display: none;">
+                        <textarea id="ocr-dash-raw-textarea" class="ocr-dash-editor-textarea" placeholder="OCR Output Markdown text will appear here..."></textarea>
+                    </div>
+                    
+                    <!-- Tab Content 3: Legibility Alerts -->
+                    <div id="ocr-dash-view-alerts" class="ocr-dash-tab-panel" style="display: none;">
+                        <div class="ocr-dash-alerts-intro">
+                            <span class="ocr-dash-warning-icon">⚠️</span>
+                            <div>
+                                <strong>Exception Management & Blurry Phrases:</strong>
+                                <p>Instead of omitting fuzzy text, Gemini flags blurry fragments or bad handwriting. Verify these with the original visual document.</p>
+                            </div>
+                        </div>
+                        
+                        <div id="ocr-dash-alerts-list" class="ocr-dash-alerts-list-container">
+                            <!-- Injected alerts items cards -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Actions / Insert Button -->
+                <div class="ocr-dash-actions-bar" id="ocr-dash-actions-bar" style="display: none;">
+                    <button id="ocr-dash-copy-btn" class="ocr-dash-action-btn">Copy to Clipboard</button>
+                    <button id="ocr-dash-download-btn" class="ocr-dash-action-btn">Download .md</button>
+                    <button id="ocr-dash-insert-btn" class="ocr-dash-btn-insert">📥 Insert into Samyak Page</button>
+                </div>
+            </div>
+
+            <!-- Close Button for Mobile Drawer View -->
+            <button id="mobile-preview-close-btn" class="mobile-preview-close-btn" title="Preview बंद करें">&times;</button>
+        </main>
+    </div>
+
+    <!-- Image Insertion Modal -->
+    <div id="image-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>📷 Insert Photo / Image</h3>
+                <button id="close-modal-btn" class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- Source Tabs -->
+                <div class="modal-tabs" style="display: flex; gap: 10px; margin-bottom: 8px; border-bottom: 1px solid var(--ui-border); padding-bottom: 8px;">
+                    <button type="button" id="modal-tab-upload" class="modal-tab-btn active" style="flex: 1; background: none; border: none; color: #fff; border-bottom: 2px solid var(--ui-accent); padding: 6px; cursor: pointer; font-size: 12px; font-weight: 600;">Upload File</button>
+                    <button type="button" id="modal-tab-url" class="modal-tab-btn" style="flex: 1; background: none; border: none; color: var(--ui-text-muted); border-bottom: 2px solid transparent; padding: 6px; cursor: pointer; font-size: 12px; font-weight: 600;">Web URL</button>
+                </div>
+                
+                <!-- Tab Content 1: Upload -->
+                <div id="modal-content-upload">
+                    <div id="modal-upload-zone" class="upload-zone">
+                        <span class="upload-icon">📤</span>
+                        <p>Click to upload an image</p>
+                        <span class="file-name-label" id="selected-file-name">No file selected</span>
+                        <input type="file" id="modal-image-file" accept="image/*" style="display: none;">
+                    </div>
+                </div>
+
+                <!-- Tab Content 2: URL -->
+                <div id="modal-content-url" style="display: none;">
+                    <div class="input-group">
+                        <label for="image-url-input">Image Web URL</label>
+                        <input type="text" id="image-url-input" placeholder="https://example.com/photo.jpg">
+                    </div>
+                </div>
+                
+                <!-- Preview area -->
+                <div id="modal-image-preview-container" class="image-preview-container" style="display: none; margin-top: 10px;">
+                    <img id="modal-image-preview" src="" alt="Preview">
+                    <button type="button" id="remove-preview-btn" class="btn-remove-preview">Remove</button>
+                </div>
+
+                <!-- Input Group: Caption -->
+                <div class="input-group" style="margin-top: 10px;">
+                    <label for="image-caption">Image Caption</label>
+                    <input type="text" id="image-caption" placeholder="Enter photo caption">
+                </div>
+
+                <!-- Input Group: Width & Alignment in same row -->
+                <div class="settings-grid" style="grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+                    <div class="input-group">
+                        <label for="image-width">Width / Size</label>
+                        <select id="image-width">
+                            <option value="30%">Small (30%)</option>
+                            <option value="50%">Medium (50%)</option>
+                            <option value="75%">Large (75%)</option>
+                            <option value="90%" selected>Extra Large (90%)</option>
+                            <option value="100%">Full Width (100%)</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="image-align">Alignment</label>
+                        <select id="image-align">
+                            <option value="left">Left</option>
+                            <option value="center" selected>Center</option>
+                            <option value="right">Right</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="cancel-image-btn" class="btn btn-secondary">Cancel</button>
+                <button type="button" id="insert-confirm-btn" class="btn btn-primary" disabled>Insert Image</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table Insertion Modal -->
+    <div id="table-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>📊 Insert Table</h3>
+                <button id="close-table-modal-btn" class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="settings-grid" style="grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div class="input-group">
+                        <label for="table-cols">Columns</label>
+                        <input type="number" id="table-cols" min="1" max="10" value="3">
+                    </div>
+                    <div class="input-group">
+                        <label for="table-rows">Rows</label>
+                        <input type="number" id="table-rows" min="1" max="20" value="3">
+                    </div>
+                </div>
+                
+                <div class="settings-grid" style="grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+                    <div class="input-group">
+                        <label for="table-width-select">Table Width</label>
+                        <select id="table-width-select">
+                            <option value="50%">Compact (50%)</option>
+                            <option value="75%">Medium (75%)</option>
+                            <option value="90%">Large (90%)</option>
+                            <option value="100%" selected>Full Width (100%)</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="table-align-select">Alignment</label>
+                        <select id="table-align-select">
+                            <option value="left">Left</option>
+                            <option value="center" selected>Center</option>
+                            <option value="right">Right</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="cover-editor-helper" style="margin-top: 10px; border-left-color: var(--secondary-color);">
+                    <p>💡 <strong>Table Generation Note:</strong> Table insert karne ke baad aap editor me data ko edit kar sakte hain. Column headers default text se populate honge.</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="cancel-table-btn" class="btn btn-secondary">Cancel</button>
+                <button type="button" id="insert-table-confirm-btn" class="btn btn-primary">Insert Table</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Magazine Compiler Modal -->
+    <div id="compiler-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>🛠️ Smart Magazine Compiler</h3>
+                <button id="close-compiler-modal-btn" class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="cover-editor-helper" style="margin-bottom: 15px;">
+                    <p>💡 <strong>Compiler Info:</strong> Alag-alag parts (e.g. Part 1, 2, 3) ki `.raaz` files upload karein. Compiler inke headings aur content ko smart-merge karke ek single monthly magazine generate kar dega.</p>
+                </div>
+                
+                <div class="settings-grid" style="gap: 15px;">
+                    <div class="input-group full-width" style="grid-column: span 2;">
+                        <label>File 1 (Part 1 / Days 1-10):</label>
+                        <input type="file" id="compiler-file-1" accept=".raaz" class="opt-select" style="background-color: #16161e; border: 1px solid var(--ui-border); color: #fff; padding: 4px 8px; width: 100%;">
+                    </div>
+                    <div class="input-group full-width" style="grid-column: span 2;">
+                        <label>File 2 (Part 2 / Days 11-20):</label>
+                        <input type="file" id="compiler-file-2" accept=".raaz" class="opt-select" style="background-color: #16161e; border: 1px solid var(--ui-border); color: #fff; padding: 4px 8px; width: 100%;">
+                    </div>
+                    <div class="input-group full-width" style="grid-column: span 2;">
+                        <label>File 3 (Part 3 / Days 21-30 - Optional):</label>
+                        <input type="file" id="compiler-file-3" accept=".raaz" class="opt-select" style="background-color: #16161e; border: 1px solid var(--ui-border); color: #fff; padding: 4px 8px; width: 100%;">
+                    </div>
+                    
+                    <hr style="grid-column: span 2; border: 0; border-top: 1px solid var(--ui-border); width: 100%; margin: 10px 0;">
+                    
+                    <div class="input-group full-width" style="grid-column: span 2;">
+                                        <label for="compiled-title">New Magazine Title:</label>
+                                        <input type="text" id="compiled-title" value="Samyak" style="width: 100%;">
+                    </div>
+                    <div class="input-group full-width" style="grid-column: span 2;">
+                        <label for="compiled-tagline">New Tagline:</label>
+                        <input type="text" id="compiled-tagline" value="कोचिंग नहीं क्रांति" style="width: 100%;">
+                    </div>
+                    <div class="input-group full-width" style="grid-column: span 2;">
+                        <label for="compiled-subtitle">New Subtitle / Date:</label>
+                        <input type="text" id="compiled-subtitle" value="राजस्थान समसामयिकी : मई 2026 - संपूर्ण मासिक" style="width: 100%;">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="cancel-compiler-btn" class="btn btn-secondary">Cancel</button>
+                <button type="button" id="compile-confirm-btn" class="btn btn-primary" disabled>Compile & Merge</button>
+            </div>
+        </div>
+    </div>
+    <!-- Shortcuts & Formatting Help Modal -->
+    <div id="help-modal" class="modal-overlay">
+        <div class="modal-content" style="width: 580px; max-width: 95%;">
+            <div class="modal-header">
+                <h3>Formatting & Shortcuts Guide</h3>
+                <button id="close-help-modal-btn" class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body" style="max-height: 450px; overflow-y: auto; font-family: var(--font-ui); font-size: 13px; gap: 16px; line-height: 1.5; color: #fff;">
+                <div style="background-color: rgba(255, 255, 255, 0.03); border: 1px solid var(--ui-border); padding: 12px; border-radius: 6px;">
+                    <h4 style="margin: 0 0 8px 0; color: var(--ui-accent); display: flex; align-items: center; gap: 6px; font-size: 14px;">
+                        <span>✍️</span> Markdown Basics (बुनियादी फॉर्मेटिंग)
+                    </h4>
+                    <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.08);"><td style="padding: 6px 0; font-weight: bold; width: 40%; font-family: monospace;"># Section Name</td><td style="padding: 6px 0; color: var(--ui-text-muted);">Main Heading Bar (मुख्य हेडिंग)</td></tr>
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.08);"><td style="padding: 6px 0; font-weight: bold; font-family: monospace;">## Topic Name</td><td style="padding: 6px 0; color: var(--ui-text-muted);">Topic Title with underline (विषय हेडिंग)</td></tr>
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.08);"><td style="padding: 6px 0; font-weight: bold; font-family: monospace;">🔶, 🔷, 🔸, 🔹, ♦️, 💎</td><td style="padding: 6px 0; color: var(--ui-text-muted);">Prefix for auto topic styling (बिना ## के)</td></tr>
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.08);"><td style="padding: 6px 0; font-weight: bold; font-family: monospace;">•, -, *, (1), 1.</td><td style="padding: 6px 0; color: var(--ui-text-muted);">Bullet list items (बुलेट बिंदु)</td></tr>
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.08);"><td style="padding: 6px 0; font-weight: bold; font-family: monospace;">&gt; Highlight text</td><td style="padding: 6px 0; color: var(--ui-text-muted);">Box Highlight / Note (💡 हाइलाइट बॉक्स)</td></tr>
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.08);"><td style="padding: 6px 0; font-weight: bold; font-family: monospace;">==green|text==</td><td style="padding: 6px 0; color: var(--ui-text-muted);"><span style="background-color: rgba(74, 222, 128, 0.35); border: 1px solid rgba(74, 222, 128, 0.5); padding: 1px 4px; border-radius: 3px; color: #4ade80;">Green Highlight</span></td></tr>
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.08);"><td style="padding: 6px 0; font-weight: bold; font-family: monospace;">==pink|text==</td><td style="padding: 6px 0; color: var(--ui-text-muted);"><span style="background-color: rgba(244, 114, 182, 0.35); border: 1px solid rgba(244, 114, 182, 0.5); padding: 1px 4px; border-radius: 3px; color: #f472b6;">Pink Highlight</span></td></tr>
+                    </table>
+                </div>
+
+                <div style="background-color: rgba(255, 255, 255, 0.03); border: 1px solid var(--ui-border); padding: 12px; border-radius: 6px;">
+                    <h4 style="margin: 0 0 8px 0; color: var(--ui-accent); display: flex; align-items: center; gap: 6px; font-size: 14px;">
+                        <span>📄</span> Layout & Structure (पेज लेआउट और गैप)
+                    </h4>
+                    <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.08);"><td style="padding: 6px 0; font-weight: bold; width: 40%; font-family: monospace;">[pagebreak] या ---</td><td style="padding: 6px 0; color: var(--ui-text-muted);">Force break to a new page (नया पेज ब्रेक)</td></tr>
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.08);"><td style="padding: 6px 0; font-weight: bold; font-family: monospace;">[columnbreak] या [colbreak]</td><td style="padding: 6px 0; color: var(--ui-text-muted);">Force break to a new column (मैनुअल कॉलम ब्रेक)</td></tr>
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.08);"><td style="padding: 6px 0; font-weight: bold; font-family: monospace;">[space N] या space N</td><td style="padding: 6px 0; color: var(--ui-text-muted);">Insert blank lines (e.g. <code>[space 3]</code>)</td></tr>
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.08);"><td style="padding: 6px 0; font-weight: bold; font-family: monospace;">***, * * *, [thankyou]</td><td style="padding: 6px 0; color: var(--ui-text-muted);">Premium magazine end star divider (विभाजक)</td></tr>
+                    </table>
+                </div>
+
+                <div style="background-color: rgba(255, 255, 255, 0.03); border: 1px solid var(--ui-border); padding: 12px; border-radius: 6px;">
+                    <h4 style="margin: 0 0 8px 0; color: var(--ui-accent); display: flex; align-items: center; gap: 6px; font-size: 14px;">
+                        <span>🧩</span> Advanced Templates (विशेष कार्ड्स)
+                    </h4>
+                    <p style="margin: 0 0 8px 0; color: var(--ui-text-muted); font-size: 12px;">इन फॉर्मेट्स को एडिटर के <strong>Template dropdown</strong> से आसानी से लोड कर सकते हैं:</p>
+                    <ul style="margin: 0; padding-left: 18px; color: var(--ui-text-muted); line-height: 1.6;">
+                        <li style="margin-bottom: 6px;"><strong style="color: #fff;">Personality Card:</strong><br><code style="font-size: 11px; background-color: rgba(0,0,0,0.2); padding: 2px 4px; border-radius: 3px;">&lt;!-- personality|name=नाम|designation=पद|achievement=विवरण|image=इमेज ID --&gt;</code></li>
+                        <li style="margin-bottom: 6px;"><strong style="color: #fff;">Stats Card:</strong><br><code style="font-size: 11px; background-color: rgba(0,0,0,0.2); padding: 2px 4px; border-radius: 3px;">&lt;!-- stats|title=शीर्षक|value=आँकड़े|sub=विवरण --&gt;</code></li>
+                        <li style="margin-bottom: 6px;"><strong style="color: #fff;">Facts Grid:</strong><br><code style="font-size: 11px; background-color: rgba(0,0,0,0.2); padding: 2px 4px; border-radius: 3px;">&lt;!-- facts-grid|item1=तथ्य 1|item2=तथ्य 2|item3=तथ्य 3|item4=तथ्य 4 --&gt;</code></li>
+                        <li style="margin-bottom: 6px;"><strong style="color: #fff;">Announcement:</strong><br><code style="font-size: 11px; background-color: rgba(0,0,0,0.2); padding: 2px 4px; border-radius: 3px;">&lt;!-- announcement|title=शीर्षक|desc=विवरण --&gt;</code></li>
+                    </ul>
+                </div>
+
+                <div style="background-color: rgba(255, 255, 255, 0.03); border: 1px solid var(--ui-border); padding: 12px; border-radius: 6px;">
+                    <h4 style="margin: 0 0 8px 0; color: var(--ui-accent); display: flex; align-items: center; gap: 6px; font-size: 14px;">
+                        <span>⌨️</span> Keyboard Shortcuts (कीबोर्ड शॉर्टकट)
+                    </h4>
+                    <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.08);"><td style="padding: 6px 0; font-weight: bold; width: 40%; font-family: monospace;">Ctrl + P</td><td style="padding: 6px 0; color: var(--ui-text-muted);">Save Document as PDF (पीडीएफ सेव करें)</td></tr>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="close-help-btn" class="btn btn-secondary">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Raaz's Profile Modal -->
+    <div id="raaz-profile-modal" class="modal-overlay">
+        <canvas id="raaz-fireworks-canvas" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1;"></canvas>
+        <div class="modal-content raaz-profile-card" style="z-index: 2; position: relative;">
+            <div class="modal-header">
+                <h3>👤 Developer Profile</h3>
+                <button id="close-raaz-modal-btn" class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body raaz-profile-body">
+                <div class="raaz-profile-header">
+                     <div class="raaz-avatar-container">
+                         <img src="raaz_profile.png" alt="Raaz Kushwah" class="raaz-avatar">
+                         <div class="raaz-avatar-glow"></div>
+                     </div>
+                     <h2 class="raaz-name">Raaz Kushwah</h2>
+                     <p class="raaz-title">techy who hates tech</p>
+                </div>
+                <div class="raaz-profile-right-col">
+                    <div class="raaz-info-grid">
+                         <div class="raaz-info-item">
+                             <span class="raaz-info-icon">🎂</span>
+                             <div class="raaz-info-content">
+                                 <label>Date of Birth</label>
+                                 <span>03 March 2002</span>
+                             </div>
+                         </div>
+                         <div class="raaz-info-item">
+                             <span class="raaz-info-icon">📍</span>
+                             <div class="raaz-info-content">
+                                 <label>Address</label>
+                                 <span>Dholpur, Rajasthan, India</span>
+                             </div>
+                         </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="close-raaz-btn" class="btn btn-secondary" style="width: 100%; justify-content: center;">Close Profile</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Premium Mobile-Friendly Color Picker Modal -->
+    <div id="custom-color-picker-modal" class="modal-overlay">
+        <div class="modal-content color-picker-modal-content">
+            <div class="modal-header">
+                <h3 id="color-picker-title">Pick Premium Color</h3>
+                <button class="close-btn" id="close-color-picker-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- Selected color preview and Hex input -->
+                <div class="color-preview-row">
+                    <div id="color-picker-preview-box" class="color-preview-box"></div>
+                    <div class="color-input-field-wrapper">
+                        <label for="color-picker-hex-input">Hex Code:</label>
+                        <input type="text" id="color-picker-hex-input" class="hex-text-input" placeholder="#FFFFFF" maxlength="7" autocomplete="off" spellcheck="false">
+                    </div>
+                </div>
+                
+                <!-- Curated Premium Swatches Grid -->
+                <div class="swatches-section">
+                    <h4 class="swatches-title">⚜️ Samyak Premium Swatches</h4>
+                    <div class="swatches-grid">
+                        <!-- Swatches generated dynamically in JS -->
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="apply-custom-color-btn" class="search-action-btn" style="background-color: var(--ui-accent); color: #000; font-weight: 700;">Apply Color</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Premium Layout Optimizer Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="loading-spinner-container">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">🪄 Optimizing Layout (स्मार्ट श्रिंक)...</div>
+        </div>
+    </div>
+
+    <!-- Mobile-only Floating Preview Toggle Button -->
+    <button id="mobile-preview-toggle-btn" class="mobile-preview-toggle-btn" title="Live Preview देखें">👁️</button>
+
+    <!-- Script loading -->
+    <script src="app.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(reg => console.log('Service Worker registered successfully:', reg.scope))
+                    .catch(err => console.log('Service Worker registration failed:', err));
+            });
+        }
+    </script>
+
+    <!-- Visual Page Grid Layout Manager Modal -->
+    <div id="page-grid-modal" class="page-grid-overlay" style="display: none;">
+        <div class="page-grid-modal-container">
+            <header class="page-grid-modal-header">
+                <div class="page-grid-modal-title-area">
+                    <h2>सम्यक् Letter Page Layout Manager</h2>
+                    <p>पेजों को री-ऑर्डर करने के लिए ड्रैग एंड ड्रॉप करें, या क्लोन/डिलीट करें (Drag & drop to reorder, clone or delete pages)</p>
+                </div>
+                <button id="close-grid-modal-btn" class="close-grid-modal-btn" title="Close Grid Manager">&times;</button>
+            </header>
+            <div class="page-grid-scroll-area">
+                <div id="page-grid-items-container" class="page-grid-items-container">
+                    <!-- Dynamic page cards will be injected here -->
+                </div>
+            </div>
+            <footer class="page-grid-modal-footer">
+                <div class="footer-stats-info">
+                    <span id="grid-total-pages-label">Total Content Pages: 0</span>
+                </div>
+                <button id="grid-add-page-btn" class="grid-action-btn-success">➕ Add New Page</button>
+            </footer>
+        </div>
+    </div>
+
+
+
+    <!-- Destination Page Selector Modal -->
+    <div id="ocr-page-selector-modal" class="modal-overlay" style="z-index: 100002;">
+        <div class="modal-content" style="width: 420px; max-width: 90%;">
+            <div class="modal-header">
+                <h3>📥 Select Destination Page</h3>
+                <button id="ocr-page-selector-close" class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body" style="gap: 12px; text-align: left;">
+                <p style="font-size: 12.5px; color: #cbd5e1; line-height: 1.45; margin: 0 0 10px 0;">
+                    चुनें कि आप इस OCR रिज़ल्ट को किस पेज पर इन्सर्ट करना चाहते हैं (Select where you want to insert the OCR digitized text):
+                </p>
+                <div class="input-group">
+                    <label for="ocr-destination-page-select">Select Destination Page</label>
+                    <select id="ocr-destination-page-select" class="opt-select" style="background-color: #16161e; border: 1px solid var(--ui-border); color: #fff; width: 100%; padding: 8px;">
+                        <!-- Dynamic page list injected via JS -->
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="ocr-page-selector-cancel" class="btn btn-secondary">Cancel</button>
+                <button type="button" id="ocr-page-selector-confirm" class="btn btn-primary" style="background-color: var(--ui-accent); color: #000; font-weight: 700;">Confirm Insert</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
