@@ -260,6 +260,8 @@
                                 <div class="toolbar-tray-drawer" id="toolbar-tray-drawer">
                                     <button class="tool-btn" id="btn-pagebreak" data-prefix="&#10;[pagebreak]&#10;" title="Insert Page Break">📄</button>
                                     <button class="tool-btn" id="insert-table-btn" title="Insert Table">📊</button>
+                                    <button class="tool-btn" id="btn-text-color" title="Change Text Color (🎨 पाठ का रंग)">🎨</button>
+                                    <button class="tool-btn" id="btn-premium-box" data-prefix="[box-royal]&#10;" data-suffix="&#10;[/box]" title="Wrap in Premium Box (📦 प्रीमियम बॉक्स)">📦</button>
                                     <button class="tool-btn" id="btn-search-toggle" title="Find and Replace">🔍</button>
                                     <button class="tool-btn" id="btn-help-shortcuts" title="Shortcuts & Formatting Help">❓</button>
                                 </div>
@@ -1295,6 +1297,25 @@
                 <button type="button" id="ocr-page-selector-cancel" class="btn btn-secondary">Cancel</button>
                 <button type="button" id="ocr-page-selector-confirm" class="btn btn-primary" style="background-color: var(--ui-accent); color: #000; font-weight: 700;">Confirm Insert</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Dynamic Text Color Picker Palette -->
+    <div id="text-color-picker-palette" class="text-color-palette-popup" style="display: none;">
+        <div class="color-palette-title">Select Text Color</div>
+        <div class="color-palette-grid">
+            <button class="color-capsule" style="background-color: #f97316;" data-color="#f97316" title="Samyak Orange"></button>
+            <button class="color-capsule" style="background-color: #c5a353;" data-color="#c5a353" title="Premium Gold"></button>
+            <button class="color-capsule" style="background-color: #ef4444;" data-color="#ef4444" title="Ruby Red"></button>
+            <button class="color-capsule" style="background-color: #10b981;" data-color="#10b981" title="Emerald Green"></button>
+            <button class="color-capsule" style="background-color: #3b82f6;" data-color="#3b82f6" title="Royal Blue"></button>
+            <button class="color-capsule" style="background-color: #8b5cf6;" data-color="#8b5cf6" title="Lavender Purple"></button>
+            <button class="color-capsule" style="background-color: #ffffff; border: 1px solid #444;" data-color="#ffffff" title="White"></button>
+            <button class="color-capsule" style="background-color: #000000; border: 1px solid #444;" data-color="#000000" title="Black"></button>
+        </div>
+        <div class="color-palette-footer">
+            <input type="color" id="custom-text-color-input" value="#ff0000" title="Choose Custom Color">
+            <span class="custom-color-label">Custom Color</span>
         </div>
     </div>
 </body>
