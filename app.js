@@ -5146,6 +5146,30 @@ document.addEventListener('DOMContentLoaded', () => {
         const lines = text.split('\n');
         const blocks = [];
         
+        function cleanRepeatedTableHeaders(tableLines) {
+            if (!tableLines || tableLines.length < 3) return tableLines;
+            
+            const isSeparator = (str) => /^\s*\|(\s*:?-+:?\s*\|)+\s*$/.test(str);
+            if (!isSeparator(tableLines[1])) return tableLines;
+            
+            const cleanLines = [tableLines[0], tableLines[1]];
+            const headerTrimmed = tableLines[0].trim().replace(/\s+/g, ' ');
+            
+            for (let k = 2; k < tableLines.length; k++) {
+                const currentLine = tableLines[k];
+                const currentTrimmed = currentLine.trim().replace(/\s+/g, ' ');
+                
+                if (k + 1 < tableLines.length && 
+                    currentTrimmed === headerTrimmed && 
+                    isSeparator(tableLines[k + 1])) {
+                    k++; 
+                    continue;
+                }
+                cleanLines.push(currentLine);
+            }
+            return cleanLines;
+        }
+        
         const knownSections = [
             "योजनाएँ एवं नीतियाँ", "योजनाएँ एवं नीतियां", "योजनाएं एवं नीतियां", 
             "महोत्सव/मेले/कार्यक्रम", "महोत्सव, मेले व कार्यक्रम", "महोत्सव, मेले और कार्यक्रम",
@@ -5274,6 +5298,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         i++;
                         tableLines.push(lines[i]);
                     }
+                    tableLines = cleanRepeatedTableHeaders(tableLines);
                     blocks.push({
                         type: 'table',
                         config: tableConfig,
@@ -5289,6 +5314,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     i++;
                     tableLines.push(lines[i]);
                 }
+                tableLines = cleanRepeatedTableHeaders(tableLines);
                 blocks.push({
                     type: 'table',
                     config: null,
