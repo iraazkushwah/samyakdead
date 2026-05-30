@@ -786,94 +786,12 @@
                     </section>
                 </div>
 
-                <!-- Tab Panel 5: OCR Handwriting Extractor -->
-                <div id="panel-ocr" class="sidebar-panel">
-                    <section class="settings-section">
-                        <!-- Document Preview & Controls Left Side -->
-                        <div class="global-page-options">
-                            <h4 class="options-group-title">📂 Document Preview & Settings</h4>
-                            
-                            <div style="display:flex; flex-direction:column; gap:12px; margin-top:10px;">
-                                <!-- Drag and Drop widget -->
-                                <div id="ocr-dash-drag-zone" class="ocr-dash-drag-zone" style="aspect-ratio:auto; height:120px; border-style:dashed; flex-direction:column; padding:15px; border-radius:8px; border-color:rgba(197, 160, 89, 0.35);">
-                                    <span class="ocr-dash-upload-icon" style="font-size:24px; color:var(--ui-accent, #c5a059);">📤</span>
-                                    <h4 style="font-size:11.5px; text-align:center; color:#cbd5e1; margin: 4px 0 0 0;">Drag & drop or select PDF / image</h4>
-                                    <p style="font-size:10px; color:#94a3b8; margin: 2px 0 0 0;">Maximum limit: 15MB • PDF / Image</p>
-                                    <input type="file" id="ocr-dash-file-input" accept="image/png, image/jpeg, image/jpg, application/pdf" style="display: none;">
-                                </div>
-                                
-                                <!-- Preview view -->
-                                <div id="ocr-dash-preview-area" class="ocr-dash-preview-area" style="display: none; flex-direction: column; gap: 8px;">
-                                    <div class="ocr-dash-file-details" style="display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.02); padding: 6px; border-radius: 6px; border: 1px solid var(--ui-border);">
-                                        <div class="ocr-file-badge" id="ocr-dash-file-badge" style="font-size: 9px; font-weight: bold; background: rgba(197,160,89,0.15); color: var(--ui-accent, #c5a059); padding: 2px 4px; border-radius: 4px;">IMG</div>
-                                        <div class="ocr-file-info" style="flex: 1; display: flex; flex-direction: column; min-width: 0;">
-                                            <span class="ocr-file-name" id="ocr-dash-file-name" style="font-size: 11px; font-weight: 600; color: #f8fafc; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">document.png</span>
-                                            <span class="ocr-file-size" id="ocr-dash-file-size" style="font-size: 9px; color: #94a3b8;">1.2 MB</span>
-                                        </div>
-                                        <button id="ocr-dash-remove-file-btn" class="ocr-dash-remove-btn" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: none; width: 20px; height: 20px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold;">&times;</button>
-                                    </div>
-                                    
-                                    <div class="ocr-dash-image-container" style="position: relative; width: 100%; height: 180px; background: #0c0c0e; border-radius: 6px; overflow: hidden; display: flex; align-items: center; justify-content: center; border: 1.5px solid var(--ui-border);">
-                                        <div id="ocr-dash-scan-overlay" class="ocr-dash-scan-overlay" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10;">
-                                            <div class="ocr-dash-scan-line" style="position: absolute; width: 100%; height: 3px; background: linear-gradient(to right, transparent, var(--ui-accent, #c5a059), transparent); box-shadow: 0 0 10px var(--ui-accent, #c5a059); animation: ocrLaserSweep 2.2s ease-in-out infinite;"></div>
-                                        </div>
-                                        <img id="ocr-dash-preview-img" style="max-height: 160px; max-width: 100%; object-fit: contain; border-radius: 4px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);" src="" alt="OCR Preview">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Settings Card -->
-                        <div class="global-page-options" style="margin-top:15px;">
-                            <h4 class="options-group-title">⚙️ OCR Settings</h4>
-                            <div style="display:flex; flex-direction:column; gap:12px; margin-top:10px;">
-                                <div class="ocr-dash-input-group" style="display:flex; flex-direction:column; gap:6px;">
-                                    <label for="ocr-dash-engine-select" style="font-size: 11px; font-weight: 700; color: #cbd5e1;">🧠 OCR Engine</label>
-                                    <select id="ocr-dash-engine-select" style="padding: 8px 10px; background: #16161f; border: 1px solid var(--ui-border); border-radius: 6px; color: #cbd5e1; font-size: 12px; outline: none;">
-                                        <option value="Google Vision API (High Precision)">Google Vision API (High Precision)</option>
-                                        <option value="Fine-tuned Tesseract">Fine-tuned Tesseract OCR</option>
-                                        <option value="Multimodal Gemini Vision OCR" selected>Gemini Pro Vision Engine</option>
-                                    </select>
-                                </div>
-                                
-                                <div class="ocr-dash-toggle-row" style="display:flex; align-items:center; justify-content:space-between;">
-                                    <span style="font-size: 12px; font-weight: 600; color: #cbd5e1;">📐 Layout Analysis</span>
-                                    <button id="ocr-dash-layout-toggle" class="ocr-dash-switch active">
-                                        <div class="ocr-dash-switch-thumb"></div>
-                                    </button>
-                                </div>
-                                
-                                <div class="ocr-dash-toggle-row" style="display:flex; align-items:center; justify-content:space-between;">
-                                    <span style="font-size: 12px; font-weight: 600; color: #cbd5e1;">✍️ Auto-Structuring (MD)</span>
-                                    <button id="ocr-dash-struct-toggle" class="ocr-dash-switch active">
-                                        <div class="ocr-dash-switch-thumb"></div>
-                                    </button>
-                                </div>
-                                
-                                <button id="ocr-dash-process-btn" class="ocr-dash-btn-primary" style="display: none; width: 100%; padding: 12px; font-weight: 700; font-size: 13px; text-align: center; border: none; border-radius: 8px; color: white; background: linear-gradient(135deg, var(--ui-accent, #c5a059), #a68444); cursor: pointer; box-shadow: 0 4px 12px rgba(197,160,89,0.2);">
-                                    Start Process
-                                </button>
-                                
-                                <div id="ocr-dash-processing-indicator" class="ocr-dash-processing-card" style="display: none; align-items: center; gap: 12px; background: rgba(79, 70, 229, 0.1); border: 1px solid rgba(79, 70, 229, 0.2); border-radius: 8px; padding: 10px 14px;">
-                                    <span class="ocr-dash-spinner"></span>
-                                    <div class="ocr-dash-processing-text" style="display: flex; flex-direction: column; text-align: left;">
-                                        <strong style="font-size: 12px; font-weight: 700; color: #818cf8;">Scanning content...</strong>
-                                        <span style="font-size: 9px; color: #94a3b8; margin-top: 1px;">Running Gemini layout recognition</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Quick Help Guide -->
-                        <div class="global-page-options" style="margin-top:15px; background: rgba(197, 160, 89, 0.03); border: 1px solid rgba(197, 160, 89, 0.1); border-radius: 8px; padding: 12px;">
-                            <h5 style="margin: 0 0 6px 0; font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--ui-accent, #c5a059);">💡 How to use:</h5>
-                            <ul style="margin: 0; padding-left: 14px; font-size: 11px; color: #cbd5e1; line-height: 1.5; display: flex; flex-direction: column; gap: 4px;">
-                                <li>Upload a handwritten notes page or PDF.</li>
-                                <li>Choose settings and click <strong>'Start Process'</strong> to trigger Gemini.</li>
-                                <li>The results will be shown on the right side workspace. Review and click <strong>'Insert'</strong> to place it onto a page!</li>
-                            </ul>
-                        </div>
-                    </section>
+                <!-- Tab Panel 5: OCR Handwriting Extractor (Embedded Live Web App) -->
+                <div id="panel-ocr" class="sidebar-panel" style="padding: 0; height: 100%; overflow: hidden;">
+                    <iframe src="https://hindi-ocr-markdown-formatter-1038614782118.asia-southeast1.run.app/" 
+                            style="width: 100%; height: 100%; border: none; background: #0b0f19;" 
+                            title="Samyak OCR Scanner">
+                    </iframe>
                 </div>
             </div>
 
@@ -1318,7 +1236,7 @@
     <button id="mobile-preview-toggle-btn" class="mobile-preview-toggle-btn" title="Live Preview देखें">👁️</button>
 
     <!-- Script loading -->
-    <script src="app.js"></script>
+    <script type="module" src="app.js"></script>
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {

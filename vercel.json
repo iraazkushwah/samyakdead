@@ -2,10 +2,6 @@
   "version": 2,
   "routes": [
     {
-      "src": "/api/ocr",
-      "dest": "/api/ocr.ts"
-    },
-    {
       "src": "/(.*)",
       "dest": "/$1"
     }

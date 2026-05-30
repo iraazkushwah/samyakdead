@@ -8874,6 +8874,29 @@ body.light-mode .premium-slider-group input[type="range"]::-webkit-slider-thumb 
     line-height: 1.2;
 }
 
+/* Fullscreen OCR mode styling */
+.app-container.ocr-mode .editor-panel {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 100% !important;
+}
+
+.app-container.ocr-mode .resize-handle {
+    display: none !important;
+}
+
+.app-container.ocr-mode .preview-panel {
+    display: none !important;
+}
+
+.app-container.ocr-mode .floating-editor-controls {
+    display: none !important;
+}
+
+.app-container.ocr-mode .mobile-preview-toggle-btn {
+    display: none !important;
+}
+
 
 
 

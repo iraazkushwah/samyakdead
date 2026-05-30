@@ -2,6 +2,12 @@
    SAMYAK - PAGE-BY-PAGE WORKSPACE CONTROLLER
    ========================================================================== */
 
+// ==========================================================================
+// 💡 CONFIGURATION: अपना नया OCR Backend URL यहाँ डालें (e.g., "https://your-backend.com/api/ocr")
+// यदि इसे खाली ("") छोड़ेंगे, तो यह स्थानीय /api/ocr पाथ का उपयोग करेगा।
+// ==========================================================================
+const OCR_BACKEND_URL = "https://hindi-ocr-markdown-formatter-1038614782118.asia-southeast1.run.app/api/ocr";
+
 document.addEventListener('DOMContentLoaded', () => {
     // IndexedDB Database utilities
     const DB_NAME = 'SamyakDatabase';
@@ -664,14 +670,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const previewHeader = document.querySelector('.preview-panel .preview-header');
         const canvasWrapper = document.querySelector('.preview-panel .canvas-wrapper');
         const mobileCloseBtn = document.getElementById('mobile-preview-close-btn');
+        const appContainer = document.querySelector('.app-container');
         
         if (targetPanelId === 'panel-ocr') {
+            if (appContainer) appContainer.classList.add('ocr-mode');
             if (previewHeader) previewHeader.style.display = 'none';
             if (canvasWrapper) canvasWrapper.style.display = 'none';
             if (mobileCloseBtn) mobileCloseBtn.style.display = 'none';
             if (ocrIntegratedWorkspace) ocrIntegratedWorkspace.style.display = 'flex';
             resetOcrDashProject(false);
         } else {
+            if (appContainer) appContainer.classList.remove('ocr-mode');
             if (previewHeader) previewHeader.style.display = 'flex';
             if (canvasWrapper) canvasWrapper.style.display = 'block';
             if (mobileCloseBtn) mobileCloseBtn.style.display = '';
@@ -1848,7 +1857,8 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const selectedEngine = ocrDashEngineSelect ? ocrDashEngineSelect.value : "Google Vision API (High Precision)";
 
-                const response = await fetch('/api/ocr', {
+                const backendUrl = OCR_BACKEND_URL || '/api/ocr';
+                const response = await fetch(backendUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
