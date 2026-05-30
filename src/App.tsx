@@ -23,12 +23,6 @@ import {
 } from "lucide-react";
 import { FileData, OCRResult, OCRAlert } from "./types";
 
-// ==========================================================================
-// 💡 CONFIGURATION: अपना नया OCR Backend URL यहाँ डालें (e.g., "https://your-backend.com/api/ocr")
-// यदि इसे खाली ("") छोड़ेंगे, तो यह स्थानीय /api/ocr पाथ का उपयोग करेगा।
-// ==========================================================================
-const OCR_BACKEND_URL = "https://hindi-ocr-markdown-formatter-1038614782118.asia-southeast1.run.app/api/ocr";
-
 // Standard English translations mapping conforming to English-only UI request
 const TRANSLATIONS = {
   en: {
@@ -165,8 +159,7 @@ export default function App() {
     setUploadedFile(prev => prev ? { ...prev, status: "processing", error: undefined } : null);
 
     try {
-      const backendUrl = OCR_BACKEND_URL || "/api/ocr";
-      const response = await fetch(backendUrl, {
+      const response = await fetch("/api/ocr", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
