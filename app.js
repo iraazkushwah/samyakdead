@@ -167,7 +167,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Dynamic Toolbar Layout Configurations & Sanitization
     const defaultToolbarLayout = {
         main: ['btn-section', 'btn-chapter', 'btn-topic', 'btn-bullet', 'btn-note'],
-        tray: ['btn-pagebreak', 'insert-table-btn', 'btn-text-color', 'btn-premium-box', 'btn-search-toggle', 'btn-help-shortcuts']
+        tray: ['btn-pagebreak', 'insert-table-btn', 'btn-search-toggle', 'btn-help-shortcuts']
     };
 
     let currentToolbarLayout = { ...defaultToolbarLayout };
@@ -2034,9 +2034,6 @@ document.addEventListener('DOMContentLoaded', () => {
         // 4. Process Inline Code: `code`
         escaped = escaped.replace(/`(.*?)`/g, '<code style="font-family: monospace; font-size: 11px; background: rgba(0,0,0,0.4); padding: 2px 4px; border-radius: 3px; color: #818cf8;">$1</code>');
 
-        // 4.5. Process Custom Text Color: [color:value]text[/color]
-        escaped = escaped.replace(/\[color:(.*?)\](.*?)\[\/color\]/g, '<span style="color: $1">$2</span>');
-
         // 5. Math Unicode Shorthand Replacements
         const mathSymbols = {
             '\\\\alpha': 'α',
@@ -3187,7 +3184,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Markdown tool prefix insertion (and wrapping selection if data-suffix is present)
     toolbarButtons.forEach(btn => {
         btn.addEventListener('click', (e) => {
-            if (btn.id === 'toolbar-tray-trigger' || btn.id === 'toolbar-customize-trigger' || btn.id === 'btn-text-color') return; // Skip trigger buttons & text color button
+            if (btn.id === 'toolbar-tray-trigger' || btn.id === 'toolbar-customize-trigger') return; // Skip trigger buttons
             
             if (isCustomizeMode) {
                 // Intercept click in customize mode to move the icon
@@ -3229,74 +3226,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
-
-    // Sleek Floating Text Color Picker Logic
-    const btnTextColor = document.getElementById('btn-text-color');
-    const textColorPalettePopup = document.getElementById('text-color-picker-palette');
-    const customTextColorInput = document.getElementById('custom-text-color-input');
-
-    if (btnTextColor && textColorPalettePopup && customTextColorInput) {
-        btnTextColor.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-
-            if (textColorPalettePopup.style.display === 'flex') {
-                textColorPalettePopup.style.display = 'none';
-                return;
-            }
-
-            // Temporarily show to calculate correct size
-            textColorPalettePopup.style.display = 'flex';
-
-            const rect = btnTextColor.getBoundingClientRect();
-            const paletteHeight = textColorPalettePopup.offsetHeight || 135;
-            const paletteWidth = textColorPalettePopup.offsetWidth || 180;
-
-            // Position above the button, centered or aligned left
-            const topPos = rect.top + window.scrollY - paletteHeight - 8;
-            const leftPos = Math.max(8, rect.left + window.scrollX - (paletteWidth - rect.width) / 2);
-
-            textColorPalettePopup.style.top = `${topPos}px`;
-            textColorPalettePopup.style.left = `${leftPos}px`;
-        });
-
-        // Predefined color capsules click handler
-        textColorPalettePopup.querySelectorAll('.color-capsule').forEach(capsule => {
-            capsule.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                const color = capsule.getAttribute('data-color');
-                applyTextColor(color);
-            });
-        });
-
-        // Custom color input handler
-        customTextColorInput.addEventListener('change', (e) => {
-            const color = customTextColorInput.value;
-            applyTextColor(color);
-        });
-
-        // Apply color function
-        function applyTextColor(color) {
-            if (activePageIndex > 0) {
-                insertWrappedAtCursor(pageContentInput, `[color:${color}]`, '[/color]');
-                pagesData[activePageIndex].text = pageContentInput.value;
-                renderPreview(); // Ensure live preview is instantly updated!
-                updateStats();
-                saveWorkspaceToLocalStorage();
-            }
-            textColorPalettePopup.style.display = 'none';
-        }
-
-        // Close when clicking outside
-        document.addEventListener('click', (e) => {
-            if (textColorPalettePopup.style.display === 'flex') {
-                if (!textColorPalettePopup.contains(e.target) && e.target !== btnTextColor) {
-                    textColorPalettePopup.style.display = 'none';
-                }
-            }
-        });
-    }
 
     if (toolbarCustomizeTrigger) {
         toolbarCustomizeTrigger.addEventListener('click', () => {
