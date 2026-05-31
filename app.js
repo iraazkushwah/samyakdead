@@ -6,7 +6,7 @@
 // 💡 CONFIGURATION: अपना नया OCR Backend URL यहाँ डालें (e.g., "https://your-backend.com/api/ocr")
 // यदि इसे खाली ("") छोड़ेंगे, तो यह स्थानीय /api/ocr पाथ का उपयोग करेगा।
 // ==========================================================================
-const OCR_BACKEND_URL = "https://hindi-ocr-markdown-formatter-1038614782118.asia-southeast1.run.app/api/ocr";
+const OCR_BACKEND_URL = "https://untitled-1038614782118.asia-southeast1.run.app/api/ocr";
 
 document.addEventListener('DOMContentLoaded', () => {
     // IndexedDB Database utilities
