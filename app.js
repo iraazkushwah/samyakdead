@@ -1278,43 +1278,78 @@ document.addEventListener('DOMContentLoaded', () => {
     // Layout Integrity & Auto-Fixer Event Listener
     if (validateIntegrityBtn) {
         validateIntegrityBtn.addEventListener('click', () => {
-            // Enable tight compaction mode when the smart fixer button is clicked
+            // Helper function: Scan A4 page DOM geometry to detect exact overflowing blocks and text snippets
+            const scanOverflows = () => {
+                const pages = pagesContainer.querySelectorAll('.a4-page:not(.cover-page)');
+                let details = [];
+                
+                pages.forEach(page => {
+                    const pageNum = page.getAttribute('data-page');
+                    const contentEl = page.querySelector('.page-content');
+                    if (!contentEl) return;
+                    
+                    const isTwoCol = contentEl.classList.contains('layout-two-column');
+                    const children = contentEl.children;
+                    let pageOverflows = [];
+                    
+                    for (let j = 0; j < children.length; j++) {
+                        const el = children[j];
+                        let isElOverflow = false;
+                        
+                        if (isTwoCol) {
+                            // In 2-column mode, horizontal overflow (beyond the second column)
+                            isElOverflow = (el.offsetLeft + el.clientWidth) > (contentEl.clientWidth + 5);
+                        } else {
+                            // In 1-column mode, vertical overflow (beyond the page height)
+                            isElOverflow = (el.offsetTop + el.clientHeight) > (contentEl.clientHeight + 5);
+                        }
+                        
+                        if (isElOverflow) {
+                            let snippet = "";
+                            if (el.classList.contains('markdown-table')) {
+                                const rowsCount = el.querySelectorAll('tr').length;
+                                snippet = `सारणी (Table - ${rowsCount} पंक्तियाँ)`;
+                            } else {
+                                const txt = el.textContent.trim().replace(/\s+/g, ' ');
+                                snippet = txt.length > 35 ? txt.substring(0, 35) + '...' : txt;
+                            }
+                            if (snippet) {
+                                pageOverflows.push(snippet);
+                            }
+                        }
+                    }
+                    
+                    if (pageOverflows.length > 0) {
+                        details.push({
+                            page: pageNum,
+                            snippets: pageOverflows
+                        });
+                    }
+                });
+                return details;
+            };
+
+            // 1. Scan for overflows BEFORE applying fixes
+            const initialOverflows = scanOverflows();
+
+            // 2. Enable smart spacing / tight compaction mode
             isTightCompaction = true;
             localStorage.setItem('samyak-tight-compaction', 'true');
             document.body.classList.add('tight-compaction');
 
-            // 1. Run a strict, threshold-bypassing re-pagination pass to fix overflows automatically
+            // 3. Run strict re-pagination pass to auto-flow overflowing words to next pages
             renderPreview(true);
             saveWorkspaceToLocalStorage();
 
-            // 2. Read scrollWidth/scrollHeight for all pages in the DOM to check if any still overflow
-            const pages = pagesContainer.querySelectorAll('.a4-page:not(.cover-page)');
-            let overflowPages = [];
+            // 4. Scan again AFTER fixing
+            const remainingOverflows = scanOverflows();
             
-            pages.forEach(page => {
-                const pageNum = page.getAttribute('data-page');
-                const contentEl = page.querySelector('.page-content');
-                if (!contentEl) return;
-                
-                const isTwoCol = contentEl.classList.contains('layout-two-column');
-                let isOverflow = false;
-                
-                if (isTwoCol) {
-                    isOverflow = contentEl.scrollWidth > (contentEl.clientWidth + 2);
-                } else {
-                    isOverflow = contentEl.scrollHeight > contentEl.clientHeight + 2;
-                }
-                
-                if (isOverflow) {
-                    overflowPages.push(pageNum);
-                }
-            });
-            
-            showIntegrityResultModal(overflowPages);
+            // 5. Show a highly detailed, luxurious layout report modal to the user
+            showIntegrityReportModal(initialOverflows, remainingOverflows);
         });
     }
 
-    function showIntegrityResultModal(overflowPages) {
+    function showIntegrityReportModal(initialOverflows, remainingOverflows) {
         const oldNotification = document.getElementById('integrity-notification');
         if (oldNotification) oldNotification.remove();
         
@@ -1327,44 +1362,91 @@ document.addEventListener('DOMContentLoaded', () => {
             left: '50%',
             transform: 'translateX(-50%) translateY(-50px)',
             opacity: '0',
-            background: 'rgba(15, 23, 42, 0.88)',
-            backdropFilter: 'blur(16px)',
-            webkitBackdropFilter: 'blur(16px)',
+            background: 'rgba(15, 23, 42, 0.92)',
+            backdropFilter: 'blur(20px)',
+            webkitBackdropFilter: 'blur(20px)',
             borderRadius: '12px',
-            padding: '16px 24px',
-            boxShadow: '0 20px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+            padding: '18px 24px',
+            boxShadow: '0 20px 50px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
             zIndex: '9999',
             fontFamily: 'var(--font-body), sans-serif',
-            fontSize: '14px',
+            fontSize: '13.5px',
             color: '#fff',
             display: 'flex',
-            alignItems: 'center',
-            gap: '12px',
+            alignItems: 'flex-start',
+            gap: '14px',
             transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
             border: '1px solid rgba(255, 255, 255, 0.1)',
-            minWidth: '340px',
-            maxWidth: '90vw'
+            minWidth: '380px',
+            maxWidth: '90vw',
+            lineHeight: '1.5'
         });
         
-        const isSuccess = overflowPages.length === 0;
+        const hadOverflows = initialOverflows.length > 0;
+        const isFullyFixed = remainingOverflows.length === 0;
         
-        if (isSuccess) {
-            notification.style.borderColor = 'rgba(197, 160, 89, 0.5)'; // Elegant Gold Border
-            notification.style.boxShadow = '0 10px 30px rgba(197, 160, 89, 0.15), 0 20px 40px rgba(0, 0, 0, 0.5)';
+        if (hadOverflows && isFullyFixed) {
+            // Overflows existed but were successfully auto-fixed and pushed to subsequent pages
+            notification.style.borderColor = 'rgba(197, 160, 89, 0.6)'; // Gold Accent
+            notification.style.boxShadow = '0 10px 30px rgba(197, 160, 89, 0.2), 0 20px 50px rgba(0, 0, 0, 0.6)';
+            
+            let reportHTML = `<div style="flex: 1;">
+                <strong style="display: block; color: #e2b857; font-size: 15px; margin-bottom: 6px;">स्मार्ट स्पेसिंग एवं लेआउट सफलतापूर्वक दुरुस्त!</strong>`;
+            
+            initialOverflows.forEach(item => {
+                reportHTML += `<div style="margin-bottom: 6px; padding-left: 6px; border-left: 2px solid #e2b857; font-size: 12.5px; color: #e2e8f0;">
+                    • <strong>पन्ना (Page) ${item.page}:</strong> पर ओवरफ़्लो हो रहा टेक्स्ट <code style="background: rgba(255,255,255,0.06); padding: 2px 4px; border-radius: 4px; color: #cbd5e1; font-family: monospace;">"${item.snippets.join(', ')}"</code> को सफलतापूर्वक अगले पन्ने पर खिसका दिया गया है।
+                </div>`;
+            });
+            
+            reportHTML += `<span style="color: #4ade80; font-size: 12px; font-weight: 600; display: block; margin-top: 4px;">✅ सभी खाली जगह हटा दी गई हैं और पूरे डॉक्यूमेंट का टेक्स्ट 100% दिखाई दे रहा है।</span></div>`;
+            
+            notification.innerHTML = `<span style="font-size: 24px; color: #e2b857; margin-top: -2px;">⚜️</span> ${reportHTML}`;
+            
+        } else if (!hadOverflows && isFullyFixed) {
+            // No overflows were detected initially, document is completely clean
+            notification.style.borderColor = 'rgba(197, 160, 89, 0.5)'; // Gold Accent
+            notification.style.boxShadow = '0 10px 30px rgba(197, 160, 89, 0.15), 0 20px 50px rgba(0, 0, 0, 0.6)';
             notification.innerHTML = `
-                <span style="font-size: 20px; color: #e2b857;">⚜️</span>
-                <div>
-                    <strong style="display: block; color: #e2b857; margin-bottom: 2px;">स्मार्ट स्पेसिंग एवं लेआउट दुरुस्त!</strong>
-                    <span style="color: #cbd5e1; font-size: 12.5px;">सभी खाली जगह हटा दी गई हैं और विषय-वस्तु को 2 कॉलमों में पूरी तरह विभाजित कर दिया गया है।</span>
+                <span style="font-size: 24px; color: #e2b857;">⚜️</span>
+                <div style="flex: 1;">
+                    <strong style="display: block; color: #e2b857; font-size: 15px; margin-bottom: 4px;">स्मार्ट स्पेसिंग एवं लेआउट बिल्कुल सही है!</strong>
+                    <span style="color: #e2e8f0; font-size: 12.5px;">डॉक्यूमेंट में कोई भी शब्द छिपा हुआ नहीं है। सभी खाली जगह हटा दी गई हैं और विषय-वस्तु को 2 कॉलमों में पूरी तरह विभाजित कर दिया गया है।</span>
                 </div>
             `;
         } else {
-            notification.style.borderColor = 'rgba(239, 68, 68, 0.4)';
-            notification.style.boxShadow = '0 10px 30px rgba(239, 68, 68, 0.15), 0 20px 40px rgba(0, 0, 0, 0.5)';
-            notification.innerHTML = `
-                <span style="font-size: 20px; color: #f87171;">⚠️</span>
-                <div>
-                    <strong style="display: block; color: #f87171; margin-bottom: 2px;">असाधारण ओवरफ़्लो!</strong>
+            // Exceptional overflow (e.g. a single block is so massive that it doesn't fit even on an empty page)
+            notification.style.borderColor = 'rgba(239, 68, 68, 0.5)'; // Crimson Accent
+            notification.style.boxShadow = '0 10px 30px rgba(239, 68, 68, 0.15), 0 20px 50px rgba(0, 0, 0, 0.6)';
+            
+            let reportHTML = `<div style="flex: 1;">
+                <strong style="display: block; color: #f87171; font-size: 15px; margin-bottom: 6px;">असाधारण ओवरफ़्लो मिला!</strong>`;
+            
+            remainingOverflows.forEach(item => {
+                reportHTML += `<div style="margin-bottom: 6px; padding-left: 6px; border-left: 2px solid #f87171; font-size: 12.5px; color: #e2e8f0;">
+                    • <strong>पन्ना (Page) ${item.page}:</strong> पर ब्लॉक <code style="background: rgba(255,255,255,0.06); padding: 2px 4px; border-radius: 4px; color: #cbd5e1; font-family: monospace;">"${item.snippets.join(', ')}"</code> पन्ने की सीमा से बहुत बड़ा है और विभाजित नहीं हो पा रहा।
+                </div>`;
+            });
+            
+            reportHTML += `<span style="color: #cbd5e1; font-size: 12px; display: block; margin-top: 4px;">💡 कृपया इस ब्लॉक को मैन्युअल रूप से छोटा करें या इस पन्ने का फ़ॉन्ट साइज़ थोड़ा छोटा करें।</span></div>`;
+            
+            notification.innerHTML = `<span style="font-size: 24px; color: #f87171;">⚠️</span> ${reportHTML}`;
+        }
+        
+        document.body.appendChild(notification);
+        
+        requestAnimationFrame(() => {
+            notification.style.transform = 'translateX(-50%) translateY(0)';
+            notification.style.opacity = '1';
+        });
+        
+        // Detailed reports are slightly larger, so keep them visible for 7 seconds
+        setTimeout(() => {
+            notification.style.transform = 'translateX(-50%) translateY(-50px)';
+            notification.style.opacity = '0';
+            setTimeout(() => notification.remove(), 400);
+        }, 7500);
+    }g>
                     <span style="color: #cbd5e1; font-size: 12.5px;">पन्ना (Page) <strong>${overflowPages.join(', ')}</strong> पर एक सिंगल ब्लॉक बहुत बड़ा है जो खाली पेज पर भी फिट नहीं हो रहा। कृपया उसका फॉन्ट साइज थोड़ा छोटा करें।</span>
                 </div>
             `;
@@ -6644,6 +6726,39 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             activeA4Page.classList.add('active-page-spotlight');
         }
+
+        // 5.5 Detect and mark overflow states on pages in real-time
+        const renderedPages = pagesContainer.querySelectorAll('.a4-page:not(.cover-page)');
+        renderedPages.forEach(page => {
+            const pageNum = page.getAttribute('data-page');
+            const contentEl = page.querySelector('.page-content');
+            if (!contentEl) return;
+            
+            const isTwoCol = contentEl.classList.contains('layout-two-column');
+            let isOverflow = false;
+            
+            if (isTwoCol) {
+                isOverflow = contentEl.scrollWidth > (contentEl.clientWidth + 2);
+            } else {
+                isOverflow = contentEl.scrollHeight > MAX_CONTENT_HEIGHT;
+            }
+            
+            // Remove old badge if any
+            const oldBadge = page.querySelector('.overflow-badge');
+            if (oldBadge) oldBadge.remove();
+            
+            if (isOverflow) {
+                page.classList.add('overflow-detected');
+                
+                // Create a beautiful, blinking overflow warning badge inside the page container
+                const badge = document.createElement('div');
+                badge.className = 'overflow-badge';
+                badge.innerHTML = `⚠️ ओवरफ़्लो (Overflow)`;
+                page.appendChild(badge);
+            } else {
+                page.classList.remove('overflow-detected');
+            }
+        });
 
         // 6. Sync warning states on left page-tabs sidebar
         renderTabsList();
