@@ -86,6 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Compiler DOM Elements
     const compileMagazinesBtn = document.getElementById('compile-magazines-btn');
+    const validateIntegrityBtn = document.getElementById('validate-integrity-btn');
     const compilerModal = document.getElementById('compiler-modal');
     const closeCompilerModalBtn = document.getElementById('close-compiler-modal-btn');
     const cancelCompilerBtn = document.getElementById('cancel-compiler-btn');
@@ -1267,6 +1268,110 @@ document.addEventListener('DOMContentLoaded', () => {
             saveWorkspaceToLocalStorage();
             hideTableModal();
         });
+    }
+
+    // Layout Integrity & Auto-Fixer Event Listener
+    if (validateIntegrityBtn) {
+        validateIntegrityBtn.addEventListener('click', () => {
+            // 1. Run a strict, threshold-bypassing re-pagination pass to fix overflows automatically
+            renderPreview(true);
+            saveWorkspaceToLocalStorage();
+
+            // 2. Read scrollWidth/scrollHeight for all pages in the DOM to check if any still overflow
+            const pages = pagesContainer.querySelectorAll('.a4-page:not(.cover-page)');
+            let overflowPages = [];
+            
+            pages.forEach(page => {
+                const pageNum = page.getAttribute('data-page');
+                const contentEl = page.querySelector('.page-content');
+                if (!contentEl) return;
+                
+                const isTwoCol = contentEl.classList.contains('layout-two-column');
+                let isOverflow = false;
+                
+                if (isTwoCol) {
+                    isOverflow = contentEl.scrollWidth > (contentEl.clientWidth + 2);
+                } else {
+                    isOverflow = contentEl.scrollHeight > contentEl.clientHeight + 2;
+                }
+                
+                if (isOverflow) {
+                    overflowPages.push(pageNum);
+                }
+            });
+            
+            showIntegrityResultModal(overflowPages);
+        });
+    }
+
+    function showIntegrityResultModal(overflowPages) {
+        const oldNotification = document.getElementById('integrity-notification');
+        if (oldNotification) oldNotification.remove();
+        
+        const notification = document.createElement('div');
+        notification.id = 'integrity-notification';
+        
+        Object.assign(notification.style, {
+            position: 'fixed',
+            top: '20px',
+            left: '50%',
+            transform: 'translateX(-50%) translateY(-50px)',
+            opacity: '0',
+            background: 'rgba(15, 23, 42, 0.88)',
+            backdropFilter: 'blur(16px)',
+            webkitBackdropFilter: 'blur(16px)',
+            borderRadius: '12px',
+            padding: '16px 24px',
+            boxShadow: '0 20px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+            zIndex: '9999',
+            fontFamily: 'var(--font-body), sans-serif',
+            fontSize: '14px',
+            color: '#fff',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            minWidth: '340px',
+            maxWidth: '90vw'
+        });
+        
+        const isSuccess = overflowPages.length === 0;
+        
+        if (isSuccess) {
+            notification.style.borderColor = 'rgba(197, 160, 89, 0.5)'; // Elegant Gold Border
+            notification.style.boxShadow = '0 10px 30px rgba(197, 160, 89, 0.15), 0 20px 40px rgba(0, 0, 0, 0.5)';
+            notification.innerHTML = `
+                <span style="font-size: 20px; color: #e2b857;">⚜️</span>
+                <div>
+                    <strong style="display: block; color: #e2b857; margin-bottom: 2px;">लेआउट पूरी तरह दुरुस्त है!</strong>
+                    <span style="color: #cbd5e1; font-size: 12.5px;">इंजन ने छिपे हुए शब्दों को अगले पेजों पर खिसका कर लेआउट को पूरी तरह ठीक कर दिया है।</span>
+                </div>
+            `;
+        } else {
+            notification.style.borderColor = 'rgba(239, 68, 68, 0.4)';
+            notification.style.boxShadow = '0 10px 30px rgba(239, 68, 68, 0.15), 0 20px 40px rgba(0, 0, 0, 0.5)';
+            notification.innerHTML = `
+                <span style="font-size: 20px; color: #f87171;">⚠️</span>
+                <div>
+                    <strong style="display: block; color: #f87171; margin-bottom: 2px;">असाधारण ओवरफ़्लो!</strong>
+                    <span style="color: #cbd5e1; font-size: 12.5px;">पन्ना (Page) <strong>${overflowPages.join(', ')}</strong> पर एक सिंगल ब्लॉक बहुत बड़ा है जो खाली पेज पर भी फिट नहीं हो रहा। कृपया उसका फॉन्ट साइज थोड़ा छोटा करें।</span>
+                </div>
+            `;
+        }
+        
+        document.body.appendChild(notification);
+        
+        requestAnimationFrame(() => {
+            notification.style.transform = 'translateX(-50%) translateY(0)';
+            notification.style.opacity = '1';
+        });
+        
+        setTimeout(() => {
+            notification.style.transform = 'translateX(-50%) translateY(-50px)';
+            notification.style.opacity = '0';
+            setTimeout(() => notification.remove(), 400);
+        }, 5500);
     }
 
     // Magazine Compiler Modal Event Listeners
@@ -6138,7 +6243,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Render right-side actual A4 pages sequentially
-    function renderPreview() {
+    function renderPreview(forceStrictSplit = false) {
         // Save current scroll positions of the preview canvas scroll wrapper to prevent jumping
         const canvasWrapper = document.querySelector('.canvas-wrapper');
         const savedScrollTop = canvasWrapper ? canvasWrapper.scrollTop : 0;
@@ -6272,12 +6377,13 @@ document.addEventListener('DOMContentLoaded', () => {
             let isOverflow = false;
             if (isTwoCol) {
                 // In two column layouts, check scrollWidth if the estimated content height is close to the double-column limit
-                // Using MAX_CONTENT_HEIGHT * 2.0 - 180 as threshold to prevent layout thrashing and only check near limits
-                if (currentPageHeight > (MAX_CONTENT_HEIGHT * 1.2)) {
+                // If forceStrictSplit is true, bypass threshold and always check actual scrollWidth
+                if (forceStrictSplit || currentPageHeight > (MAX_CONTENT_HEIGHT * 1.2)) {
                     isOverflow = currentPageStruct.contentElement.scrollWidth > (currentPageStruct.contentElement.clientWidth + 2);
                 }
-            } else if (currentPageHeight > checkThreshold) {
+            } else if (forceStrictSplit || currentPageHeight > checkThreshold) {
                 // Only read scrollHeight when estimated height gets close to or exceeds limit
+                // If forceStrictSplit is true, bypass threshold and always check actual scrollHeight
                 const actualHeight = currentPageStruct.contentElement.scrollHeight;
                 currentPageHeight = actualHeight; // Sync running estimate with actual measurement
                 isOverflow = actualHeight > MAX_CONTENT_HEIGHT;
