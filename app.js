@@ -6476,7 +6476,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const coverPage = pagesData[0];
         const newContentPages = pageContentMarkdownArray.map((txt, index) => {
             const oldPage = pagesData[index + 1];
-            const oldLayout = oldPage ? (oldPage.layout || 'single') : 'single';
+            let oldLayout = 'single';
+            if (oldPage) {
+                oldLayout = oldPage.layout || 'single';
+            } else {
+                // If it is a dynamically generated new page, inherit the layout of the previous page
+                const prevPage = index > 0 ? pagesData[index] : null;
+                oldLayout = prevPage ? (prevPage.layout || 'single') : 'single';
+            }
             return {
                 type: 'content',
                 text: txt,
