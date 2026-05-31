@@ -6376,14 +6376,10 @@ document.addEventListener('DOMContentLoaded', () => {
             // Check if page overflows
             let isOverflow = false;
             if (isTwoCol) {
-                // In two column layouts, check scrollWidth if the estimated content height is close to the double-column limit
-                // If forceStrictSplit is true, bypass threshold and always check actual scrollWidth
-                if (forceStrictSplit || currentPageHeight > (MAX_CONTENT_HEIGHT * 1.2)) {
-                    isOverflow = currentPageStruct.contentElement.scrollWidth > (currentPageStruct.contentElement.clientWidth + 2);
-                }
-            } else if (forceStrictSplit || currentPageHeight > checkThreshold) {
-                // Only read scrollHeight when estimated height gets close to or exceeds limit
-                // If forceStrictSplit is true, bypass threshold and always check actual scrollHeight
+                // In two column layouts, always check actual scrollWidth to prevent hidden text
+                isOverflow = currentPageStruct.contentElement.scrollWidth > (currentPageStruct.contentElement.clientWidth + 2);
+            } else {
+                // In single column layouts, always check actual scrollHeight to prevent hidden text
                 const actualHeight = currentPageStruct.contentElement.scrollHeight;
                 currentPageHeight = actualHeight; // Sync running estimate with actual measurement
                 isOverflow = actualHeight > MAX_CONTENT_HEIGHT;
