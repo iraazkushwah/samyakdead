@@ -419,6 +419,11 @@ document.addEventListener('DOMContentLoaded', () => {
     let cachedMaxContentHeight = null; // Cache to prevent layout thrashing
     let draggedTOCSectionName = null; // Store dragged section name for TOC reordering
 
+    let isTightCompaction = localStorage.getItem('samyak-tight-compaction') === 'true';
+    if (isTightCompaction) {
+        document.body.classList.add('tight-compaction');
+    }
+
     // Last Page State
     let lastPageData = {
         title: 'THANK YOU',
@@ -1273,6 +1278,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Layout Integrity & Auto-Fixer Event Listener
     if (validateIntegrityBtn) {
         validateIntegrityBtn.addEventListener('click', () => {
+            // Enable tight compaction mode when the smart fixer button is clicked
+            isTightCompaction = true;
+            localStorage.setItem('samyak-tight-compaction', 'true');
+            document.body.classList.add('tight-compaction');
+
             // 1. Run a strict, threshold-bypassing re-pagination pass to fix overflows automatically
             renderPreview(true);
             saveWorkspaceToLocalStorage();
@@ -1344,8 +1354,8 @@ document.addEventListener('DOMContentLoaded', () => {
             notification.innerHTML = `
                 <span style="font-size: 20px; color: #e2b857;">⚜️</span>
                 <div>
-                    <strong style="display: block; color: #e2b857; margin-bottom: 2px;">लेआउट पूरी तरह दुरुस्त है!</strong>
-                    <span style="color: #cbd5e1; font-size: 12.5px;">इंजन ने छिपे हुए शब्दों को अगले पेजों पर खिसका कर लेआउट को पूरी तरह ठीक कर दिया है।</span>
+                    <strong style="display: block; color: #e2b857; margin-bottom: 2px;">स्मार्ट स्पेसिंग एवं लेआउट दुरुस्त!</strong>
+                    <span style="color: #cbd5e1; font-size: 12.5px;">सभी खाली जगह हटा दी गई हैं और विषय-वस्तु को 2 कॉलमों में पूरी तरह विभाजित कर दिया गया है।</span>
                 </div>
             `;
         } else {

@@ -3418,6 +3418,41 @@ body.light-mode .search-replace-panel {
     break-inside: avoid-column; /* Keep individual list items whole so a single bullet isn't split across columns */
 }
 
+/* Tight Compaction Mode: Removes all column break restrictions to eliminate blank spaces */
+body.tight-compaction .page-content.layout-two-column > * {
+    break-inside: auto !important;
+    break-after: auto !important;
+    break-before: auto !important;
+}
+
+body.tight-compaction .topic-container {
+    break-after: auto !important;
+    break-inside: auto !important;
+}
+
+body.tight-compaction .topic-container + .bullet-list,
+body.tight-compaction .topic-container + p.body-text,
+body.tight-compaction .topic-container + .highlight-box,
+body.tight-compaction .topic-container + .inserted-image-container,
+body.tight-compaction .topic-container + .markdown-table {
+    break-before: auto !important;
+}
+
+body.tight-compaction .page-content.layout-two-column .bullet-list > .bullet-item {
+    break-inside: auto !important;
+}
+
+body.tight-compaction .highlight-box,
+body.tight-compaction .premium-box,
+body.tight-compaction .personality-feature-card,
+body.tight-compaction .stats-callout-grid,
+body.tight-compaction .quick-facts-grid,
+body.tight-compaction .announcement-alert-box {
+    break-inside: auto !important;
+    break-after: auto !important;
+    break-before: auto !important;
+}
+
 .page-content.layout-two-column .section-heading-bar {
     column-span: none;
     display: block !important; /* Ensure it is a block container */
