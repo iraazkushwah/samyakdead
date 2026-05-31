@@ -6262,7 +6262,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (isOverflow) {
                 // We have an overflow. Let's see if we can split this block.
-                let canSplit = (block.type === 'paragraph' || block.type === 'bullet' || block.type === 'box' || block.type === 'table');
+                let canSplit = (block.type === 'paragraph' || block.type === 'bullet' || block.type === 'box');
                 let splitSuccess = false;
 
                 if (canSplit) {

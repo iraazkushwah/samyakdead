@@ -3403,10 +3403,15 @@ body.light-mode .search-replace-panel {
     break-inside: avoid-column; /* Prevent elements from splitting halfway across columns */
 }
 
-/* Allow paragraphs and bullet lists to break across columns to fill gaps and look compact */
+/* Allow paragraphs, bullet lists, and tables to break across columns to fill gaps and look compact */
 .page-content.layout-two-column > p.body-text,
-.page-content.layout-two-column > .bullet-list {
+.page-content.layout-two-column > .bullet-list,
+.page-content.layout-two-column > .markdown-table {
     break-inside: auto;
+}
+
+.markdown-table tr {
+    break-inside: avoid;
 }
 
 .page-content.layout-two-column .bullet-list > .bullet-item {
