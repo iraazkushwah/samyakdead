@@ -534,9 +534,9 @@ sub {
 /* Editor Panel (Left Sidebar) */
 .editor-panel {
     position: relative;
-    width: calc(100vw - 860px); /* Dynamically set to maximize editor space while keeping A4 preview perfectly visible */
+    width: 8.5in; /* Sized exactly to Letter page width */
     min-width: 380px;
-    max-width: calc(100vw - 860px); /* Hard limit to prevent A4 preview from overflowing horizontally */
+    max-width: 8.5in;
     flex-shrink: 0;
     background: rgba(12, 12, 20, 0.45);
     backdrop-filter: blur(12px);

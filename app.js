@@ -6092,8 +6092,31 @@ document.addEventListener('DOMContentLoaded', () => {
                 return 220; // conservative estimate for image height
             case 'table':
                 {
-                    const rows = text.split('\n').filter(l => l.trim()).length;
-                    return (rows * 32) + 20; // 32px per row + padding/margin
+                    const linesOfTable = text.split('\n').filter(l => l.trim());
+                    let totalTableHeight = 20; // base padding/margin
+                    
+                    linesOfTable.forEach((line, idx) => {
+                        if (idx === 1 && line.replace(/[^|:\-]/g, '').trim() === line) {
+                            return; // skip separator row
+                        }
+                        
+                        const cells = line.split('|').map(c => c.trim()).slice(1, -1);
+                        let maxCellLines = 1;
+                        
+                        cells.forEach(cellText => {
+                            // In 2-Column layouts, cells are very narrow
+                            const cellWidth = isTwoCol ? 110 : 220;
+                            const charsPerLine = Math.max(10, Math.floor(cellWidth / (0.55 * fontSize)));
+                            const cellLines = Math.ceil(cellText.length / charsPerLine) || 1;
+                            if (cellLines > maxCellLines) {
+                                maxCellLines = cellLines;
+                            }
+                        });
+                        
+                        totalTableHeight += (maxCellLines * lineHeight) + 12; // cell height + padding
+                    });
+                    
+                    return totalTableHeight;
                 }
             case 'box':
                 {
@@ -6250,7 +6273,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (isTwoCol) {
                 // In two column layouts, check scrollWidth if the estimated content height is close to the double-column limit
                 // Using MAX_CONTENT_HEIGHT * 2.0 - 180 as threshold to prevent layout thrashing and only check near limits
-                if (currentPageHeight > (MAX_CONTENT_HEIGHT * 2.0 - 180)) {
+                if (currentPageHeight > (MAX_CONTENT_HEIGHT * 1.2)) {
                     isOverflow = currentPageStruct.contentElement.scrollWidth > (currentPageStruct.contentElement.clientWidth + 2);
                 }
             } else if (currentPageHeight > checkThreshold) {
