@@ -2526,6 +2526,26 @@ strong {
         margin: 0 !important;
         padding: 0 !important;
     }
+
+    /* Explicitly force all A4 text to black for high-contrast print legibility regardless of dark active themes */
+    .a4-page {
+        color: #000000 !important;
+        --text-color: #000000 !important;
+        --text-dark: #000000 !important;
+    }
+
+    .a4-page p, .a4-page span:not(.diamond):not(.ocr-dash-card-badge), .a4-page li, .a4-page td, .a4-page div:not(.section-heading-bar):not(.chapter-num-main-bg):not(.chapter-num-accent-bg) {
+        color: #000000 !important;
+    }
+
+    /* Overwrite bright yellow high alert text color to dark, legible amber for white paper printing */
+    .high-alert-highlight {
+        color: #78350f !important;
+        background-color: rgba(245, 158, 11, 0.15) !important;
+        border: 1px solid rgba(245, 158, 11, 0.45) !important;
+        box-shadow: none !important;
+        text-shadow: none !important;
+    }
     
     .app-container {
         display: block !important;
