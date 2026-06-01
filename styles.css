@@ -2546,6 +2546,17 @@ strong {
         box-shadow: none !important;
         text-shadow: none !important;
     }
+
+    /* Force page-footer, border, social links and SVGs to black in print */
+    .page-footer {
+        border-top: 1px solid #000000 !important;
+        color: #000000 !important;
+    }
+
+    .footer-social-link, .footer-social-link svg, .social-svg-icon {
+        color: #000000 !important;
+        fill: #000000 !important;
+    }
     
     .app-container {
         display: block !important;
