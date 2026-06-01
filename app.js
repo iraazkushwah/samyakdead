@@ -672,26 +672,17 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // 3. Swap main preview with Integrated OCR Workspace if active panel is panel-ocr
+        // Ensure preview panel and standard A4 page layout remain fully visible at all times
         const previewHeader = document.querySelector('.preview-panel .preview-header');
         const canvasWrapper = document.querySelector('.preview-panel .canvas-wrapper');
         const mobileCloseBtn = document.getElementById('mobile-preview-close-btn');
         const appContainer = document.querySelector('.app-container');
         
-        if (targetPanelId === 'panel-ocr') {
-            if (appContainer) appContainer.classList.add('ocr-mode');
-            if (previewHeader) previewHeader.style.display = 'none';
-            if (canvasWrapper) canvasWrapper.style.display = 'none';
-            if (mobileCloseBtn) mobileCloseBtn.style.display = 'none';
-            if (ocrIntegratedWorkspace) ocrIntegratedWorkspace.style.display = 'flex';
-            resetOcrDashProject(false);
-        } else {
-            if (appContainer) appContainer.classList.remove('ocr-mode');
-            if (previewHeader) previewHeader.style.display = 'flex';
-            if (canvasWrapper) canvasWrapper.style.display = 'block';
-            if (mobileCloseBtn) mobileCloseBtn.style.display = '';
-            if (ocrIntegratedWorkspace) ocrIntegratedWorkspace.style.display = 'none';
-        }
+        if (appContainer) appContainer.classList.remove('ocr-mode');
+        if (previewHeader) previewHeader.style.display = 'flex';
+        if (canvasWrapper) canvasWrapper.style.display = 'block';
+        if (mobileCloseBtn) mobileCloseBtn.style.display = '';
+        if (ocrIntegratedWorkspace) ocrIntegratedWorkspace.style.display = 'none';
     }
 
     // Reusable image compression helper using Canvas (reduces 1MB+ images to ~50KB for insane performance)

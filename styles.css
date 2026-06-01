@@ -1825,7 +1825,7 @@ body.light-mode .header-stats {
     justify-content: space-between;
     align-items: center;
     border-top: 1px solid rgba(0, 0, 0, 0.08);
-    padding-top: 5px;
+    padding-top: 14px;
     margin-top: auto; /* Push footer to the absolute page bottom */
     width: 100%;
     z-index: 102;
@@ -2547,15 +2547,17 @@ strong {
         text-shadow: none !important;
     }
 
-    /* Force page-footer, border, social links and SVGs to black in print */
+    /* Force page-footer, border, social links and SVGs to black in print and shift down */
     .page-footer {
         border-top: 1px solid #000000 !important;
         color: #000000 !important;
+        padding-top: 14px !important;
     }
 
-    .footer-social-link, .footer-social-link svg, .social-svg-icon {
+    .footer-social-link, .footer-social-link svg, .social-svg-icon, a, a * {
         color: #000000 !important;
         fill: #000000 !important;
+        text-decoration: none !important;
     }
     
     .app-container {
