@@ -1446,24 +1446,6 @@ document.addEventListener('DOMContentLoaded', () => {
             notification.style.opacity = '0';
             setTimeout(() => notification.remove(), 400);
         }, 7500);
-    }g>
-                    <span style="color: #cbd5e1; font-size: 12.5px;">पन्ना (Page) <strong>${overflowPages.join(', ')}</strong> पर एक सिंगल ब्लॉक बहुत बड़ा है जो खाली पेज पर भी फिट नहीं हो रहा। कृपया उसका फॉन्ट साइज थोड़ा छोटा करें।</span>
-                </div>
-            `;
-        }
-        
-        document.body.appendChild(notification);
-        
-        requestAnimationFrame(() => {
-            notification.style.transform = 'translateX(-50%) translateY(0)';
-            notification.style.opacity = '1';
-        });
-        
-        setTimeout(() => {
-            notification.style.transform = 'translateX(-50%) translateY(-50px)';
-            notification.style.opacity = '0';
-            setTimeout(() => notification.remove(), 400);
-        }, 5500);
     }
 
     // Magazine Compiler Modal Event Listeners
