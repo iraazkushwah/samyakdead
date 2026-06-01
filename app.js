@@ -6341,7 +6341,9 @@ document.addEventListener('DOMContentLoaded', () => {
             document.body.appendChild(tempPageStruct.pageElement);
             const measuredHeight = tempPageStruct.contentElement.clientHeight;
             document.body.removeChild(tempPageStruct.pageElement);
-            if (measuredHeight > 0) {
+            // Sanity check: only cache if height is realistic (e.g., above 500px)
+            // to prevent caching buggy heights measured before styles.css fully loads
+            if (measuredHeight > 500) {
                 cachedMaxContentHeight = measuredHeight;
             }
         }
@@ -9302,4 +9304,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Run order restoration instantly
     restoreAccordionOrder();
+
+    // Clear height cache and re-render preview once all stylesheets and fonts are fully loaded
+    window.addEventListener('load', () => {
+        cachedMaxContentHeight = null;
+        renderPreview();
+    });
 });
