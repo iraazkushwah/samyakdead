@@ -2547,16 +2547,23 @@ strong {
         text-shadow: none !important;
     }
 
-    /* Force page-footer, border, social links and SVGs to black in print and shift down */
+    /* Force page-footer and border to black in print and shift down */
     .page-footer {
         border-top: 1px solid #000000 !important;
         color: #000000 !important;
         padding-top: 14px !important;
     }
 
-    .footer-social-link, .footer-social-link svg, .social-svg-icon, a, a * {
+    /* Print footer social links and SVGs in their matching theme color (primary-color) rather than blue or black */
+    .footer-social-link, .footer-social-link *, .social-svg-icon {
+        color: var(--primary-color) !important;
+        fill: var(--primary-color) !important;
+        text-decoration: none !important;
+    }
+
+    /* General standard links in text can remain black and clean in print */
+    a:not(.footer-social-link), a:not(.footer-social-link) * {
         color: #000000 !important;
-        fill: #000000 !important;
         text-decoration: none !important;
     }
     
