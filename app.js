@@ -6333,7 +6333,7 @@ document.addEventListener('DOMContentLoaded', () => {
             clearTimeout(renderTimeout);
         }
         // Measure dynamic available height of page content container
-        if (cachedMaxContentHeight === null) {
+        if (cachedMaxContentHeight === null || cachedMaxContentHeight < 500) {
             const tempPageStruct = createContentPageDOM(999, 999);
             tempPageStruct.pageElement.style.position = 'absolute';
             tempPageStruct.pageElement.style.visibility = 'hidden';
@@ -9306,8 +9306,14 @@ document.addEventListener('DOMContentLoaded', () => {
     restoreAccordionOrder();
 
     // Clear height cache and re-render preview once all stylesheets and fonts are fully loaded
-    window.addEventListener('load', () => {
+    const triggerInitialRender = () => {
         cachedMaxContentHeight = null;
         renderPreview();
-    });
+    };
+
+    if (document.readyState === 'complete') {
+        triggerInitialRender();
+    } else {
+        window.addEventListener('load', triggerInitialRender);
+    }
 });
