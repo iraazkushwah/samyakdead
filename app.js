@@ -5578,11 +5578,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 /^\(\d+\)/.test(trimmed) || 
                 /^\d+\./.test(trimmed)
             ) {
+                const leadingSpaces = line.match(/^(\s+)/);
+                const isNested = leadingSpaces && leadingSpaces[1].length >= 2;
                 blocks.push({
                     type: 'bullet',
                     markdown: line,
                     startLine: start,
-                    endLine: i
+                    endLine: i,
+                    isNested: isNested,
+                    indentLevel: isNested ? Math.floor(leadingSpaces[1].length / 2) : 0
                 });
             } 
             
@@ -5909,9 +5913,19 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // 3. BULLET ITEM RENDER
         else if (block.type === 'bullet') {
-            let bulletText = line.replace(/^[•\-\*\u2022\u25CF]\s*/, '').trim();
+            // Fix Double Bullet Bug: strip any standard/custom bullet character
+            let bulletText = line.replace(/^\s*[•\-\*\u2022\u25CF\u25AA\u25AB➜⭐★]\s*/, '').trim();
             const item = document.createElement('div');
             item.className = 'bullet-item';
+            
+            // Add nested list and indentation classes if applicable
+            if (block.isNested) {
+                item.classList.add('bullet-item-nested');
+                if (block.indentLevel) {
+                    item.classList.add(`bullet-indent-${block.indentLevel}`);
+                }
+            }
+            
             let formattedText = formatMarkdownText(bulletText);
             item.innerHTML = formattedText;
             return item;
@@ -6087,7 +6101,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateNodeContent(node, type, markdown) {
         let line = markdown.trim();
         if (type === 'bullet') {
-            let bulletText = line.replace(/^[•\-\*\u2022\u25CF]\s*/, '').trim();
+            let bulletText = line.replace(/^\s*[•\-\*\u2022\u25CF\u25AA\u25AB➜⭐★]\s*/, '').trim();
             let formattedText = formatMarkdownText(bulletText);
             node.innerHTML = formattedText;
         } else if (type === 'box') {

@@ -2110,6 +2110,42 @@ a.footer-social-link:hover {
     top: 1px;
 }
 
+/* ==========================================
+   NESTED SUB-BULLET STYLES (STAR & ARROW)
+   ========================================== */
+
+/* 1. Indentation for Nested Sub-Bullets */
+.bullet-list .bullet-item-nested {
+    margin-left: 20px !important;
+    padding-left: 15px !important;
+}
+
+/* Multi-level indentation classes if needed */
+.bullet-list .bullet-indent-2 {
+    margin-left: 40px !important;
+}
+.bullet-list .bullet-indent-3 {
+    margin-left: 60px !important;
+}
+
+/* 2. Sub-Bullet Arrow Icon Style */
+.bullet-list .bullet-item-nested::before {
+    content: "➜" !important;
+    font-size: 11px !important;
+    top: 2px !important;
+    left: 2px !important;
+    color: var(--secondary-color, #c5a353) !important;
+}
+
+/* 3. Automatic Star Icon for Parent Bullets (when nested bullets are present in the list) */
+.bullet-list:has(.bullet-item-nested) .bullet-item:not(.bullet-item-nested)::before {
+    content: "★" !important;
+    font-size: 13px !important;
+    top: 1px !important;
+    left: 2px !important;
+    color: var(--primary-color, #850f0f) !important;
+}
+
 /* Highlight boxes */
 .highlight-box {
     background: rgba(197, 163, 83, 0.08);
