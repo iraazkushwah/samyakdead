@@ -278,9 +278,10 @@ export default function App() {
       // List spacing & highlights
       if (cleanLine.startsWith("- ") || cleanLine.startsWith("• ")) {
         const listText = cleanLine.substring(2);
+        const hasNumbering = /^\s*(\([0-9a-zA-Z\u0966-\u096f]+\)|[0-9a-zA-Z\u0966-\u096f]+[\.\)])/.test(listText);
         return (
-          <div key={idx} style={{ paddingLeft: `${indentPadding + 16}px` }} className="flex items-start gap-2.5 my-1.5 text-slate-300 font-sans leading-relaxed">
-            <span className="text-indigo-400 font-bold mt-1">•</span>
+          <div key={idx} style={{ paddingLeft: `${indentPadding + (hasNumbering ? 0 : 16)}px` }} className="flex items-start gap-2.5 my-1.5 text-slate-300 font-sans leading-relaxed">
+            {!hasNumbering && <span className="text-indigo-400 font-bold mt-1">•</span>}
             <div className="flex-1">{parseInlineHighlights(listText)}</div>
           </div>
         );

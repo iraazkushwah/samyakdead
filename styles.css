@@ -9013,6 +9013,16 @@ body.light-mode .premium-slider-group input[type="range"]::-webkit-slider-thumb 
     display: none !important;
 }
 
+/* Custom Bullet Item adjustments when list items already start with numbering */
+.bullet-item.no-bullet-icon::before {
+    content: none !important;
+    display: none !important;
+}
+.bullet-item.no-bullet-icon {
+    padding-left: 0 !important;
+}
+
+
 
 
 

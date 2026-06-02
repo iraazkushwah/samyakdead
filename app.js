@@ -1653,7 +1653,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const unifiedMarkdown = mergedMarkdownParts.join('\n');
 
         // 4. Overwrite pagesData with cover page and the merged content markdown
-        const firstFileLayout = (fileStates[0] && fileStates[0].pagesData && fileStates[0].pagesData[1]) ? (fileStates[0].pagesData[1].layout || 'single') : 'single';
+        const firstFileLayout = (fileStates[0] && fileStates[0].pagesData && fileStates[0].pagesData[1]) ? (fileStates[0].pagesData[1].layout || 'two-column') : 'two-column';
         const compiledPages = [
             {
                 type: 'cover',
@@ -4038,7 +4038,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Sync page layout selector
             if (pageLayoutSelect && pagesData[index]) {
-                pageLayoutSelect.value = pagesData[index].layout || 'single';
+                pageLayoutSelect.value = pagesData[index].layout || 'two-column';
             }
             
             // Populate textarea specifically for this page
@@ -4075,7 +4075,7 @@ document.addEventListener('DOMContentLoaded', () => {
         pagesData.push({
             type: 'content',
             text: '',
-            layout: 'single'
+            layout: 'two-column'
         });
 
         const newIndex = pagesData.length - 1;
@@ -4233,7 +4233,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const clonedPage = {
             type: 'content',
             text: pageToClone.text || '',
-            layout: pageToClone.layout || 'single'
+            layout: pageToClone.layout || 'two-column'
         };
         // Insert after idx
         pagesData.splice(idx + 1, 0, clonedPage);
@@ -5925,6 +5925,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     item.classList.add(`bullet-indent-${block.indentLevel}`);
                 }
             }
+
+            // Check if list item already has numbering format to hide the bullet icon
+            const hasNumbering = /^\s*(\([0-9a-zA-Z\u0966-\u096f]+\)|[0-9a-zA-Z\u0966-\u096f]+[\.\)])/.test(bulletText);
+            if (hasNumbering) {
+                item.classList.add('no-bullet-icon');
+            }
             
             let formattedText = formatMarkdownText(bulletText);
             item.innerHTML = formattedText;
@@ -6102,6 +6108,13 @@ document.addEventListener('DOMContentLoaded', () => {
         let line = markdown.trim();
         if (type === 'bullet') {
             let bulletText = line.replace(/^\s*[•\-\*\u2022\u25CF\u25AA\u25AB➜⭐★]\s*/, '').trim();
+            // Check if list item already has numbering format to hide the bullet icon
+            const hasNumbering = /^\s*(\([0-9a-zA-Z\u0966-\u096f]+\)|[0-9a-zA-Z\u0966-\u096f]+[\.\)])/.test(bulletText);
+            if (hasNumbering) {
+                node.classList.add('no-bullet-icon');
+            } else {
+                node.classList.remove('no-bullet-icon');
+            }
             let formattedText = formatMarkdownText(bulletText);
             node.innerHTML = formattedText;
         } else if (type === 'box') {
@@ -6660,13 +6673,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const coverPage = pagesData[0];
         const newContentPages = pageContentMarkdownArray.map((txt, index) => {
             const oldPage = pagesData[index + 1];
-            let oldLayout = 'single';
+            let oldLayout = 'two-column';
             if (oldPage) {
-                oldLayout = oldPage.layout || 'single';
+                oldLayout = oldPage.layout || 'two-column';
             } else {
                 // If it is a dynamically generated new page, inherit the layout of the previous page
                 const prevPage = index > 0 ? pagesData[index] : null;
-                oldLayout = prevPage ? (prevPage.layout || 'single') : 'single';
+                oldLayout = prevPage ? (prevPage.layout || 'two-column') : 'two-column';
             }
             return {
                 type: 'content',
@@ -7190,8 +7203,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 5. Update content pages (keeping layout configs intact)
         const cover = pagesData[0];
-        const layouts = pagesData.slice(1).map(p => p.layout || 'single');
-        if (layouts.length === 0) layouts.push('single');
+        const layouts = pagesData.slice(1).map(p => p.layout || 'two-column');
+        if (layouts.length === 0) layouts.push('two-column');
         const newPages = layouts.map((lay, idx) => ({
             type: 'content',
             text: (idx === 0) ? unifiedMarkdown : '',
@@ -7854,7 +7867,7 @@ document.addEventListener('DOMContentLoaded', () => {
             {
                 type: 'content',
                 text: '',
-                layout: 'single'
+                layout: 'two-column'
             }
         ];
         
@@ -8615,9 +8628,9 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // 5. Update pagesData content pages with this unified markdown, preserving all layouts
         const cover = pagesData[0];
-        const layouts = pagesData.slice(1).map(p => p.layout || 'single');
+        const layouts = pagesData.slice(1).map(p => p.layout || 'two-column');
         if (layouts.length === 0) {
-            layouts.push('single');
+            layouts.push('two-column');
         }
         const newPages = layouts.map((lay, idx) => ({
             type: 'content',
