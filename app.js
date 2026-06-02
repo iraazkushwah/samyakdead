@@ -74,6 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const pageLayoutSelect = document.getElementById('page-layout-select');
     const applyLayoutAllBtn = document.getElementById('apply-layout-all-btn');
     const compactSpacingToggle = document.getElementById('compact-spacing-toggle');
+    const tightCompactionToggle = document.getElementById('tight-compaction-toggle');
     const pageTemplateSelect = document.getElementById('page-template-select');
     const btnSearchToggle = document.getElementById('btn-search-toggle');
     const searchReplacePanel = document.getElementById('search-replace-panel');
@@ -1289,10 +1290,12 @@ document.addEventListener('DOMContentLoaded', () => {
                         
                         if (isTwoCol) {
                             // In 2-column mode, horizontal overflow (beyond the second column)
-                            isElOverflow = (el.offsetLeft + el.clientWidth) > (contentEl.clientWidth + 5);
+                            const relativeLeft = el.offsetLeft - contentEl.offsetLeft;
+                            isElOverflow = (relativeLeft + el.clientWidth) > (contentEl.clientWidth + 5);
                         } else {
                             // In 1-column mode, vertical overflow (beyond the page height)
-                            isElOverflow = (el.offsetTop + el.clientHeight) > (contentEl.clientHeight + 5);
+                            const relativeTop = el.offsetTop - contentEl.offsetTop;
+                            isElOverflow = (relativeTop + el.clientHeight) > (contentEl.clientHeight + 5);
                         }
                         
                         if (isElOverflow) {
@@ -1327,6 +1330,9 @@ document.addEventListener('DOMContentLoaded', () => {
             isTightCompaction = true;
             localStorage.setItem('samyak-tight-compaction', 'true');
             document.body.classList.add('tight-compaction');
+            if (tightCompactionToggle) {
+                tightCompactionToggle.checked = true;
+            }
 
             // 3. Run strict re-pagination pass to auto-flow overflowing words to next pages
             renderPreview(true);
@@ -2535,6 +2541,18 @@ document.addEventListener('DOMContentLoaded', () => {
         compactSpacingToggle.addEventListener('change', () => {
             customDesignSettings.compactMode = compactSpacingToggle.checked;
             document.body.classList.toggle('compact-mode', customDesignSettings.compactMode);
+            cachedMaxContentHeight = null;
+            renderPreview();
+            saveWorkspaceToLocalStorage();
+        });
+    }
+
+    // Tight Compaction Toggle binding
+    if (tightCompactionToggle) {
+        tightCompactionToggle.addEventListener('change', () => {
+            isTightCompaction = tightCompactionToggle.checked;
+            localStorage.setItem('samyak-tight-compaction', isTightCompaction ? 'true' : 'false');
+            document.body.classList.toggle('tight-compaction', isTightCompaction);
             cachedMaxContentHeight = null;
             renderPreview();
             saveWorkspaceToLocalStorage();
@@ -7452,6 +7470,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (compactSpacingToggle) {
             compactSpacingToggle.checked = !!customDesignSettings.compactMode;
         }
+        if (tightCompactionToggle) {
+            tightCompactionToggle.checked = !!isTightCompaction;
+        }
         document.body.classList.toggle('compact-mode', !!customDesignSettings.compactMode);
 
         // Dynamically fetch computed theme colors to act as fallbacks instead of hardcoding Maroon/Gold/Blue
@@ -7841,6 +7862,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const activeTheme = 'royal-durbar';
         localStorage.setItem('samyak-global-theme', activeTheme);
         applyTheme(activeTheme, false);
+
+        // Reset tight compaction mode
+        isTightCompaction = false;
+        localStorage.setItem('samyak-tight-compaction', 'false');
+        document.body.classList.remove('tight-compaction');
+        if (tightCompactionToggle) {
+            tightCompactionToggle.checked = false;
+        }
 
         // Keep the cover page metadata as is, enforcing the active theme
         const currentCover = {
