@@ -227,13 +227,86 @@ export default function App() {
     document.body.removeChild(element);
   };
 
+  // Render table with Solid Grid styling (both horizontal and vertical borders clearly visible)
+  const renderTable = (rows: string[], tableIdx: number) => {
+    const parsedRows = rows.map(row => {
+      const cells = row.split("|").map(cell => cell.trim());
+      if (row.startsWith("|")) cells.shift();
+      if (row.endsWith("|")) cells.pop();
+      return cells;
+    });
+
+    if (parsedRows.length === 0) return null;
+
+    const headerCells = parsedRows[0];
+    let bodyRows = parsedRows.slice(1);
+
+    // Skip the markdown separator row (e.g. |---|---|)
+    if (bodyRows.length > 0 && bodyRows[0].every(cell => /^[ \t]*:?-+:?[ \t]*$/.test(cell))) {
+      bodyRows = bodyRows.slice(1);
+    }
+
+    return (
+      <div key={`table-${tableIdx}`} className="my-6 overflow-x-auto rounded-lg border border-slate-700 shadow-md">
+        <table className="w-full text-xs md:text-sm border-collapse text-left">
+          <thead>
+            <tr className="bg-slate-800/80 border-b border-slate-700">
+              {headerCells.map((cell, colIdx) => (
+                <th key={colIdx} className="px-4 py-3 font-semibold text-slate-100 border-r border-slate-700 last:border-r-0">
+                  {parseInlineHighlights(cell)}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-700 bg-slate-900/40">
+            {bodyRows.map((rowCells, rowIdx) => (
+              <tr key={rowIdx} className="hover:bg-slate-800/50 transition-colors">
+                {rowCells.map((cell, colIdx) => (
+                  <td key={colIdx} className="px-4 py-3 text-slate-350 border-r border-slate-700 last:border-r-0 leading-relaxed font-sans">
+                    {parseInlineHighlights(cell || "")}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  };
+
   // Custom UI Parser to beautifully format headings, bullets, and Exception warning highlights
   const renderFormattedMarkdownToReact = (text: string) => {
     if (!text) return null;
 
     const lines = text.split("\n");
+    const parsedBlocks: ({ type: "table"; rows: string[] } | { type: "line"; content: string; originalIndex: number })[] = [];
+    let currentTableRows: string[] = [];
 
-    return lines.map((line, idx) => {
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const trimmed = line.trim();
+
+      if (trimmed.startsWith("|")) {
+        currentTableRows.push(line);
+      } else {
+        if (currentTableRows.length > 0) {
+          parsedBlocks.push({ type: "table", rows: currentTableRows });
+          currentTableRows = [];
+        }
+        parsedBlocks.push({ type: "line", content: line, originalIndex: i });
+      }
+    }
+    if (currentTableRows.length > 0) {
+      parsedBlocks.push({ type: "table", rows: currentTableRows });
+    }
+
+    return parsedBlocks.map((block, blockIdx) => {
+      if (block.type === "table") {
+        return renderTable(block.rows, blockIdx);
+      }
+
+      const { content: line, originalIndex: idx } = block;
+
       // Preserve alignment spacing/indentation by rendering padding dynamically
       const indentMatch = line.match(/^(\s+)/);
       const indentPadding = indentMatch ? indentMatch[1].length * 8 : 0;

@@ -201,8 +201,11 @@ Please format your response strictly as valid JSON matching the specified respon
     if (parsedOCRResult && typeof parsedOCRResult.markdown === "string") {
       // 1. Replaces line-isolated section break dividers (---) with simple double newlines to make sure they display as a continuous text stream
       parsedOCRResult.markdown = parsedOCRResult.markdown.replace(/^[ \t]*-{3,}[ \t]*$/gm, "\n");
-      // 2. Replaces any remaining consecutive hyphens (3 or more) anywhere in the text with empty string or single spaces so they never segment or break documents
-      parsedOCRResult.markdown = parsedOCRResult.markdown.replace(/---+/g, " ");
+      // 2. Replaces any remaining consecutive hyphens (3 or more) anywhere in the text with empty string or single spaces so they never segment or break documents, except in table lines containing '|'
+      parsedOCRResult.markdown = parsedOCRResult.markdown
+        .split("\n")
+        .map(line => (line.includes("|") ? line : line.replace(/---+/g, " ")))
+        .join("\n");
 
       // 3. Join bullet points and paragraphs that were split across multiple lines
       const lines = parsedOCRResult.markdown.split("\n");
