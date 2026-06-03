@@ -142,6 +142,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const printPdfBtn = document.getElementById('print-pdf-btn');
     const smartShrinkBtn = document.getElementById('smart-shrink-btn');
     const smartSpaceBtn = document.getElementById('smart-space-btn');
+    const removeGapsBtn = document.getElementById('remove-gaps-btn');
+    const btnRemoveGaps = document.getElementById('btn-remove-gaps');
     const loadingOverlay = document.getElementById('loading-overlay');
     
     const zoomInBtn = document.getElementById('zoom-in');
@@ -169,7 +171,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Dynamic Toolbar Layout Configurations & Sanitization
     const defaultToolbarLayout = {
         main: ['btn-section', 'btn-chapter', 'btn-topic', 'btn-bullet', 'btn-note'],
-        tray: ['btn-pagebreak', 'insert-table-btn', 'btn-search-toggle', 'btn-help-shortcuts']
+        tray: ['btn-pagebreak', 'insert-table-btn', 'btn-search-toggle', 'btn-remove-gaps', 'btn-help-shortcuts']
     };
 
     let currentToolbarLayout = { ...defaultToolbarLayout };
@@ -3178,6 +3180,94 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Remove Gaps (Blank Lines & Spacer Tags) Listener
+    function removeDocumentGaps() {
+        if (activePageIndex <= 0 || activePageIndex >= pagesData.length) {
+            alert("कृपया कोई कंटेंट पेज चुनें (बदलाव केवल कंटेंट पेजों पर लागू होते हैं)।");
+            return;
+        }
+
+        // Save current input state before running cleaner
+        saveCurrentInputState();
+
+        const proceed = confirm("क्या आप खाली लाइनें (blank lines) और [space] गैप हटाना चाहते हैं?");
+        if (!proceed) return;
+
+        const allPages = confirm("क्या आप इसे सभी पेजों पर लागू करना चाहते हैं?\n\n- OK: सभी पेजों से हटाएं\n- Cancel: केवल वर्तमान सक्रिय पेज से हटाएं");
+
+        let pagesCleaned = 0;
+        let emptyLinesRemoved = 0;
+        let spacersRemoved = 0;
+
+        function cleanText(text) {
+            if (!text) return { text: '', emptyLines: 0, spacers: 0 };
+            let original = text;
+            
+            // Remove spacer tags like [space N] or space N
+            const spacerRegex = /^\[?(space|spce)(?:\s+\d+)?\]?$/gim;
+            const spacerMatches = original.match(spacerRegex) || [];
+            let cleaned = original.replace(spacerRegex, '');
+
+            // Remove all blank lines (reduce multiple newlines to a single newline)
+            let lines = cleaned.split('\n');
+            let originalLineCount = lines.length;
+            let nonSpaceLines = lines.filter(line => line.trim() !== '');
+            let cleanedLineCount = nonSpaceLines.length;
+            
+            let emptyLinesRemovedCount = Math.max(0, originalLineCount - cleanedLineCount - (lines[lines.length - 1] === '' ? 1 : 0));
+            cleaned = nonSpaceLines.join('\n');
+
+            return {
+                text: cleaned,
+                emptyLines: emptyLinesRemovedCount,
+                spacers: spacerMatches.length
+            };
+        }
+
+        if (allPages) {
+            for (let idx = 1; idx < pagesData.length; idx++) {
+                if (pagesData[idx] && pagesData[idx].type === 'content' && pagesData[idx].text) {
+                    const res = cleanText(pagesData[idx].text);
+                    if (res.text !== pagesData[idx].text) {
+                        pagesData[idx].text = res.text;
+                        pagesCleaned++;
+                        emptyLinesRemoved += res.emptyLines;
+                        spacersRemoved += res.spacers;
+                    }
+                }
+            }
+            if (activePageIndex > 0 && activePageIndex < pagesData.length) {
+                pageContentInput.value = pagesData[activePageIndex].text;
+            }
+        } else {
+            if (activePageIndex > 0 && activePageIndex < pagesData.length) {
+                const res = cleanText(pagesData[activePageIndex].text);
+                if (res.text !== pagesData[activePageIndex].text) {
+                    pagesData[activePageIndex].text = res.text;
+                    pageContentInput.value = res.text;
+                    pagesCleaned = 1;
+                    emptyLinesRemoved = res.emptyLines;
+                    spacersRemoved = res.spacers;
+                }
+            }
+        }
+
+        if (pagesCleaned > 0) {
+            alert(`सफलतापूर्वक खाली लाइनें और गैप हटा दिए गए हैं! ✨\n- हटाए गए खाली लाइन्स: ${emptyLinesRemoved}\n- हटाए गए स्पेस टैग: ${spacersRemoved}\n- अपडेट किए गए पेज: ${pagesCleaned}`);
+            renderPreview();
+            saveWorkspaceToLocalStorage();
+        } else {
+            alert("पेज में कोई अतिरिक्त खाली लाइन या गैप नहीं मिला। ✨");
+        }
+    }
+
+    if (removeGapsBtn) {
+        removeGapsBtn.addEventListener('click', removeDocumentGaps);
+    }
+    if (btnRemoveGaps) {
+        btnRemoveGaps.addEventListener('click', removeDocumentGaps);
+    }
+
     // Highly robust PDF print button action
     if (printPdfBtn) {
         printPdfBtn.addEventListener('click', () => {
@@ -3372,7 +3462,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Markdown tool prefix insertion (and wrapping selection if data-suffix is present)
     toolbarButtons.forEach(btn => {
         btn.addEventListener('click', (e) => {
-            if (btn.id === 'toolbar-tray-trigger' || btn.id === 'toolbar-customize-trigger') return; // Skip trigger buttons
+            if (btn.id === 'toolbar-tray-trigger' || btn.id === 'toolbar-customize-trigger' || btn.id === 'btn-remove-gaps') return; // Skip trigger and custom action buttons
             
             if (isCustomizeMode) {
                 // Intercept click in customize mode to move the icon
@@ -6695,9 +6785,13 @@ document.addEventListener('DOMContentLoaded', () => {
             if (oldPage) {
                 oldLayout = oldPage.layout || 'two-column';
             } else {
-                // If it is a dynamically generated new page, inherit the layout of the previous page
-                const prevPage = index > 0 ? pagesData[index] : null;
-                oldLayout = prevPage ? (prevPage.layout || 'two-column') : 'two-column';
+                // If it is a dynamically generated new page, inherit the layout from the closest preceding page
+                for (let k = index; k >= 1; k--) {
+                    if (pagesData[k] && pagesData[k].layout) {
+                        oldLayout = pagesData[k].layout;
+                        break;
+                    }
+                }
             }
             return {
                 type: 'content',
@@ -6985,8 +7079,22 @@ document.addEventListener('DOMContentLoaded', () => {
         // Content Wrapper
         const content = document.createElement('div');
         content.className = 'page-content';
-        if (visualPageNum !== 999 && pagesData[visualPageNum] && pagesData[visualPageNum].layout === 'two-column') {
-            content.classList.add('layout-two-column');
+        if (visualPageNum !== 999) {
+            let layout = 'two-column';
+            if (pagesData[visualPageNum] && pagesData[visualPageNum].layout) {
+                layout = pagesData[visualPageNum].layout;
+            } else {
+                // Inherit layout from the closest previous page if this page is newly/dynamically generated
+                for (let idx = visualPageNum - 1; idx >= 1; idx--) {
+                    if (pagesData[idx] && pagesData[idx].layout) {
+                        layout = pagesData[idx].layout;
+                        break;
+                    }
+                }
+            }
+            if (layout === 'two-column') {
+                content.classList.add('layout-two-column');
+            }
         }
 
         // Footer

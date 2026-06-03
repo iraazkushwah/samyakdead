@@ -4879,6 +4879,18 @@ body.light-mode .personality-description {
     transform: translateY(-1px);
 }
 
+#remove-gaps-btn {
+    border: 1px dashed var(--ui-accent);
+    color: var(--ui-accent);
+    background-color: rgba(16, 185, 129, 0.08);
+    transition: var(--transition-smooth);
+}
+#remove-gaps-btn:hover {
+    background-color: var(--ui-accent);
+    color: white;
+    transform: translateY(-1px);
+}
+
 /* ==========================================================================
    PREMIUM CUSTOM COVER PAGE DECORATIVE OVERRIDES FOR MORPHING THEMES
    ========================================================================== */
