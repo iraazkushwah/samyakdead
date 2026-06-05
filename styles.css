@@ -9082,24 +9082,24 @@ body.light-mode .premium-slider-group input[type="range"]::-webkit-slider-thumb 
 }
 
 .explanation-card {
-    border: 1px solid var(--ui-border, rgba(255, 255, 255, 0.12));
+    border: 1px solid color-mix(in srgb, var(--text-color, #000) 12%, transparent) !important;
     border-radius: 6px;
     overflow: hidden;
-    background: rgba(255, 255, 255, 0.015);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    background: color-mix(in srgb, var(--text-color, #000) 2%, transparent) !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
     display: flex;
     flex-direction: column;
 }
 
 .explanation-header {
-    background: var(--ui-border, rgba(255, 255, 255, 0.08));
-    color: var(--ui-text, #fff);
+    background: color-mix(in srgb, var(--text-color, #000) 6%, transparent) !important;
+    color: var(--text-color, #000) !important;
     font-weight: bold;
     padding: 6px 12px;
     font-size: 11px;
     text-transform: uppercase;
     letter-spacing: 0.8px;
-    border-bottom: 1px solid var(--ui-border, rgba(255, 255, 255, 0.12));
+    border-bottom: 1px solid color-mix(in srgb, var(--text-color, #000) 12%, transparent) !important;
     font-family: 'Poppins', 'Outfit', sans-serif;
     user-select: none;
 }
@@ -9108,7 +9108,7 @@ body.light-mode .premium-slider-group input[type="range"]::-webkit-slider-thumb 
     padding: 10px 12px;
     font-size: 13px;
     line-height: 1.45;
-    color: var(--ui-text-muted, #cbd5e1);
+    color: var(--text-color, #000) !important;
 }
 
 .explanation-content .bullet-item {
@@ -9281,6 +9281,208 @@ body.light-mode .premium-slider-group input[type="range"]::-webkit-slider-thumb 
     word-break: break-all;
     white-space: pre-wrap;
 }
+
+/* ==========================================================================
+   EXPLANATION CARD DESIGN STYLES
+   ========================================================================== */
+
+/* Resets/Hiders for non-classic styles */
+.explanation-wrapper.style-modern-accent .explanation-header,
+.explanation-wrapper.style-editorial-ribbon .explanation-header,
+.explanation-wrapper.style-glass-floating .explanation-header,
+.explanation-wrapper.style-two-tone-split .explanation-header {
+    display: none !important;
+}
+
+/* 1. Modern Accent Style (Left border highlight) */
+.explanation-wrapper.style-modern-accent {
+    margin-top: 8px;
+}
+.explanation-wrapper.style-modern-accent .explanation-qnum {
+    background: var(--ui-accent, #cfac62) !important;
+    color: #000000 !important;
+    padding: 3px 10px !important;
+    border-radius: 20px !important;
+    font-size: 11px !important;
+    font-weight: 800 !important;
+    display: inline-block !important;
+    width: max-content !important;
+    margin-bottom: 6px !important;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+}
+.explanation-wrapper.style-modern-accent .explanation-card {
+    border: none !important;
+    border-left: 4px solid var(--ui-accent, #cfac62) !important;
+    background: color-mix(in srgb, var(--ui-accent, #cfac62) 6%, transparent) !important;
+    border-radius: 0 6px 6px 0 !important;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08) !important;
+}
+.explanation-wrapper.style-modern-accent .explanation-content {
+    padding: 10px 14px !important;
+}
+
+/* 2. Editorial Ribbon Style (Overlapping badge) */
+.explanation-wrapper.style-editorial-ribbon {
+    position: relative;
+    padding-top: 18px;
+    margin-top: 10px;
+}
+.explanation-wrapper.style-editorial-ribbon .explanation-qnum {
+    position: absolute;
+    top: 5px;
+    left: 15px;
+    background: var(--secondary-color, #c5a353) !important;
+    color: #ffffff !important;
+    padding: 4px 12px !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    border-radius: 3px !important;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.25) !important;
+    z-index: 10 !important;
+    font-family: 'Poppins', 'Outfit', sans-serif;
+}
+.explanation-wrapper.style-editorial-ribbon .explanation-card {
+    border: 1px solid var(--ui-border, rgba(255, 255, 255, 0.08)) !important;
+    border-radius: 8px !important;
+    background: rgba(255, 255, 255, 0.01) !important;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1) !important;
+}
+.explanation-wrapper.style-editorial-ribbon .explanation-content {
+    padding: 18px 14px 12px 14px !important; /* Top padding to accommodate ribbon */
+}
+
+/* 3. Glassmorphism Card Style (Tech frosted glass) */
+.explanation-wrapper.style-glass-floating {
+    margin-top: 8px;
+}
+.explanation-wrapper.style-glass-floating .explanation-qnum {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    color: var(--ui-text, #ffffff) !important;
+    padding: 2px 8px !important;
+    border-radius: 4px !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    display: inline-block !important;
+    width: max-content !important;
+    margin-bottom: 6px !important;
+}
+.explanation-wrapper.style-glass-floating .explanation-card {
+    background: rgba(255, 255, 255, 0.03) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.06) !important;
+    border-radius: 10px !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important;
+    position: relative;
+}
+.explanation-wrapper.style-glass-floating .explanation-card::after {
+    content: "📖";
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    font-size: 14px;
+    opacity: 0.4;
+    pointer-events: none;
+}
+.explanation-wrapper.style-glass-floating .explanation-content {
+    padding: 12px 14px !important;
+}
+
+/* 4. Two-Tone Split Column Style */
+.explanation-wrapper.style-two-tone-split {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 15px !important;
+    margin-top: 12px;
+    width: 100%;
+}
+.explanation-wrapper.style-two-tone-split .explanation-qnum {
+    width: 50px !important;
+    flex-shrink: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    padding-top: 8px !important;
+    font-size: 14px !important;
+    font-weight: 800 !important;
+    color: var(--ui-accent, #cfac62) !important;
+    border-right: 1.5px solid var(--ui-border, rgba(255, 255, 255, 0.12)) !important;
+    height: auto !important;
+    margin-bottom: 0 !important;
+    font-family: 'Poppins', 'Outfit', sans-serif;
+}
+.explanation-wrapper.style-two-tone-split .explanation-qnum::after {
+    content: "हल";
+    font-size: 9px;
+    font-weight: 500;
+    color: var(--ui-text-muted, #cbd5e1);
+    margin-top: 4px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+.explanation-wrapper.style-two-tone-split .explanation-card {
+    flex-grow: 1 !important;
+    border: none !important;
+    background: none !important;
+    box-shadow: none !important;
+}
+.explanation-wrapper.style-two-tone-split .explanation-content {
+    padding: 4px 0 !important;
+}
+
+/* Live Style Toggle Button in Preview */
+.explanation-wrapper {
+    position: relative;
+}
+
+.explanation-style-toggle {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--ui-accent, #cfac62) !important;
+    color: #000000 !important;
+    border: 1px solid rgba(0,0,0,0.15) !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    cursor: pointer;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1), transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 105;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+    outline: none;
+    padding: 0;
+}
+
+.explanation-wrapper:hover .explanation-style-toggle {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.explanation-style-toggle:hover {
+    transform: scale(1.15) !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+/* Hide toggle button in print layouts completely */
+@media print {
+    .explanation-style-toggle {
+        display: none !important;
+    }
+}
+
+
 
 
 

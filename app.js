@@ -354,6 +354,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const designSectionShape = document.getElementById('design-section-shape');
     const designTopicIcon = document.getElementById('design-topic-icon');
     const designBulletStyle = document.getElementById('design-bullet-style');
+    const designExplanationStyle = document.getElementById('design-explanation-style');
 
     const designInnerBorder = document.getElementById('design-inner-border');
     const designCornerColor = document.getElementById('design-corner-color');
@@ -486,6 +487,7 @@ document.addEventListener('DOMContentLoaded', () => {
         sectionShape: 'rectangle',
         topicIcon: 'orange-diamond',
         bulletStyle: 'classic',
+        explanationStyle: 'modern-accent',
         
         // Page Spacings Customizations
         pageMarginX: '8',
@@ -1371,7 +1373,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 fileBlocks.forEach(b => {
                     // Strip manual page breaks and column breaks inside sections to let content flow naturally
                     if (b.type !== 'pagebreak' && b.type !== 'columnbreak') {
-                        mergedMarkdownParts.push(b.markdown);
+                        mergedMarkdownParts.push(getBlockMarkdown(b));
                     }
                 });
             }
@@ -3390,6 +3392,13 @@ document.addEventListener('DOMContentLoaded', () => {
             saveWorkspaceToLocalStorage();
         });
     }
+    if (designExplanationStyle) {
+        designExplanationStyle.addEventListener('change', (e) => {
+            customDesignSettings.explanationStyle = e.target.value;
+            renderPreview();
+            saveWorkspaceToLocalStorage();
+        });
+    }
 
     // Group 2: Topic Heading
     designTopicText.addEventListener('input', (e) => {
@@ -5074,6 +5083,19 @@ document.addEventListener('DOMContentLoaded', () => {
         return formatted;
     }
 
+    function getBlockMarkdown(block) {
+        if (!block) return '';
+        if (block.type === 'box-container') {
+            const tag = block.boxType || 'box';
+            return `[${tag}]\n${block.markdown || ''}\n[/box]`;
+        }
+        if (block.type === 'explanation') {
+            const qPart = block.qNum ? ` q="${block.qNum}"` : '';
+            return `[explanation${qPart}]\n${block.markdown || ''}\n[/explanation]`;
+        }
+        return block.markdown !== undefined ? block.markdown : '';
+    }
+
     function parseTextToBlocks(text) {
         // Preserving trailing spaces and newlines to prevent cursor jumping
         text = text || '';
@@ -5606,6 +5628,35 @@ document.addEventListener('DOMContentLoaded', () => {
         if (block.type === 'explanation') {
             const wrapper = document.createElement('div');
             wrapper.className = 'explanation-wrapper';
+            
+            const expStyle = customDesignSettings.explanationStyle || 'modern-accent';
+            wrapper.classList.add(`style-${expStyle}`);
+            
+            // Floating style toggle action button on the preview card
+            const toggleStyleBtn = document.createElement('button');
+            toggleStyleBtn.className = 'explanation-style-toggle';
+            toggleStyleBtn.title = 'Change Explanation Style (व्याख्या कार्ड स्टाइल बदलें)';
+            toggleStyleBtn.innerHTML = '🔄';
+            toggleStyleBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                
+                const styleArray = ['classic-header', 'modern-accent', 'editorial-ribbon', 'glass-floating', 'two-tone-split'];
+                const currentStyle = customDesignSettings.explanationStyle || 'modern-accent';
+                let nextIdx = (styleArray.indexOf(currentStyle) + 1) % styleArray.length;
+                const nextStyle = styleArray[nextIdx];
+                
+                customDesignSettings.explanationStyle = nextStyle;
+                
+                const designExplanationStyle = document.getElementById('design-explanation-style');
+                if (designExplanationStyle) {
+                    designExplanationStyle.value = nextStyle;
+                }
+                
+                renderPreview();
+                saveWorkspaceToLocalStorage();
+            });
+            wrapper.appendChild(toggleStyleBtn);
             
             if (block.qNum) {
                 const qNumEl = document.createElement('div');
@@ -6262,7 +6313,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     innerBlocks.forEach(inner => {
                         innerHeight += estimateBlockHeight(inner, fontSize, lineSpacing, isTwoCol);
                     });
-                    const extraHeight = (block.qNum ? 20 : 0) + 28 + 16;
+                    const expStyle = customDesignSettings.explanationStyle || 'modern-accent';
+                    let extraHeight = 16; // base padding/margins
+                    if (expStyle === 'classic-header') {
+                        extraHeight += (block.qNum ? 20 : 0) + 28;
+                    } else if (expStyle === 'modern-accent' || expStyle === 'glass-floating') {
+                        extraHeight += (block.qNum ? 20 : 0);
+                    } else if (expStyle === 'editorial-ribbon') {
+                        extraHeight += 25; // padding for ribbon
+                    } else if (expStyle === 'two-tone-split') {
+                        extraHeight += 0; // split column places question number to the side
+                    }
                     return innerHeight + extraHeight;
                 }
             case 'section':
@@ -6420,7 +6481,7 @@ document.addEventListener('DOMContentLoaded', () => {
         for (let i = 0; i < blocks.length; i++) {
             const block = blocks[i];
             if (block.type === 'pagebreak') {
-                currentPageMarkdownLines.push(block.markdown);
+                currentPageMarkdownLines.push(getBlockMarkdown(block));
                 pageContentMarkdownArray.push(currentPageMarkdownLines.join('\n'));
                 currentPageMarkdownLines = [];
                 
@@ -6469,8 +6530,13 @@ document.addEventListener('DOMContentLoaded', () => {
             // Check if page overflows
             let isOverflow = false;
             if (isTwoCol) {
-                // In two column layouts, always check actual scrollWidth to prevent hidden text
-                isOverflow = currentPageStruct.contentElement.scrollWidth > (currentPageStruct.contentElement.clientWidth + 2);
+                // In two column layouts, check actual scrollWidth with a 15px zoom-rounding-tolerance
+                const contentEl = currentPageStruct.contentElement;
+                isOverflow = contentEl.scrollWidth > (contentEl.clientWidth + 15);
+                if (!isOverflow) {
+                    // Double check if any child's right edge overflows column 2 (virtual column 3 overflow)
+                    isOverflow = Array.from(contentEl.children).some(child => child.offsetLeft + child.offsetWidth > contentEl.clientWidth + 15);
+                }
             } else {
                 // In single column layouts, measure content height by the bottom of the last child
                 const children = currentPageStruct.contentElement.children;
@@ -6513,7 +6579,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         let testMarkdown = words.slice(0, wordCount).join(separator);
                         updateNodeContent(node, block.type, testMarkdown);
                         if (isTwoCol) {
-                            return currentPageStruct.contentElement.scrollWidth <= (currentPageStruct.contentElement.clientWidth + 2);
+                            const contentEl = currentPageStruct.contentElement;
+                            const hasHScroll = contentEl.scrollWidth > (contentEl.clientWidth + 15);
+                            if (hasHScroll) return false;
+                            return !Array.from(contentEl.children).some(child => child.offsetLeft + child.offsetWidth > contentEl.clientWidth + 15);
                         } else {
                             const children = currentPageStruct.contentElement.children;
                             let contentHeight = 0;
@@ -6584,7 +6653,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             }
 
                             // Save current page
-                            currentPageMarkdownLines.push(block.markdown);
+                            currentPageMarkdownLines.push(getBlockMarkdown(block));
                             pageContentMarkdownArray.push(currentPageMarkdownLines.join('\n'));
                             currentPageMarkdownLines = [];
 
@@ -6671,7 +6740,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Only push to currentPageMarkdownLines if we didn't already push and clear it in splitSuccess
             if (currentPageStruct.contentElement.contains(node) || (activeBulletListElement && activeBulletListElement.contains(node))) {
-                currentPageMarkdownLines.push(block.markdown);
+                currentPageMarkdownLines.push(getBlockMarkdown(block));
             }
         }
 
@@ -6754,7 +6823,10 @@ document.addEventListener('DOMContentLoaded', () => {
             let isOverflow = false;
             
             if (isTwoCol) {
-                isOverflow = contentEl.scrollWidth > (contentEl.clientWidth + 2);
+                isOverflow = contentEl.scrollWidth > (contentEl.clientWidth + 15);
+                if (!isOverflow) {
+                    isOverflow = Array.from(contentEl.children).some(child => child.offsetLeft + child.offsetWidth > contentEl.clientWidth + 15);
+                }
             } else {
                 // In single column layouts, measure content height by the bottom of the last child
                 const children = contentEl.children;
@@ -7225,7 +7297,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 mergedMarkdownParts.push(sec.nameOrig);
             }
             sec.blocks.forEach(b => {
-                mergedMarkdownParts.push(b.markdown);
+                mergedMarkdownParts.push(getBlockMarkdown(b));
             });
             // Spacer between sections
             if (sec.blocks.length > 0 || (sec.nameNorm !== '__intro__' && sec.nameOrig)) {
@@ -7658,6 +7730,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (designBulletStyle) {
             designBulletStyle.value = customDesignSettings.bulletStyle || 'classic';
         }
+        if (designExplanationStyle) {
+            designExplanationStyle.value = customDesignSettings.explanationStyle || 'modern-accent';
+        }
 
         if (headerLogoPreview && headerLogoPreviewGroup) {
             if (customDesignSettings.headerLogoSrc) {
@@ -7722,6 +7797,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 if (customDesignSettings.bulletStyle === undefined) {
                     customDesignSettings.bulletStyle = 'classic';
+                }
+                if (customDesignSettings.explanationStyle === undefined) {
+                    customDesignSettings.explanationStyle = 'modern-accent';
                 }
                 if (customDesignSettings.pageMarginX === undefined) {
                     customDesignSettings.pageMarginX = '8';
@@ -8240,6 +8318,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (designBulletStyle) {
             designBulletStyle.value = 'classic';
         }
+        customDesignSettings.explanationStyle = 'modern-accent';
+        if (designExplanationStyle) {
+            designExplanationStyle.value = 'modern-accent';
+        }
 
         designBorderThick.value = '2';
         designBorderThickVal.textContent = '2px';
@@ -8669,7 +8751,7 @@ document.addEventListener('DOMContentLoaded', () => {
         blocks.splice(insertIndex, 0, draggedBlock);
         
         // 4. Join back to single markdown string
-        const newMarkdown = blocks.map(b => b.markdown).join('\n');
+        const newMarkdown = blocks.map(b => getBlockMarkdown(b)).join('\n');
         
         // 5. Update pagesData content pages with this unified markdown, preserving all layouts
         const cover = pagesData[0];
