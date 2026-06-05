@@ -63,8 +63,6 @@
                             <line x1="12" y1="3" x2="12" y2="15" />
                         </svg>
                     </button>
-                    <button id="validate-integrity-btn" class="header-action-btn" title="Verify & Fix Layout (लेआउट दुरुस्त करें)">🔍</button>
-                    <button id="compile-magazines-btn" class="header-action-btn" title="Compile Monthly Magazine">🛠️</button>
                     <input type="file" id="import-project-file" accept=".raaz" style="display: none;">
                 </div>
                 <div class="author-credit" id="author-name-btn" title="View Raaz's Profile">
@@ -811,8 +809,8 @@
                 <!-- Speed Dial Sub-buttons -->
                 <div class="fab-menu-items">
                     <button id="print-pdf-btn" class="fab-sub-btn btn-primary" title="Save as PDF">🖨️</button>
+                    <button id="check-visibility-btn" class="fab-sub-btn btn-secondary" title="Check Text Visibility: जांचें कि कोई टेक्स्ट छिपा या गायब तो नहीं है">🔍</button>
                     <button id="smart-shrink-btn" class="fab-sub-btn btn-secondary" title="Smart Shrink: Auto-shrink spacing/size slightly to fit overflow content onto previous pages">🪄</button>
-                    <button id="smart-space-btn" class="fab-sub-btn btn-secondary" title="Smart Space: Automatically clean up extra spaces and blank lines across all pages">🧹</button>
                     <button id="remove-gaps-btn" class="fab-sub-btn btn-secondary" title="Remove Gaps: Remove all blank lines and spacer tags from pages to make the layout tight">🗜️</button>
                     <button id="clear-all-btn" class="fab-sub-btn btn-clear" title="Clear Content: Clear all content and start fresh">🗑️</button>
                 </div>
@@ -1097,6 +1095,22 @@
             </div>
         </div>
     </div>
+    <!-- Text Visibility / Layout Integrity Modal -->
+    <div id="integrity-modal" class="modal-overlay">
+        <div class="modal-content" style="width: 600px; max-width: 95%;">
+            <div class="modal-header">
+                <h3>🔍 पाठ दृश्यता जांच (Text Visibility Audit)</h3>
+                <button id="close-integrity-modal-btn" class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body" id="integrity-modal-body" style="max-height: 450px; overflow-y: auto; font-family: var(--font-ui); font-size: 13px; display: flex; flex-direction: column; gap: 16px; line-height: 1.5; color: #fff; text-align: left;">
+                <!-- Audit content dynamically inserted here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="close-integrity-btn" class="btn btn-secondary" style="background: rgba(255, 255, 255, 0.08); color: #fff; border: 1px solid rgba(255, 255, 255, 0.15);">Close</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Shortcuts & Formatting Help Modal -->
     <div id="help-modal" class="modal-overlay">
         <div class="modal-content" style="width: 580px; max-width: 95%;">

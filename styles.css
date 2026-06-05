@@ -1812,6 +1812,7 @@ body.light-mode .header-stats {
 }
 
 .page-content {
+    position: relative;
     flex-grow: 1;
     display: flex;
     flex-direction: column;
@@ -4867,17 +4868,6 @@ body.light-mode .personality-description {
     transform: translateY(-1px);
 }
 
-#smart-space-btn {
-    border: 1px dashed var(--ui-accent);
-    color: var(--ui-accent);
-    background-color: rgba(99, 102, 241, 0.08);
-    transition: var(--transition-smooth);
-}
-#smart-space-btn:hover {
-    background-color: var(--ui-accent);
-    color: white;
-    transform: translateY(-1px);
-}
 
 #remove-gaps-btn {
     border: 1px dashed var(--ui-accent);
@@ -9033,6 +9023,265 @@ body.light-mode .premium-slider-group input[type="range"]::-webkit-slider-thumb 
 .bullet-item.no-bullet-icon {
     padding-left: 0 !important;
 }
+
+/* --- Test Series Custom Components (Bilingual MCQ & Explanations) --- */
+
+/* Bilingual MCQ Container */
+.bilingual-mcq-container {
+    display: flex;
+    gap: 20px;
+    width: 100%;
+    margin-bottom: 14px;
+    box-sizing: border-box;
+    align-items: stretch;
+}
+
+.bilingual-mcq-col {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.bilingual-mcq-hi {
+    border-right: 1px dashed var(--ui-border, rgba(255, 255, 255, 0.15));
+    padding-right: 10px;
+}
+
+.bilingual-mcq-en {
+    padding-left: 10px;
+}
+
+/* Ensure paragraph margins inside bilingual MCQ columns are clean */
+.bilingual-mcq-col p, 
+.bilingual-mcq-col .body-text {
+    margin: 2px 0;
+    line-height: 1.4;
+}
+
+.bilingual-mcq-col .bullet-list {
+    margin-top: 4px;
+}
+
+/* Detailed Solution/Explanation Card */
+.explanation-wrapper {
+    width: 100%;
+    margin-bottom: 12px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+}
+
+.explanation-qnum {
+    font-weight: bold;
+    font-size: 14px;
+    color: var(--ui-accent, #cfac62);
+    margin-bottom: 4px;
+    font-family: 'Poppins', 'Outfit', sans-serif;
+}
+
+.explanation-card {
+    border: 1px solid var(--ui-border, rgba(255, 255, 255, 0.12));
+    border-radius: 6px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.015);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+}
+
+.explanation-header {
+    background: var(--ui-border, rgba(255, 255, 255, 0.08));
+    color: var(--ui-text, #fff);
+    font-weight: bold;
+    padding: 6px 12px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    border-bottom: 1px solid var(--ui-border, rgba(255, 255, 255, 0.12));
+    font-family: 'Poppins', 'Outfit', sans-serif;
+    user-select: none;
+}
+
+.explanation-content {
+    padding: 10px 12px;
+    font-size: 13px;
+    line-height: 1.45;
+    color: var(--ui-text-muted, #cbd5e1);
+}
+
+.explanation-content .bullet-item {
+    margin: 4px 0;
+}
+
+.explanation-content p {
+    margin: 4px 0;
+}
+
+/* --- Text Visibility Audit Styles --- */
+
+.audit-results-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+}
+
+.audit-success-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 30px 20px;
+    background: rgba(46, 125, 50, 0.12) !important;
+    border: 1px solid rgba(46, 125, 50, 0.3) !important;
+    border-radius: 8px;
+    gap: 10px;
+}
+
+.audit-success-box .success-icon {
+    font-size: 40px;
+    animation: success-bounce 1s infinite alternate;
+}
+
+@keyframes success-bounce {
+    0% { transform: translateY(0) scale(1); }
+    100% { transform: translateY(-5px) scale(1.05); }
+}
+
+.audit-success-box h4 {
+    margin: 0;
+    font-size: 16px;
+    color: #81c784;
+}
+
+.audit-success-box p {
+    margin: 0;
+    color: #e8f5e9;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.audit-issues-header {
+    background: rgba(229, 57, 53, 0.08) !important;
+    border-left: 4px solid #ef5350 !important;
+    padding: 10px 14px;
+    border-radius: 4px;
+}
+
+.audit-issues-header h4 {
+    margin: 0 0 4px 0;
+    color: #ef5350;
+    font-size: 14px;
+}
+
+.audit-issues-header p {
+    margin: 0;
+    font-size: 12px;
+    color: #ffcdd2;
+}
+
+.audit-cards-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.audit-card {
+    background: rgba(255, 255, 255, 0.02) !important;
+    border: 1px solid var(--ui-border, rgba(255, 255, 255, 0.12)) !important;
+    border-radius: 6px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.audit-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+.audit-card.severity-completely-hidden {
+    border-left: 4px solid #ef5350 !important;
+}
+
+.audit-card.severity-partially-clipped {
+    border-left: 4px solid #ff9800 !important;
+}
+
+.audit-card.severity-unrendered {
+    border-left: 4px solid #ab47bc !important;
+}
+
+.audit-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.audit-page-tag {
+    font-weight: 700;
+    font-size: 12px;
+    color: var(--ui-accent, #cfac62);
+    font-family: 'Poppins', 'Outfit', sans-serif;
+}
+
+.audit-badge {
+    font-size: 10px;
+    font-weight: bold;
+    padding: 2px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.audit-badge.badge-danger {
+    background: #c62828 !important;
+    color: #ffffff !important;
+}
+
+.audit-badge.badge-warning {
+    background: #ef6c00 !important;
+    color: #ffffff !important;
+}
+
+.audit-badge.badge-missing {
+    background: #6a1b9a !important;
+    color: #ffffff !important;
+}
+
+.audit-card-meta {
+    display: flex;
+    gap: 15px;
+    font-size: 11px;
+    color: var(--ui-text-muted, #cbd5e1);
+}
+
+.audit-card-meta span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.audit-card-body {
+    background: rgba(0, 0, 0, 0.2) !important;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+.audit-card-body code {
+    font-family: monospace;
+    font-size: 12px;
+    color: #e0e0e0;
+    word-break: break-all;
+    white-space: pre-wrap;
+}
+
 
 
 

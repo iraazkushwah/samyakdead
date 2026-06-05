@@ -86,8 +86,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchStatus = document.getElementById('search-status');
     
     // Compiler DOM Elements
-    const compileMagazinesBtn = document.getElementById('compile-magazines-btn');
-    const validateIntegrityBtn = document.getElementById('validate-integrity-btn');
     const compilerModal = document.getElementById('compiler-modal');
     const closeCompilerModalBtn = document.getElementById('close-compiler-modal-btn');
     const cancelCompilerBtn = document.getElementById('cancel-compiler-btn');
@@ -141,7 +139,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const clearAllBtn = document.getElementById('clear-all-btn');
     const printPdfBtn = document.getElementById('print-pdf-btn');
     const smartShrinkBtn = document.getElementById('smart-shrink-btn');
-    const smartSpaceBtn = document.getElementById('smart-space-btn');
     const removeGapsBtn = document.getElementById('remove-gaps-btn');
     const btnRemoveGaps = document.getElementById('btn-remove-gaps');
     const loadingOverlay = document.getElementById('loading-overlay');
@@ -1269,284 +1266,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Layout Integrity & Auto-Fixer Event Listener
-    if (validateIntegrityBtn) {
-        validateIntegrityBtn.addEventListener('click', () => {
-            // Helper function: Scan A4 page DOM geometry to detect exact overflowing blocks and text snippets
-            const scanOverflows = () => {
-                const pages = pagesContainer.querySelectorAll('.a4-page:not(.cover-page)');
-                let details = [];
-                
-                pages.forEach(page => {
-                    const pageNum = page.getAttribute('data-page');
-                    const contentEl = page.querySelector('.page-content');
-                    if (!contentEl) return;
-                    
-                    const isTwoCol = contentEl.classList.contains('layout-two-column');
-                    const children = contentEl.children;
-                    let pageOverflows = [];
-                    
-                    for (let j = 0; j < children.length; j++) {
-                        const el = children[j];
-                        let isElOverflow = false;
-                        
-                        if (isTwoCol) {
-                            // In 2-column mode, horizontal overflow (beyond the second column)
-                            const relativeLeft = el.offsetLeft - contentEl.offsetLeft;
-                            isElOverflow = (relativeLeft + el.clientWidth) > (contentEl.clientWidth + 5);
-                        } else {
-                            // In 1-column mode, vertical overflow (beyond the page height)
-                            const relativeTop = el.offsetTop - contentEl.offsetTop;
-                            isElOverflow = (relativeTop + el.clientHeight) > (contentEl.clientHeight + 5);
-                        }
-                        
-                        if (isElOverflow) {
-                            let snippet = "";
-                            if (el.classList.contains('markdown-table')) {
-                                const rowsCount = el.querySelectorAll('tr').length;
-                                snippet = `सारणी (Table - ${rowsCount} पंक्तियाँ)`;
-                            } else {
-                                const txt = el.textContent.trim().replace(/\s+/g, ' ');
-                                snippet = txt.length > 35 ? txt.substring(0, 35) + '...' : txt;
-                            }
-                            if (snippet) {
-                                pageOverflows.push(snippet);
-                            }
-                        }
-                    }
-                    
-                    if (pageOverflows.length > 0) {
-                        details.push({
-                            page: pageNum,
-                            snippets: pageOverflows
-                        });
-                    }
-                });
-                return details;
-            };
 
-            // 1. Scan for overflows BEFORE applying fixes
-            const initialOverflows = scanOverflows();
 
-            // 2. Enable smart spacing / tight compaction mode
-            isTightCompaction = true;
-            localStorage.setItem('samyak-tight-compaction', 'true');
-            document.body.classList.add('tight-compaction');
-            if (tightCompactionToggle) {
-                tightCompactionToggle.checked = true;
-            }
 
-            // 3. Run strict re-pagination pass to auto-flow overflowing words to next pages
-            renderPreview(true);
-            saveWorkspaceToLocalStorage();
-
-            // 4. Scan again AFTER fixing
-            const remainingOverflows = scanOverflows();
-            
-            // 5. Show a highly detailed, luxurious layout report modal to the user
-            showIntegrityReportModal(initialOverflows, remainingOverflows);
-        });
-    }
-
-    function showIntegrityReportModal(initialOverflows, remainingOverflows) {
-        const oldNotification = document.getElementById('integrity-notification');
-        if (oldNotification) oldNotification.remove();
-        
-        const notification = document.createElement('div');
-        notification.id = 'integrity-notification';
-        
-        Object.assign(notification.style, {
-            position: 'fixed',
-            top: '20px',
-            left: '50%',
-            transform: 'translateX(-50%) translateY(-50px)',
-            opacity: '0',
-            background: 'rgba(15, 23, 42, 0.92)',
-            backdropFilter: 'blur(20px)',
-            webkitBackdropFilter: 'blur(20px)',
-            borderRadius: '12px',
-            padding: '18px 24px',
-            boxShadow: '0 20px 50px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
-            zIndex: '9999',
-            fontFamily: 'var(--font-body), sans-serif',
-            fontSize: '13.5px',
-            color: '#fff',
-            display: 'flex',
-            alignItems: 'flex-start',
-            gap: '14px',
-            transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
-            minWidth: '380px',
-            maxWidth: '90vw',
-            lineHeight: '1.5'
-        });
-        
-        const hadOverflows = initialOverflows.length > 0;
-        const isFullyFixed = remainingOverflows.length === 0;
-        
-        if (hadOverflows && isFullyFixed) {
-            // Overflows existed but were successfully auto-fixed and pushed to subsequent pages
-            notification.style.borderColor = 'rgba(197, 160, 89, 0.6)'; // Gold Accent
-            notification.style.boxShadow = '0 10px 30px rgba(197, 160, 89, 0.2), 0 20px 50px rgba(0, 0, 0, 0.6)';
-            
-            let reportHTML = `<div style="flex: 1;">
-                <strong style="display: block; color: #e2b857; font-size: 15px; margin-bottom: 6px;">स्मार्ट स्पेसिंग एवं लेआउट सफलतापूर्वक दुरुस्त!</strong>`;
-            
-            initialOverflows.forEach(item => {
-                reportHTML += `<div style="margin-bottom: 6px; padding-left: 6px; border-left: 2px solid #e2b857; font-size: 12.5px; color: #e2e8f0;">
-                    • <strong>पन्ना (Page) ${item.page}:</strong> पर ओवरफ़्लो हो रहा टेक्स्ट <code style="background: rgba(255,255,255,0.06); padding: 2px 4px; border-radius: 4px; color: #cbd5e1; font-family: monospace;">"${item.snippets.join(', ')}"</code> को सफलतापूर्वक अगले पन्ने पर खिसका दिया गया है।
-                </div>`;
-            });
-            
-            reportHTML += `<span style="color: #4ade80; font-size: 12px; font-weight: 600; display: block; margin-top: 4px;">✅ सभी खाली जगह हटा दी गई हैं और पूरे डॉक्यूमेंट का टेक्स्ट 100% दिखाई दे रहा है।</span></div>`;
-            
-            notification.innerHTML = `<span style="font-size: 24px; color: #e2b857; margin-top: -2px;">⚜️</span> ${reportHTML}`;
-            
-        } else if (!hadOverflows && isFullyFixed) {
-            // No overflows were detected initially, document is completely clean
-            notification.style.borderColor = 'rgba(197, 160, 89, 0.5)'; // Gold Accent
-            notification.style.boxShadow = '0 10px 30px rgba(197, 160, 89, 0.15), 0 20px 50px rgba(0, 0, 0, 0.6)';
-            notification.innerHTML = `
-                <span style="font-size: 24px; color: #e2b857;">⚜️</span>
-                <div style="flex: 1;">
-                    <strong style="display: block; color: #e2b857; font-size: 15px; margin-bottom: 4px;">स्मार्ट स्पेसिंग एवं लेआउट बिल्कुल सही है!</strong>
-                    <span style="color: #e2e8f0; font-size: 12.5px;">डॉक्यूमेंट में कोई भी शब्द छिपा हुआ नहीं है। सभी खाली जगह हटा दी गई हैं और विषय-वस्तु को 2 कॉलमों में पूरी तरह विभाजित कर दिया गया है।</span>
-                </div>
-            `;
-        } else {
-            // Exceptional overflow (e.g. a single block is so massive that it doesn't fit even on an empty page)
-            notification.style.borderColor = 'rgba(239, 68, 68, 0.5)'; // Crimson Accent
-            notification.style.boxShadow = '0 10px 30px rgba(239, 68, 68, 0.15), 0 20px 50px rgba(0, 0, 0, 0.6)';
-            
-            let reportHTML = `<div style="flex: 1;">
-                <strong style="display: block; color: #f87171; font-size: 15px; margin-bottom: 6px;">असाधारण ओवरफ़्लो मिला!</strong>`;
-            
-            remainingOverflows.forEach(item => {
-                reportHTML += `<div style="margin-bottom: 6px; padding-left: 6px; border-left: 2px solid #f87171; font-size: 12.5px; color: #e2e8f0;">
-                    • <strong>पन्ना (Page) ${item.page}:</strong> पर ब्लॉक <code style="background: rgba(255,255,255,0.06); padding: 2px 4px; border-radius: 4px; color: #cbd5e1; font-family: monospace;">"${item.snippets.join(', ')}"</code> पन्ने की सीमा से बहुत बड़ा है और विभाजित नहीं हो पा रहा।
-                </div>`;
-            });
-            
-            reportHTML += `<span style="color: #cbd5e1; font-size: 12px; display: block; margin-top: 4px;">💡 कृपया इस ब्लॉक को मैन्युअल रूप से छोटा करें या इस पन्ने का फ़ॉन्ट साइज़ थोड़ा छोटा करें।</span></div>`;
-            
-            notification.innerHTML = `<span style="font-size: 24px; color: #f87171;">⚠️</span> ${reportHTML}`;
-        }
-        
-        document.body.appendChild(notification);
-        
-        requestAnimationFrame(() => {
-            notification.style.transform = 'translateX(-50%) translateY(0)';
-            notification.style.opacity = '1';
-        });
-        
-        // Detailed reports are slightly larger, so keep them visible for 7 seconds
-        setTimeout(() => {
-            notification.style.transform = 'translateX(-50%) translateY(-50px)';
-            notification.style.opacity = '0';
-            setTimeout(() => notification.remove(), 400);
-        }, 7500);
-    }
-
-    // Magazine Compiler Modal Event Listeners
-    if (compileMagazinesBtn && compilerModal) {
-        compileMagazinesBtn.addEventListener('click', () => {
-            // Reset files
-            compilerFile1.value = '';
-            compilerFile2.value = '';
-            compilerFile3.value = '';
-            compileConfirmBtn.disabled = true;
-
-            // Pre-populate metadata fields from current cover page
-            if (pagesData[0]) {
-                compiledTitleInput.value = pagesData[0].title || 'Samyak';
-                compiledTaglineInput.value = pagesData[0].tagline || 'कोचिंग नहीं क्रांति';
-                compiledSubtitleInput.value = pagesData[0].subtitle || 'राजस्थान समसामयिकी';
-            }
-
-            // Show compiler modal
-            compilerModal.classList.add('active');
-        });
-
-        const hideCompilerModal = () => {
-            compilerModal.classList.remove('active');
-        };
-        closeCompilerModalBtn.addEventListener('click', hideCompilerModal);
-        cancelCompilerBtn.addEventListener('click', hideCompilerModal);
-
-        compilerModal.addEventListener('click', (e) => {
-            if (e.target === compilerModal) {
-                hideCompilerModal();
-            }
-        });
-
-        // Function to validate files (must have at least File 1 and File 2)
-        const validateCompilerFiles = () => {
-            const file1 = compilerFile1.files[0];
-            const file2 = compilerFile2.files[0];
-            compileConfirmBtn.disabled = !(file1 && file2);
-        };
-
-        compilerFile1.addEventListener('change', validateCompilerFiles);
-        compilerFile2.addEventListener('change', validateCompilerFiles);
-        compilerFile3.addEventListener('change', validateCompilerFiles);
-
-        // Merge confirm action
-        compileConfirmBtn.addEventListener('click', () => {
-            const file1 = compilerFile1.files[0];
-            const file2 = compilerFile2.files[0];
-            const file3 = compilerFile3.files[0];
-
-            if (!file1 || !file2) {
-                alert('Please select both Part 1 and Part 2 files to compile!');
-                return;
-            }
-
-            // Read all files asynchronously
-            const readState = (file) => {
-                return new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        try {
-                            const state = JSON.parse(e.target.result);
-                            resolve(state);
-                        } catch (err) {
-                            reject(new Error(`Error reading file "${file.name}": ${err.message}`));
-                        }
-                    };
-                    reader.onerror = () => reject(new Error(`Issue loading file "${file.name}".`));
-                    reader.readAsText(file);
-                });
-            };
-
-            const promises = [readState(file1), readState(file2)];
-            if (file3) {
-                promises.push(readState(file3));
-            }
-
-            compileConfirmBtn.disabled = true;
-            compileConfirmBtn.textContent = 'Compiling...';
-
-            Promise.all(promises)
-                .then((fileStates) => {
-                    const newMeta = {
-                        title: compiledTitleInput.value.trim() || 'Samyak',
-                        tagline: compiledTaglineInput.value.trim() || 'कोचिंग नहीं क्रांति',
-                        subtitle: compiledSubtitleInput.value.trim() || 'राजस्थान समसामयिकी'
-                    };
-
-                    compileAndMergeMagazines(fileStates, newMeta);
-                    hideCompilerModal();
-                    alert('Magazines have been smart-merged and the monthly edition is loaded successfully!');
-                })
-                .catch((err) => {
-                    alert(err.message);
-                })
-                .finally(() => {
-                    compileConfirmBtn.disabled = false;
-                    compileConfirmBtn.textContent = 'Compile & Merge';
-                });
-        });
-    }
 
     // Shortcuts & Formatting Help Modal Event Listeners
     if (btnHelpShortcuts && helpModal) {
@@ -3113,72 +2835,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Smart Space (Blank Line & Space Cleaner) Click Listener
-    if (smartSpaceBtn) {
-        smartSpaceBtn.addEventListener('click', () => {
-            // First, save the current editor text if active page is a content page
-            if (activePageIndex > 0 && activePageIndex < pagesData.length) {
-                pagesData[activePageIndex].text = pageContentInput.value;
-            }
 
-            let spacesCleaned = 0;
-            let doubleNewlinesFixed = 0;
-            let totalFixedCount = 0;
-
-            // Iterate over all content pages and clean their text content
-            for (let idx = 1; idx < pagesData.length; idx++) {
-                if (pagesData[idx] && pagesData[idx].type === 'content' && pagesData[idx].text) {
-                    const originalText = pagesData[idx].text;
-                    let cleanedText = originalText;
-
-                    // 1. Remove trailing spaces or tabs from all lines
-                    cleanedText = cleanedText.replace(/[ \t]+$/gm, '');
-
-                    // 2. Reduce 3 or more consecutive newlines to exactly 2 newlines (standard double newline spacing)
-                    const consecutiveNewlinesRegex = /\n{3,}/g;
-                    const newlineMatches = cleanedText.match(consecutiveNewlinesRegex);
-                    if (newlineMatches) {
-                        doubleNewlinesFixed += newlineMatches.length;
-                    }
-                    cleanedText = cleanedText.replace(consecutiveNewlinesRegex, '\n\n');
-
-                    // 3. Trim leading/trailing blank lines/spaces per page to guarantee clean starts/ends
-                    cleanedText = cleanedText.trim();
-
-                    // 4. Clean consecutive horizontal spaces between words (2 or more spaces) to a single space
-                    // We use [^\n ] to ensure it is bounded by non-spaces, preserving starting indent spaces!
-                    const multiSpaceRegex = /([^\n ]) {2,}([^\n ])/g;
-                    const spaceMatches = cleanedText.match(multiSpaceRegex);
-                    if (spaceMatches) {
-                        spacesCleaned += spaceMatches.length;
-                    }
-                    cleanedText = cleanedText.replace(multiSpaceRegex, '$1 $2');
-
-                    // Update pagesData
-                    if (cleanedText !== originalText) {
-                        pagesData[idx].text = cleanedText;
-                        totalFixedCount++;
-                    }
-                }
-            }
-
-            if (totalFixedCount > 0) {
-                // If the active page was updated, update the textarea value instantly
-                if (activePageIndex > 0 && activePageIndex < pagesData.length) {
-                    pageContentInput.value = pagesData[activePageIndex].text;
-                }
-
-                // Show visual feedback or toast
-                alert(`Smart Space Completed successfully! ✨\n- Cleaned up double spaces in ${spacesCleaned} places.\n- Normalized excessive blank lines in ${doubleNewlinesFixed} places.\n- Optimized ${totalFixedCount} page layout streams.`);
-                
-                // Re-render and save
-                renderPreview();
-                saveWorkspaceToLocalStorage();
-            } else {
-                alert("Your document layout is already perfectly optimized! No extra blank lines or redundant spaces were found. ✨");
-            }
-        });
-    }
 
     // Remove Gaps (Blank Lines & Spacer Tags) Listener
     function removeDocumentGaps() {
@@ -5498,6 +5155,81 @@ document.addEventListener('DOMContentLoaded', () => {
                 continue;
             }
 
+            // 0.22 BILINGUAL MCQ BLOCK DETECTOR
+            const bilingualMCQStartMatch = cleanBoxLine.match(/^\[bilingual-mcq(?:\s+q=["']?(\d+)["']?)?\]$/i);
+            if (bilingualMCQStartMatch) {
+                const qNum = bilingualMCQStartMatch[1] || null;
+                let mcqLines = [];
+                i++;
+                while (i < lines.length) {
+                    const nextLine = lines[i];
+                    const nextTrimmed = nextLine.trim();
+                    const nextCleanBoxLine = nextTrimmed.replace(bulletRegex, '').trim();
+                    if (nextCleanBoxLine === '[/bilingual-mcq]') {
+                        break;
+                    }
+                    mcqLines.push(nextLine);
+                    i++;
+                }
+                const fullInner = mcqLines.join('\n');
+                let hiMarkdown = "";
+                let enMarkdown = "";
+                const hiIndex = fullInner.indexOf('{hi}');
+                const enIndex = fullInner.indexOf('{en}');
+                if (hiIndex !== -1 && enIndex !== -1) {
+                    if (hiIndex < enIndex) {
+                        hiMarkdown = fullInner.substring(hiIndex + 4, enIndex).trim();
+                        enMarkdown = fullInner.substring(enIndex + 4).trim();
+                    } else {
+                        enMarkdown = fullInner.substring(enIndex + 4, hiIndex).trim();
+                        hiMarkdown = fullInner.substring(hiIndex + 4).trim();
+                    }
+                } else if (hiIndex !== -1) {
+                    hiMarkdown = fullInner.substring(hiIndex + 4).trim();
+                } else if (enIndex !== -1) {
+                    enMarkdown = fullInner.substring(enIndex + 4).trim();
+                } else {
+                    hiMarkdown = fullInner.trim();
+                }
+                blocks.push({
+                    type: 'bilingual-mcq',
+                    qNum: qNum,
+                    hiMarkdown: hiMarkdown,
+                    enMarkdown: enMarkdown,
+                    markdown: line + '\n' + mcqLines.join('\n') + '\n' + (lines[i] || ''),
+                    startLine: start,
+                    endLine: i
+                });
+                continue;
+            }
+
+            // 0.24 EXPLANATION BLOCK DETECTOR
+            const explanationStartMatch = cleanBoxLine.match(/^\[explanation(?:\s+q=["']?(\d+)["']?)?\]$/i);
+            if (explanationStartMatch) {
+                const qNum = explanationStartMatch[1] || null;
+                let expLines = [];
+                i++;
+                while (i < lines.length) {
+                    const nextLine = lines[i];
+                    const nextTrimmed = nextLine.trim();
+                    const nextCleanBoxLine = nextTrimmed.replace(bulletRegex, '').trim();
+                    if (nextCleanBoxLine === '[/explanation]') {
+                        break;
+                    }
+                    expLines.push(nextLine);
+                    i++;
+                }
+                blocks.push({
+                    type: 'explanation',
+                    qNum: qNum,
+                    markdown: expLines.join('\n'),
+                    startLine: start,
+                    endLine: i
+                });
+                continue;
+            }
+
+
             // Match '[chapter <number>] <title> | <subtitle>'
             const chapterMatch = trimmed.match(/^\[chapter(?:\s+(\d+))?\]\s*([^|]*?)(?:\s*\|\s*(.*))?$/i);
             if (chapterMatch) {
@@ -5844,6 +5576,63 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             
             return containerEl;
+        }
+
+        if (block.type === 'bilingual-mcq') {
+            const container = document.createElement('div');
+            container.className = 'bilingual-mcq-container';
+            
+            const hiCol = document.createElement('div');
+            hiCol.className = 'bilingual-mcq-col bilingual-mcq-hi';
+            const hiBlocks = parseTextToBlocks(block.hiMarkdown);
+            hiBlocks.forEach(b => {
+                const node = renderBlockToNode(b);
+                if (node) hiCol.appendChild(node);
+            });
+            
+            const enCol = document.createElement('div');
+            enCol.className = 'bilingual-mcq-col bilingual-mcq-en';
+            const enBlocks = parseTextToBlocks(block.enMarkdown);
+            enBlocks.forEach(b => {
+                const node = renderBlockToNode(b);
+                if (node) enCol.appendChild(node);
+            });
+            
+            container.appendChild(hiCol);
+            container.appendChild(enCol);
+            return container;
+        }
+
+        if (block.type === 'explanation') {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'explanation-wrapper';
+            
+            if (block.qNum) {
+                const qNumEl = document.createElement('div');
+                qNumEl.className = 'explanation-qnum';
+                qNumEl.textContent = `${block.qNum}.`;
+                wrapper.appendChild(qNumEl);
+            }
+            
+            const card = document.createElement('div');
+            card.className = 'explanation-card';
+            
+            const header = document.createElement('div');
+            header.className = 'explanation-header';
+            header.textContent = 'Explanation';
+            card.appendChild(header);
+            
+            const content = document.createElement('div');
+            content.className = 'explanation-content';
+            const innerBlocks = parseTextToBlocks(block.markdown);
+            innerBlocks.forEach(b => {
+                const node = renderBlockToNode(b);
+                if (node) content.appendChild(node);
+            });
+            
+            card.appendChild(content);
+            wrapper.appendChild(card);
+            return wrapper;
         }
         
         if (block.type === 'personality') {
@@ -6260,6 +6049,91 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             node.innerHTML = '';
             node.appendChild(tbody);
+        } else if (type === 'bilingual-mcq') {
+            const lines = markdown.split('\n');
+            let contentLines = [];
+            for (let idx = 0; idx < lines.length; idx++) {
+                const trm = lines[idx].trim();
+                if (trm.startsWith('[bilingual-mcq') || trm === '[/bilingual-mcq]') {
+                    continue;
+                }
+                contentLines.push(lines[idx]);
+            }
+            const fullInner = contentLines.join('\n');
+            let hiMarkdown = "";
+            let enMarkdown = "";
+            const hiIndex = fullInner.indexOf('{hi}');
+            const enIndex = fullInner.indexOf('{en}');
+            if (hiIndex !== -1 && enIndex !== -1) {
+                if (hiIndex < enIndex) {
+                    hiMarkdown = fullInner.substring(hiIndex + 4, enIndex).trim();
+                    enMarkdown = fullInner.substring(enIndex + 4).trim();
+                } else {
+                    enMarkdown = fullInner.substring(enIndex + 4, hiIndex).trim();
+                    hiMarkdown = fullInner.substring(hiIndex + 4).trim();
+                }
+            } else if (hiIndex !== -1) {
+                hiMarkdown = fullInner.substring(hiIndex + 4).trim();
+            } else if (enIndex !== -1) {
+                enMarkdown = fullInner.substring(enIndex + 4).trim();
+            } else {
+                hiMarkdown = fullInner.trim();
+            }
+            
+            node.innerHTML = '';
+            const hiCol = document.createElement('div');
+            hiCol.className = 'bilingual-mcq-col bilingual-mcq-hi';
+            const hiBlocks = parseTextToBlocks(hiMarkdown);
+            hiBlocks.forEach(b => {
+                const n = renderBlockToNode(b);
+                if (n) hiCol.appendChild(n);
+            });
+            
+            const enCol = document.createElement('div');
+            enCol.className = 'bilingual-mcq-col bilingual-mcq-en';
+            const enBlocks = parseTextToBlocks(enMarkdown);
+            enBlocks.forEach(b => {
+                const n = renderBlockToNode(b);
+                if (n) enCol.appendChild(n);
+            });
+            
+            node.appendChild(hiCol);
+            node.appendChild(enCol);
+        } else if (type === 'explanation') {
+            const explanationStartMatch = markdown.trim().match(/^\[explanation(?:\s+q=["']?(\d+)["']?)?\]$/i);
+            const qNum = explanationStartMatch ? explanationStartMatch[1] : null;
+            const lines = markdown.split('\n');
+            let contentLines = [];
+            for (let idx = 0; idx < lines.length; idx++) {
+                const trm = lines[idx].trim();
+                if (trm.startsWith('[explanation') || trm === '[/explanation]') {
+                    continue;
+                }
+                contentLines.push(lines[idx]);
+            }
+            node.innerHTML = '';
+            if (qNum) {
+                const qNumEl = document.createElement('div');
+                qNumEl.className = 'explanation-qnum';
+                qNumEl.textContent = `${qNum}.`;
+                node.appendChild(qNumEl);
+            }
+            const card = document.createElement('div');
+            card.className = 'explanation-card';
+            const header = document.createElement('div');
+            header.className = 'explanation-header';
+            header.textContent = 'Explanation';
+            card.appendChild(header);
+            
+            const content = document.createElement('div');
+            content.className = 'explanation-content';
+            const innerBlocks = parseTextToBlocks(contentLines.join('\n'));
+            innerBlocks.forEach(b => {
+                const n = renderBlockToNode(b);
+                if (n) content.appendChild(n);
+            });
+            card.appendChild(content);
+            node.appendChild(card);
         } else if (type === 'empty') {
             node.innerHTML = '&nbsp;';
         } else if (type === 'spacer') {
@@ -6374,6 +6248,22 @@ document.addEventListener('DOMContentLoaded', () => {
                         innerHeight += estimateBlockHeight(inner, fontSize, lineSpacing, isTwoCol);
                     });
                     return innerHeight + 24; // Inner blocks height + 24px box padding
+                }
+            case 'bilingual-mcq':
+                {
+                    const hiHeight = calculateBlockHeightRaw({ type: 'paragraph', markdown: block.hiMarkdown }, fontSize, lineSpacing, true);
+                    const enHeight = calculateBlockHeightRaw({ type: 'paragraph', markdown: block.enMarkdown }, fontSize, lineSpacing, true);
+                    return Math.max(hiHeight, enHeight) + 16;
+                }
+            case 'explanation':
+                {
+                    const innerBlocks = parseTextToBlocks(block.markdown);
+                    let innerHeight = 0;
+                    innerBlocks.forEach(inner => {
+                        innerHeight += estimateBlockHeight(inner, fontSize, lineSpacing, isTwoCol);
+                    });
+                    const extraHeight = (block.qNum ? 20 : 0) + 28 + 16;
+                    return innerHeight + extraHeight;
                 }
             case 'section':
                 return 55; // 18px font size + padding/margin
@@ -6582,10 +6472,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 // In two column layouts, always check actual scrollWidth to prevent hidden text
                 isOverflow = currentPageStruct.contentElement.scrollWidth > (currentPageStruct.contentElement.clientWidth + 2);
             } else {
-                // In single column layouts, always check actual scrollHeight to prevent hidden text
-                const actualHeight = currentPageStruct.contentElement.scrollHeight;
-                currentPageHeight = actualHeight; // Sync running estimate with actual measurement
-                isOverflow = actualHeight > MAX_CONTENT_HEIGHT;
+                // In single column layouts, measure content height by the bottom of the last child
+                const children = currentPageStruct.contentElement.children;
+                let contentHeight = 0;
+                if (children.length > 0) {
+                    const lastChild = children[children.length - 1];
+                    contentHeight = lastChild.offsetTop + lastChild.offsetHeight;
+                }
+                currentPageHeight = contentHeight;
+                isOverflow = contentHeight > MAX_CONTENT_HEIGHT;
             }
 
             if (isOverflow) {
@@ -6620,7 +6515,13 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (isTwoCol) {
                             return currentPageStruct.contentElement.scrollWidth <= (currentPageStruct.contentElement.clientWidth + 2);
                         } else {
-                            return currentPageStruct.contentElement.scrollHeight <= MAX_CONTENT_HEIGHT;
+                            const children = currentPageStruct.contentElement.children;
+                            let contentHeight = 0;
+                            if (children.length > 0) {
+                                const lastChild = children[children.length - 1];
+                                contentHeight = lastChild.offsetTop + lastChild.offsetHeight;
+                            }
+                            return contentHeight <= MAX_CONTENT_HEIGHT;
                         }
                     };
 
@@ -6855,7 +6756,14 @@ document.addEventListener('DOMContentLoaded', () => {
             if (isTwoCol) {
                 isOverflow = contentEl.scrollWidth > (contentEl.clientWidth + 2);
             } else {
-                isOverflow = contentEl.scrollHeight > MAX_CONTENT_HEIGHT;
+                // In single column layouts, measure content height by the bottom of the last child
+                const children = contentEl.children;
+                let contentHeight = 0;
+                if (children.length > 0) {
+                    const lastChild = children[children.length - 1];
+                    contentHeight = lastChild.offsetTop + lastChild.offsetHeight;
+                }
+                isOverflow = contentHeight > MAX_CONTENT_HEIGHT;
             }
             
             // Remove old badge if any
@@ -7775,7 +7683,7 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 pagesData = state.pagesData || [];
                 lastPageData = state.lastPageData || { title: 'THANK YOU', subtitle: 'Samyak', tagline: 'कोचिंग नहीं क्रांति' };
-                activePageIndex = state.activePageIndex || 0;
+                activePageIndex = (pagesData.length > 1) ? 1 : 0;
                 contentFontSize = state.contentFontSize || 13.5;
                 watermarkSettings = state.watermarkSettings || watermarkSettings;
                 customDesignSettings = state.customDesignSettings || customDesignSettings;
@@ -8008,8 +7916,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         ];
         
-        // Reset active index to cover page
-        activePageIndex = 0;
+        // Reset active index to Page 1
+        activePageIndex = 1;
         
         // Sync values to cover fields in the UI
         docTitleInput.value = pagesData[0].title;
@@ -8046,8 +7954,8 @@ document.addEventListener('DOMContentLoaded', () => {
         saveToDB('samyak_image_counter', 1);
         heightEstimationCache.clear();
         
-        // Switch to Cover Tab
-        switchActivePage(0);
+        // Switch to Page 1 Tab
+        switchActivePage(1);
         switchSidebarTab('panel-pages');
     }
 
@@ -9454,6 +9362,210 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Run order restoration instantly
     restoreAccordionOrder();
+
+    // -------------------------------------------------------------
+    // TEXT VISIBILITY / LAYOUT INTEGRITY AUDIT FEATURE
+    // -------------------------------------------------------------
+    const checkVisibilityBtn = document.getElementById('check-visibility-btn');
+    const integrityModal = document.getElementById('integrity-modal');
+    const integrityModalBody = document.getElementById('integrity-modal-body');
+    const closeIntegrityModalBtn = document.getElementById('close-integrity-modal-btn');
+    const closeIntegrityBtn = document.getElementById('close-integrity-btn');
+
+    if (checkVisibilityBtn && integrityModal && integrityModalBody) {
+        checkVisibilityBtn.addEventListener('click', () => {
+            // Re-render first to ensure layout measurements are fresh
+            renderPreview();
+            
+            // Run the audit
+            runTextVisibilityAudit();
+            
+            // Show modal
+            integrityModal.classList.add('active');
+        });
+
+        const hideIntegrityModal = () => {
+            integrityModal.classList.remove('active');
+        };
+
+        if (closeIntegrityModalBtn) closeIntegrityModalBtn.addEventListener('click', hideIntegrityModal);
+        if (closeIntegrityBtn) closeIntegrityBtn.addEventListener('click', hideIntegrityModal);
+
+        integrityModal.addEventListener('click', (e) => {
+            if (e.target === integrityModal) {
+                hideIntegrityModal();
+            }
+        });
+    }
+
+    function runTextVisibilityAudit() {
+        const fullContentMarkdown = pagesData.slice(1).map(p => p.text).join('\n');
+        const blocks = parseTextToBlocks(fullContentMarkdown);
+        
+        const renderedBlockIds = new Set();
+        const clippedReports = [];
+        const missingReports = [];
+        
+        const contentPages = pagesContainer.querySelectorAll('.a4-page:not(.cover-page)');
+        
+        contentPages.forEach(page => {
+            const pageNum = page.getAttribute('data-page');
+            const visualPageNum = pageNum ? (parseInt(pageNum) - 1) : 1;
+            const contentEl = page.querySelector('.page-content');
+            if (!contentEl) return;
+            
+            const contentRect = contentEl.getBoundingClientRect();
+            const pageHeight = contentRect.height;
+            
+            // Find all nodes with data-block-id on this page
+            const blockNodes = contentEl.querySelectorAll('[data-block-id]');
+            blockNodes.forEach(node => {
+                const blockId = parseInt(node.getAttribute('data-block-id'));
+                renderedBlockIds.add(blockId);
+                
+                const nodeRect = node.getBoundingClientRect();
+                const relativeTop = nodeRect.top - contentRect.top;
+                const relativeBottom = nodeRect.bottom - contentRect.top;
+                
+                // Check if element extends past the page boundary
+                // We add a 2px tolerance for sub-pixel layout rounding
+                if (relativeBottom > pageHeight + 2) {
+                    const isCompletelyHidden = (relativeTop >= pageHeight - 2);
+                    const block = blocks[blockId];
+                    if (block) {
+                        clippedReports.push({
+                            page: visualPageNum,
+                            lineStart: block.startLine + 1,
+                            lineEnd: block.endLine + 1,
+                            type: block.type,
+                            text: node.textContent.trim(),
+                            severity: isCompletelyHidden ? 'completely-hidden' : 'partially-clipped'
+                        });
+                    }
+                }
+            });
+        });
+        
+        // Find completely unrendered blocks (e.g. if skipped due to pagination errors)
+        blocks.forEach((block, idx) => {
+            // Ignore pagebreak, empty spacers, column breaks etc. that don't have text
+            if (block.type !== 'pagebreak' && block.type !== 'empty' && block.type !== 'columnbreak' && block.type !== 'spacer') {
+                // If the block is not in the set of rendered block IDs
+                if (!renderedBlockIds.has(idx)) {
+                    if (block.type !== 'thankyou') {
+                        missingReports.push({
+                            lineStart: block.startLine + 1,
+                            lineEnd: block.endLine + 1,
+                            type: block.type,
+                            text: block.markdown || ''
+                        });
+                    }
+                }
+            }
+        });
+
+        // Populate modal with results
+        renderAuditReport(clippedReports, missingReports);
+    }
+
+    function renderAuditReport(clipped, missing) {
+        if (!integrityModalBody) return;
+        integrityModalBody.innerHTML = '';
+        
+        const container = document.createElement('div');
+        container.className = 'audit-results-container';
+        
+        const totalIssues = clipped.length + missing.length;
+        
+        if (totalIssues === 0) {
+            // All clear screen
+            container.innerHTML = `
+                <div class="audit-success-box">
+                    <div class="success-icon">✨</div>
+                    <h4>सब कुछ सुरक्षित है! (All Clear)</h4>
+                    <p>एडिटर में डाला गया सारा टेक्स्ट लाइव प्रिव्यू में 100% दिखाई दे रहा है। कोई भी टेक्स्ट छिपा, कटा या गायब नहीं है।</p>
+                </div>
+            `;
+        } else {
+            // Issues found screen
+            let issuesHtml = `
+                <div class="audit-issues-header">
+                    <h4>⚠️ कुल ${totalIssues} समस्याएँ मिलीं! (Issues Found)</h4>
+                    <p>निम्नलिखित स्थानों पर टेक्स्ट कट रहा है या लाइव प्रिव्यू में पूरी तरह दिखाई नहीं दे रहा है:</p>
+                </div>
+                <div class="audit-cards-grid">
+            `;
+            
+            // Add clipped elements reports
+            clipped.forEach(item => {
+                const severityLabel = item.severity === 'completely-hidden' ? 'पूर्णतः गायब (Hidden)' : 'आंशिक रूप से कटा (Clipped)';
+                const badgeClass = item.severity === 'completely-hidden' ? 'badge-danger' : 'badge-warning';
+                const severityClass = item.severity === 'completely-hidden' ? 'severity-completely-hidden' : 'severity-partially-clipped';
+                
+                // Create a snippet of the text
+                let textSnippet = item.text;
+                if (textSnippet.length > 150) {
+                    textSnippet = textSnippet.substring(0, 150) + '...';
+                }
+                
+                issuesHtml += `
+                    <div class="audit-card ${severityClass}">
+                        <div class="audit-card-header">
+                            <span class="audit-page-tag">📄 पेज ${item.page}</span>
+                            <span class="audit-badge ${badgeClass}">${severityLabel}</span>
+                        </div>
+                        <div class="audit-card-meta">
+                            <span>✏️ लाइन: ${item.lineStart === item.lineEnd ? item.lineStart : item.lineStart + ' - ' + item.lineEnd}</span>
+                            <span>📦 प्रकार: ${item.type.toUpperCase()}</span>
+                        </div>
+                        <div class="audit-card-body">
+                            <code>${escapeHtml(textSnippet)}</code>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            // Add missing elements reports
+            missing.forEach(item => {
+                let textSnippet = item.text;
+                if (textSnippet.length > 150) {
+                    textSnippet = textSnippet.substring(0, 150) + '...';
+                }
+                
+                issuesHtml += `
+                    <div class="audit-card severity-unrendered">
+                        <div class="audit-card-header">
+                            <span class="audit-page-tag">🚫 प्रिव्यू में गायब</span>
+                            <span class="audit-badge badge-missing">गायब (Missing)</span>
+                        </div>
+                        <div class="audit-card-meta">
+                            <span>✏️ लाइन: ${item.lineStart === item.lineEnd ? item.lineStart : item.lineStart + ' - ' + item.lineEnd}</span>
+                            <span>📦 प्रकार: ${item.type.toUpperCase()}</span>
+                        </div>
+                        <div class="audit-card-body">
+                            <code>${escapeHtml(textSnippet)}</code>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            issuesHtml += `</div>`;
+            container.innerHTML = issuesHtml;
+        }
+        
+        integrityModalBody.appendChild(container);
+    }
+
+    // Helper to escape HTML tags in text snippets
+    function escapeHtml(text) {
+        if (!text) return '';
+        return text
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
 
     // Clear height cache and re-render preview once all stylesheets and fonts are fully loaded
     const triggerInitialRender = () => {

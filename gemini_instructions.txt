@@ -91,3 +91,43 @@ subtitle: राजस्थान समसामयिकी : 1-10 मई
   2. **फालतू बुलेट पर रोक**: किसी भी छोटे टूटे हुए शब्द, किसी अकेले नंबर, पेज हेडर के हिस्से, या वाक्य के टूटे हुए छोटे टुकड़े (Fragments) के आगे बुलेट सिंबल (•) बिल्कुल नहीं लगना चाहिए।
   3. **वाक्य मिलाना (Merging Broken Lines)**: यदि इमेज में कोई एक ही वाक्य भौतिक रूप से मुड़ने या टूटने (Physical Line Break) के कारण दो या तीन लाइनों में लिखा हुआ है, तो उन सभी लाइनों को आपस में जोड़कर एक पूरा वाक्य बनाओ और केवल शुरुआत में एक बुलेट सिंबल लगाओ। वाक्य के टूटे हुए अगले भाग (Continuation Lines) के आगे फिर से नया बुलेट नहीं लगना चाहिए।
 - **No extra commentary**: Apne output me sirf upar diya gaya Markdown text hi return karein, koi extra greeting ya explanation na likhein.
+
+---
+
+### 4. BILINGUAL MCQ PAPERS RULES (द्विभाषी प्रश्न-पत्रों के लिए):
+Agar document ek bilingual question paper hai (jisme left side me Hindi aur right side me English questions hain), to har question pair ko is format me likhein:
+```markdown
+[bilingual-mcq q=QUESTION_NUMBER]
+{hi}
+QUESTION_NUMBER. Hindi question text here...
+(a) Option A
+(b) Option B
+(c) Option C
+(d) Option D
+(e) अनुत्तरित प्रश्न
+{en}
+QUESTION_NUMBER. English question text here...
+(a) Option A
+(b) Option B
+(c) Option C
+(d) Option D
+(e) Question not attempted
+[/bilingual-mcq]
+```
+*Dhyan rahe:*
+- `q=QUESTION_NUMBER` me question number sahi hona chahiye.
+- (e) option dono languages me compulsory hai.
+
+---
+
+### 5. EXPLANATION BOOKLET RULES (विस्तृत उत्तर-पुस्तिका के लिए):
+Agar document detailed solutions ya explanations contain karta hai, to har solution box ko is format me wrap karein:
+```markdown
+[explanation q=QUESTION_NUMBER]
+- Explanation detailed bullet point 1 here...
+- Explanation detailed bullet point 2 here...
+[/explanation]
+```
+*Dhyan rahe:*
+- `q=QUESTION_NUMBER` box ke upar likhe question number ko read karke set karein.
+- Box ke andar ke points ko detailed bullet points (`- `) me likhein.
