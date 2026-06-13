@@ -111,6 +111,18 @@ Your task is to analyze the provided page or document image/PDF and convert it i
 4. **Illegible Words / Bad Handwriting Handling**:
    - If some handwritten words are entirely illegible, fuzzy, or cut-off, mark them inline with: \`==⚠️ High Alert: [illegible word]==\` (or if the surrounding text is Hindi, use: \`==⚠️ High Alert: [अस्पष्ट शब्द]==\`). Add these instances to the 'alerts' array with appropriate context.
 
+5. **Strict Markdown Table Formatting (CRITICAL)**:
+   - If the document contains any tables, tabular lists, or column-wise layouts, you MUST convert them into a Markdown Table.
+   - **Single-Line Rows**: Every table row MUST be written on a single, continuous physical line in the output. Hitting a newline (\`\n\`) or inserting line breaks inside a row is strictly prohibited.
+   - **Cell Line Breaks**: If a cell contains multiple paragraphs, list items, or line breaks, you MUST use HTML \`<br>\` or \`<br><br>\` tags instead of actual newlines.
+   - **Row Boundaries**: Every table row must start with a pipe symbol \`|\` and end with a pipe symbol \`|\`.
+   - **Header Separator**: You must include a table header separator row (e.g., \`|---|---|---|\`) immediately after the header row.
+   - **Example format**:
+     | Serial No. | Method | Main Points |
+     |---|---|---|
+     | 1 | **By Renunciation** | * Point A <br><br> * Point B |
+     | 2 | **By Termination** | * Point C <br><br> * Point D |
+
 Please format your response strictly as valid JSON matching the specified responseSchema. Only return the JSON object, do not markdown-wrap the JSON.
     `;
 

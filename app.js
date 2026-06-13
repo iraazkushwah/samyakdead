@@ -5142,8 +5142,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!tableLines || tableLines.length < 3) return tableLines;
             
             const isSeparator = (str) => /^\s*\|(\s*:?-+:?\s*\|)+\s*$/.test(str);
-            if (!isSeparator(tableLines[1])) return tableLines;
-            
             const cleanLines = [tableLines[0], tableLines[1]];
             const headerTrimmed = tableLines[0].trim().replace(/\s+/g, ' ');
             
@@ -6598,7 +6596,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (isOverflow) {
                 // We have an overflow. Let's see if we can split this block.
-                let canSplit = (block.type === 'paragraph' || block.type === 'bullet' || block.type === 'box');
+                let canSplit = (block.type === 'paragraph' || block.type === 'bullet' || block.type === 'box' || block.type === 'table');
                 let splitSuccess = false;
 
                 if (canSplit) {
@@ -6691,6 +6689,12 @@ document.addEventListener('DOMContentLoaded', () => {
                                 // For tables, prepend header (0) and separator (1) rows to the remaining table
                                 let headerRow = words[0];
                                 let separatorRow = words[1];
+                                const isSeparator = (str) => str && /^\s*\|(\s*:?-+:?\s*\|)+\s*$/.test(str);
+                                if (!isSeparator(separatorRow)) {
+                                    // If the table lacks a proper markdown separator row, generate a valid one dynamically
+                                    const colCount = Math.max(1, headerRow.split('|').length - 2);
+                                    separatorRow = '|' + '---|'.repeat(colCount);
+                                }
                                 remainingMarkdown = headerRow + '\n' + separatorRow + '\n' + remainingMarkdown;
                             } else if (prefix) {
                                 // If remaining markdown doesn't start with prefix, add it

@@ -44,7 +44,20 @@ Handwritten page ko dekhkar niche diye gaye Rules aur Format ke mutabik text ext
    • **अवधि** :- 2026-27 से 2030-31 तक
    ```
 
-6. **Page Break / New Section (Optional)**:
+6. **Markdown Tables (सारणी/तालिका के लिए नियम - अति आवश्यक)**:
+   Agar source document me koi table, tabular list, ya column-wise structure hai, to use Markdown Table format me convert karein. Niche diye gaye rules ko strictly follow karein:
+   - **Row aek hi single line me honi chahiye**: Table ki har ek row (chahe usme kitna bhi lamba text ho) ek hi physical line me honi chahiye. Row ke beech me line break (Enter/newline) bilkul na lagayein.
+   - **Cell ke andar Newlines ke liye `<br>` use karein**: Agar kisi cell/column ke andar multiline text, multiple sentences ya bullet points hain, to wahan normal newline (`\n`) ka use na karein. Line separate karne ke liye `<br>` ya `<br><br>` ka use karein.
+   - **Pipes se start aur end karein**: Har row `|` se start aur `|` par end honi chahiye. Table headers ke thik niche header separator row (jaise `|---|---|---|`) zaroor lagayein.
+   - **Example format**:
+     ```markdown
+     | Serial No. | Method | Main Points |
+     |---|---|---|
+     | 1 | **By Renunciation** | * Point A <br><br> * Point B |
+     | 2 | **By Termination** | * Point C <br><br> * Point D |
+     ```
+
+7. **Page Break / New Section (Optional)**:
    Agar aap chahte hain ki koi section bilkul naye page se hi start ho, to wahan three dashes `---` lagayein:
    ```markdown
    ---

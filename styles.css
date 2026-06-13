@@ -2385,12 +2385,14 @@ strong {
     font-size: calc(var(--content-font-size) - 1px);
     font-weight: var(--content-font-weight, 700);
     color: var(--text-dark);
+    border: 1.5px solid var(--primary-color);
 }
 
 .markdown-table th, .markdown-table td {
     padding: 6px 10px;
     text-align: left;
     vertical-align: top;
+    border: 1px solid var(--primary-color);
 }
 
 .markdown-table th {
@@ -2400,10 +2402,6 @@ strong {
     border-top: 2px solid var(--primary-color);
     border-bottom: 2px solid var(--primary-color);
     font-family: var(--font-heading);
-}
-
-.markdown-table td {
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .markdown-table tr:nth-child(even) td {
@@ -3495,13 +3493,21 @@ body.light-mode .search-replace-panel {
 
 /* Tables in two-column layouts are styled compactly to prevent excessive height inflation */
 .page-content.layout-two-column .markdown-table {
-    font-size: calc(var(--content-font-size) - 1.5px);
+    font-size: calc(var(--content-font-size) - 2px);
     line-height: 1.25;
     margin: 6px 0;
+    width: 100% !important;
+    max-width: 100% !important;
 }
 .page-content.layout-two-column .markdown-table th,
 .page-content.layout-two-column .markdown-table td {
     padding: 4px 8px;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
+}
+.page-content.layout-two-column .markdown-table tr {
+    break-inside: auto;
 }
 
 .markdown-table tr {
@@ -3509,7 +3515,7 @@ body.light-mode .search-replace-panel {
 }
 
 .page-content.layout-two-column .bullet-list > .bullet-item {
-    break-inside: avoid-column; /* Keep individual list items whole so a single bullet isn't split across columns */
+    break-inside: auto; /* Allow individual list items to break across columns to fill gaps */
 }
 
 /* Tight Compaction Mode: Removes all column break restrictions to eliminate blank spaces */
