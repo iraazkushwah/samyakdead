@@ -2711,13 +2711,16 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Smart Shrink (Overflow Fixer) Click Listener
-    if (smartShrinkBtn) {
-        smartShrinkBtn.addEventListener('click', () => {
+    // Modularized performSmartShrink function returning a Promise
+    function performSmartShrink(showFeedbackAlert = true) {
+        return new Promise((resolve) => {
             const originalPageCount = pagesData.length;
             
             if (originalPageCount <= 2) {
-                alert("Smart Shrink only works when you have multiple pages!");
+                if (showFeedbackAlert) {
+                    alert("Smart Shrink only works when you have multiple pages!");
+                }
+                resolve(false);
                 return;
             }
 
@@ -2728,9 +2731,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const characterCount = lastPageText.length;
             const lineCount = lastPageText.split('\n').filter(l => l.trim()).length;
 
-            if (characterCount > 600 || lineCount > 6) {
+            if (showFeedbackAlert && (characterCount > 600 || lineCount > 6)) {
                 const proceed = confirm(`The last page contains a lot of content (${lineCount} lines, ${characterCount} chars). Fitting this on previous pages might require making the text size significantly smaller. Do you still want to proceed?`);
-                if (!proceed) return;
+                if (!proceed) {
+                    resolve(false);
+                    return;
+                }
             }
 
             // Show premium loading overlay
@@ -2817,7 +2823,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         cleanTempOptions(globalLineSpacingSelect, bestLs);
                         renderPreview();
                         saveWorkspaceToLocalStorage();
-                        alert(`🪄 Smart Shrink was successful!\n\nPages: ${originalPageCount} -> ${pagesData.length}\nFont Size: ${bestFs}px\nLine Spacing: ${bestLs}`);
+                        if (showFeedbackAlert) {
+                            alert(`🪄 Smart Shrink was successful!\n\nPages: ${originalPageCount} -> ${pagesData.length}\nFont Size: ${bestFs}px\nLine Spacing: ${bestLs}`);
+                        }
+                        resolve(true);
                     } else {
                         // Restore original settings
                         contentFontSize = originalFontSize;
@@ -2830,29 +2839,42 @@ document.addEventListener('DOMContentLoaded', () => {
                         cachedMaxContentHeight = null;
                         
                         renderPreview();
-                        alert("Attempted, but could not fit the content onto the previous pages without shrinking the font size below 13px.");
+                        if (showFeedbackAlert) {
+                            alert("Attempted, but could not fit the content onto the previous pages without shrinking the font size below 13px.");
+                        }
+                        resolve(false);
                     }
                 }, 60);
             }, 80);
         });
     }
 
+    // Smart Shrink (Overflow Fixer) Click Listener
+    if (smartShrinkBtn) {
+        smartShrinkBtn.addEventListener('click', () => {
+            performSmartShrink(true);
+        });
+    }
 
 
-    // Remove Gaps (Blank Lines & Spacer Tags) Listener
-    function removeDocumentGaps() {
-        if (activePageIndex <= 0 || activePageIndex >= pagesData.length) {
-            alert("कृपया कोई कंटेंट पेज चुनें (बदलाव केवल कंटेंट पेजों पर लागू होते हैं)।");
-            return;
-        }
 
+    // Modularized performRemoveDocumentGaps function returning status object
+    function performRemoveDocumentGaps(forceAllPages = false, showFeedbackAlert = true) {
         // Save current input state before running cleaner
         saveCurrentInputState();
 
-        const proceed = confirm("क्या आप खाली लाइनें (blank lines) और [space] गैप हटाना चाहते हैं?");
-        if (!proceed) return;
+        let allPages = forceAllPages;
+        if (!forceAllPages && showFeedbackAlert) {
+            if (activePageIndex <= 0 || activePageIndex >= pagesData.length) {
+                alert("कृपया कोई कंटेंट पेज चुनें (बदलाव केवल कंटेंट पेजों पर लागू होते हैं)।");
+                return { success: false, emptyLinesRemoved: 0, spacersRemoved: 0, pagesCleaned: 0 };
+            }
 
-        const allPages = confirm("क्या आप इसे सभी पेजों पर लागू करना चाहते हैं?\n\n- OK: सभी पेजों से हटाएं\n- Cancel: केवल वर्तमान सक्रिय पेज से हटाएं");
+            const proceed = confirm("क्या आप खाली लाइनें (blank lines) और [space] गैप हटाना चाहते हैं?");
+            if (!proceed) return { success: false, emptyLinesRemoved: 0, spacersRemoved: 0, pagesCleaned: 0 };
+
+            allPages = confirm("क्या आप इसे सभी पेजों पर लागू करना चाहते हैं?\n\n- OK: सभी पेजों से हटाएं\n- Cancel: केवल वर्तमान सक्रिय पेज से हटाएं");
+        }
 
         let pagesCleaned = 0;
         let emptyLinesRemoved = 0;
@@ -2912,12 +2934,22 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (pagesCleaned > 0) {
-            alert(`सफलतापूर्वक खाली लाइनें और गैप हटा दिए गए हैं! ✨\n- हटाए गए खाली लाइन्स: ${emptyLinesRemoved}\n- हटाए गए स्पेस टैग: ${spacersRemoved}\n- अपडेट किए गए पेज: ${pagesCleaned}`);
+            if (showFeedbackAlert) {
+                alert(`सफलतापूर्वक खाली लाइनें और गैप हटा दिए गए हैं! ✨\n- हटाए गए खाली लाइन्स: ${emptyLinesRemoved}\n- हटाए गए स्पेस टैग: ${spacersRemoved}\n- अपडेट किए गए पेज: ${pagesCleaned}`);
+            }
             renderPreview();
             saveWorkspaceToLocalStorage();
+            return { success: true, emptyLinesRemoved, spacersRemoved, pagesCleaned };
         } else {
-            alert("पेज में कोई अतिरिक्त खाली लाइन या गैप नहीं मिला। ✨");
+            if (showFeedbackAlert) {
+                alert("पेज में कोई अतिरिक्त खाली लाइन या गैप नहीं मिला। ✨");
+            }
+            return { success: false, emptyLinesRemoved: 0, spacersRemoved: 0, pagesCleaned: 0 };
         }
+    }
+
+    function removeDocumentGaps() {
+        performRemoveDocumentGaps(false, true);
     }
 
     if (removeGapsBtn) {
@@ -2927,22 +2959,25 @@ document.addEventListener('DOMContentLoaded', () => {
         btnRemoveGaps.addEventListener('click', removeDocumentGaps);
     }
 
-    // Highly robust PDF print button action
-    if (printPdfBtn) {
-        printPdfBtn.addEventListener('click', () => {
-            // 1. Save current state of inputs
-            saveCurrentInputState();
-            // 2. Re-render standard layouts to ensure perfect content alignment
-            renderPreview();
-            // 3. Wait for browser to fully paint ALL pages before opening print dialog
+    // Reusable triggerPrintSequence function
+    function triggerPrintSequence() {
+        // 1. Save current state of inputs
+        saveCurrentInputState();
+        // 2. Re-render standard layouts to ensure perfect content alignment
+        renderPreview();
+        // 3. Wait for browser to fully paint ALL pages before opening print dialog
+        requestAnimationFrame(() => {
             requestAnimationFrame(() => {
-                requestAnimationFrame(() => {
-                    setTimeout(() => {
-                        window.print();
-                    }, 350);
-                });
+                setTimeout(() => {
+                    window.print();
+                }, 350);
             });
         });
+    }
+
+    // Highly robust PDF print button action
+    if (printPdfBtn) {
+        printPdfBtn.addEventListener('click', triggerPrintSequence);
     }
 
 
@@ -2980,7 +3015,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Intercept Ctrl+P for print
         if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'p') {
             e.preventDefault();
-            printPdfBtn.click();
+            triggerPrintSequence();
         }
         // Intercept Ctrl+/ for toggling toolbar
         if ((e.ctrlKey || e.metaKey) && e.key === '/') {
@@ -5974,6 +6009,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
             
+            const thead = document.createElement('thead');
             const tbody = document.createElement('tbody');
             const lines = block.markdown.split('\n');
             
@@ -5994,7 +6030,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 const tr = document.createElement('tr');
                 const isHeader = isFirstRow;
-                isFirstRow = false;
                 
                 cells.forEach(cellText => {
                     const cell = document.createElement(isHeader ? 'th' : 'td');
@@ -6003,9 +6038,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     tr.appendChild(cell);
                 });
                 
-                tbody.appendChild(tr);
+                if (isHeader) {
+                    thead.appendChild(tr);
+                } else {
+                    tbody.appendChild(tr);
+                }
+                
+                isFirstRow = false;
             }
             
+            table.appendChild(thead);
             table.appendChild(tbody);
             return table;
         }
@@ -6351,6 +6393,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     const linesOfTable = text.split('\n').filter(l => l.trim());
                     let totalTableHeight = 20; // base padding/margin
                     
+                    const tblFontSize = isTwoCol ? (fontSize - 1.5) : (fontSize - 1);
+                    const tblLineSpacing = isTwoCol ? 1.25 : lineSpacing;
+                    const tblLineHeight = tblFontSize * tblLineSpacing;
+                    const tblCellPadding = isTwoCol ? 8 : 12;
+
                     linesOfTable.forEach((line, idx) => {
                         if (idx === 1 && line.replace(/[^|:\-]/g, '').trim() === line) {
                             return; // skip separator row
@@ -6362,14 +6409,14 @@ document.addEventListener('DOMContentLoaded', () => {
                         cells.forEach(cellText => {
                             // In 2-Column layouts, cells are very narrow
                             const cellWidth = isTwoCol ? 110 : 220;
-                            const charsPerLine = Math.max(10, Math.floor(cellWidth / (0.55 * fontSize)));
+                            const charsPerLine = Math.max(10, Math.floor(cellWidth / (0.55 * tblFontSize)));
                             const cellLines = Math.ceil(cellText.length / charsPerLine) || 1;
                             if (cellLines > maxCellLines) {
                                 maxCellLines = cellLines;
                             }
                         });
                         
-                        totalTableHeight += (maxCellLines * lineHeight) + 12; // cell height + padding
+                        totalTableHeight += (maxCellLines * tblLineHeight) + tblCellPadding; // cell height + padding
                     });
                     
                     return totalTableHeight;
@@ -9449,27 +9496,39 @@ document.addEventListener('DOMContentLoaded', () => {
     // TEXT VISIBILITY / LAYOUT INTEGRITY AUDIT FEATURE
     // -------------------------------------------------------------
     const checkVisibilityBtn = document.getElementById('check-visibility-btn');
+    const pdfCheckBtn = document.getElementById('pdf-check-btn');
     const integrityModal = document.getElementById('integrity-modal');
     const integrityModalBody = document.getElementById('integrity-modal-body');
     const closeIntegrityModalBtn = document.getElementById('close-integrity-modal-btn');
     const closeIntegrityBtn = document.getElementById('close-integrity-btn');
 
-    if (checkVisibilityBtn && integrityModal && integrityModalBody) {
-        checkVisibilityBtn.addEventListener('click', () => {
-            // Re-render first to ensure layout measurements are fresh
-            renderPreview();
-            
-            // Run the audit
-            runTextVisibilityAudit();
-            
-            // Show modal
+    const handleAuditClick = () => {
+        // Re-render first to ensure layout measurements are fresh
+        renderPreview();
+        
+        // Run the audit
+        runTextVisibilityAudit();
+        
+        // Show modal
+        if (integrityModal) {
             integrityModal.classList.add('active');
-        });
+        }
+    };
 
-        const hideIntegrityModal = () => {
+    if (checkVisibilityBtn) {
+        checkVisibilityBtn.addEventListener('click', handleAuditClick);
+    }
+    if (pdfCheckBtn) {
+        pdfCheckBtn.addEventListener('click', handleAuditClick);
+    }
+
+    const hideIntegrityModal = () => {
+        if (integrityModal) {
             integrityModal.classList.remove('active');
-        };
+        }
+    };
 
+    if (integrityModal) {
         if (closeIntegrityModalBtn) closeIntegrityModalBtn.addEventListener('click', hideIntegrityModal);
         if (closeIntegrityBtn) closeIntegrityBtn.addEventListener('click', hideIntegrityModal);
 
@@ -9563,19 +9622,22 @@ document.addEventListener('DOMContentLoaded', () => {
             // All clear screen
             container.innerHTML = `
                 <div class="audit-success-box">
-                    <div class="success-icon">✨</div>
-                    <h4>सब कुछ सुरक्षित है! (All Clear)</h4>
-                    <p>एडिटर में डाला गया सारा टेक्स्ट लाइव प्रिव्यू में 100% दिखाई दे रहा है। कोई भी टेक्स्ट छिपा, कटा या गायब नहीं है।</p>
+                    <div class="success-icon" style="font-size: 48px; margin-bottom: 12px;">✨</div>
+                    <h4 style="margin: 0 0 8px 0; color: #4ade80;">सब कुछ सुरक्षित है! (All Clear)</h4>
+                    <p style="margin: 0 0 16px 0; color: var(--ui-text-muted); font-size: 13px;">लाइव प्रिव्यू और सेव की गई PDF 100% मैच करेगी। कोई भी लाइन नीचे से नहीं कटेगी।</p>
+                    <button id="modal-print-pdf-btn" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 8px; font-weight: 600; padding: 10px 20px;">
+                        🖨️ PDF सेव करें (Print & Save PDF)
+                    </button>
                 </div>
             `;
         } else {
             // Issues found screen
             let issuesHtml = `
-                <div class="audit-issues-header">
-                    <h4>⚠️ कुल ${totalIssues} समस्याएँ मिलीं! (Issues Found)</h4>
-                    <p>निम्नलिखित स्थानों पर टेक्स्ट कट रहा है या लाइव प्रिव्यू में पूरी तरह दिखाई नहीं दे रहा है:</p>
+                <div class="audit-issues-header" style="margin-bottom: 14px;">
+                    <h4 style="margin: 0 0 6px 0; color: #f87171;">⚠️ कुल ${totalIssues} ओवरफ़्लो समस्याएँ मिलीं! (Issues Found)</h4>
+                    <p style="margin: 0; color: var(--ui-text-muted); font-size: 12px;">निम्नलिखित पेजों पर कुछ लाइनें नीचे से कट रही हैं जो PDF में नहीं दिखेंगी:</p>
                 </div>
-                <div class="audit-cards-grid">
+                <div class="audit-cards-grid" style="display: flex; flex-direction: column; gap: 10px; max-height: 250px; overflow-y: auto; padding-right: 4px;">
             `;
             
             // Add clipped elements reports
@@ -9591,16 +9653,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 
                 issuesHtml += `
-                    <div class="audit-card ${severityClass}">
-                        <div class="audit-card-header">
-                            <span class="audit-page-tag">📄 पेज ${item.page}</span>
-                            <span class="audit-badge ${badgeClass}">${severityLabel}</span>
+                    <div class="audit-card ${severityClass}" style="border: 1px solid rgba(239, 68, 68, 0.2); background: rgba(239, 68, 68, 0.03); padding: 10px; border-radius: 6px;">
+                        <div class="audit-card-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                            <span class="audit-page-tag" style="font-weight: 700; color: #fca5a5;">📄 पेज ${item.page}</span>
+                            <span class="audit-badge ${badgeClass}" style="background: rgba(239, 68, 68, 0.2); color: #fca5a5; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 600;">${severityLabel}</span>
                         </div>
-                        <div class="audit-card-meta">
+                        <div class="audit-card-meta" style="font-size: 11px; color: var(--ui-text-muted); display: flex; gap: 12px; margin-bottom: 6px;">
                             <span>✏️ लाइन: ${item.lineStart === item.lineEnd ? item.lineStart : item.lineStart + ' - ' + item.lineEnd}</span>
                             <span>📦 प्रकार: ${item.type.toUpperCase()}</span>
                         </div>
-                        <div class="audit-card-body">
+                        <div class="audit-card-body" style="font-family: monospace; font-size: 11px; background: rgba(0,0,0,0.15); padding: 6px; border-radius: 4px; color: #eee; word-break: break-all;">
                             <code>${escapeHtml(textSnippet)}</code>
                         </div>
                     </div>
@@ -9615,16 +9677,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 
                 issuesHtml += `
-                    <div class="audit-card severity-unrendered">
-                        <div class="audit-card-header">
-                            <span class="audit-page-tag">🚫 प्रिव्यू में गायब</span>
-                            <span class="audit-badge badge-missing">गायब (Missing)</span>
+                    <div class="audit-card severity-unrendered" style="border: 1px solid rgba(245, 158, 11, 0.2); background: rgba(245, 158, 11, 0.03); padding: 10px; border-radius: 6px;">
+                        <div class="audit-card-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                            <span class="audit-page-tag" style="font-weight: 700; color: #fde047;">🚫 प्रिव्यू में गायब</span>
+                            <span class="audit-badge badge-missing" style="background: rgba(245, 158, 11, 0.2); color: #fde047; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 600;">गायब (Missing)</span>
                         </div>
-                        <div class="audit-card-meta">
+                        <div class="audit-card-meta" style="font-size: 11px; color: var(--ui-text-muted); display: flex; gap: 12px; margin-bottom: 6px;">
                             <span>✏️ लाइन: ${item.lineStart === item.lineEnd ? item.lineStart : item.lineStart + ' - ' + item.lineEnd}</span>
                             <span>📦 प्रकार: ${item.type.toUpperCase()}</span>
                         </div>
-                        <div class="audit-card-body">
+                        <div class="audit-card-body" style="font-family: monospace; font-size: 11px; background: rgba(0,0,0,0.15); padding: 6px; border-radius: 4px; color: #eee; word-break: break-all;">
                             <code>${escapeHtml(textSnippet)}</code>
                         </div>
                     </div>
@@ -9632,10 +9694,105 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             
             issuesHtml += `</div>`;
+            
+            // Append resolution box and warning save button
+            issuesHtml += `
+                <div class="audit-resolution-box">
+                    <h5 style="margin: 0 0 10px 0; color: #fde047; font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 6px;">💡 ऑटो-फ़िक्स विकल्प (Auto-Fix Solutions)</h5>
+                    <p style="margin: 0 0 12px 0; font-size: 11px; color: var(--ui-text-muted);">निम्नलिखित विकल्पों का उपयोग करके आप ओवरफ़्लो को स्वतः ठीक कर सकते हैं:</p>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <button id="modal-smart-shrink-btn" class="btn-audit-action shrink" title="Smart Shrink: स्वतः स्पेस/फ़ॉन्ट छोटा करके फिट करें">🪄 Smart Shrink</button>
+                        <button id="modal-font-decrease-btn" class="btn-audit-action font-dec" title="Font Decrease: मैन्युअल फ़ॉन्ट साइज -0.5px छोटा करें">➖ फ़ॉन्ट छोटा करें</button>
+                        <button id="modal-remove-gaps-btn" class="btn-audit-action gaps" title="Remove Gaps: पेजों से खाली लाइनें और स्पेसिंग हटाएं">🗜️ गैप हटाएँ</button>
+                    </div>
+                    <div id="modal-fix-feedback" class="inline-feedback" style="display: none; margin-top: 10px; font-size: 12px; font-weight: 600; color: #4ade80;"></div>
+                </div>
+                <div class="audit-footer-actions" style="margin-top: 14px; display: flex; justify-content: flex-end; gap: 10px;">
+                    <button id="modal-print-warning-btn" class="btn btn-primary" style="background-color: #ef4444; border-color: #ef4444; color: white; font-weight: 600; font-size: 12px; padding: 8px 16px;">
+                        ⚠️ फिर भी PDF सेव करें (Print Anyway)
+                    </button>
+                </div>
+            `;
+            
             container.innerHTML = issuesHtml;
         }
         
         integrityModalBody.appendChild(container);
+        
+        // Bind actions to dynamically generated buttons inside the modal
+        const mPrintPdfBtn = document.getElementById('modal-print-pdf-btn');
+        const mPrintWarningBtn = document.getElementById('modal-print-warning-btn');
+        const mSmartShrinkBtn = document.getElementById('modal-smart-shrink-btn');
+        const mFontDecreaseBtn = document.getElementById('modal-font-decrease-btn');
+        const mRemoveGapsBtn = document.getElementById('modal-remove-gaps-btn');
+        const mFixFeedback = document.getElementById('modal-fix-feedback');
+        
+        const updateFeedback = (msg, isSuccess = true) => {
+            if (mFixFeedback) {
+                mFixFeedback.style.display = 'block';
+                mFixFeedback.style.color = isSuccess ? '#4ade80' : '#f87171';
+                mFixFeedback.textContent = msg;
+            }
+        };
+
+        if (mPrintPdfBtn) {
+            mPrintPdfBtn.addEventListener('click', () => {
+                hideIntegrityModal();
+                triggerPrintSequence();
+            });
+        }
+        if (mPrintWarningBtn) {
+            mPrintWarningBtn.addEventListener('click', () => {
+                hideIntegrityModal();
+                triggerPrintSequence();
+            });
+        }
+        if (mSmartShrinkBtn) {
+            mSmartShrinkBtn.addEventListener('click', async () => {
+                mSmartShrinkBtn.disabled = true;
+                mSmartShrinkBtn.textContent = 'प्रक्रिया जारी है...';
+                
+                const success = await performSmartShrink(false);
+                
+                mSmartShrinkBtn.disabled = false;
+                mSmartShrinkBtn.textContent = '🪄 Smart Shrink';
+                
+                if (success) {
+                    runTextVisibilityAudit();
+                    updateFeedback('🪄 Smart Shrink सफलतापूर्वक लागू किया गया!');
+                } else {
+                    updateFeedback('Smart Shrink विफल रहा। फ़ॉन्ट 13px से कम नहीं किया जा सकता।', false);
+                }
+            });
+        }
+        if (mFontDecreaseBtn) {
+            mFontDecreaseBtn.addEventListener('click', () => {
+                if (contentFontSize > 11) {
+                    contentFontSize = Math.max(11, Math.round((contentFontSize - 0.5) * 10) / 10);
+                    document.documentElement.style.setProperty('--content-font-size', `${contentFontSize}px`);
+                    fontSizeValSpan.textContent = `${contentFontSize}px`;
+                    cachedMaxContentHeight = null;
+                    renderPreview();
+                    saveWorkspaceToLocalStorage();
+                    
+                    runTextVisibilityAudit();
+                    updateFeedback(`फ़ॉन्ट साइज छोटा करके ${contentFontSize}px किया गया।`);
+                } else {
+                    updateFeedback('फ़ॉन्ट साइज को 11px से छोटा नहीं किया जा सकता।', false);
+                }
+            });
+        }
+        if (mRemoveGapsBtn) {
+            mRemoveGapsBtn.addEventListener('click', () => {
+                const result = performRemoveDocumentGaps(true, false);
+                if (result && result.success) {
+                    runTextVisibilityAudit();
+                    updateFeedback(`गैप हटाए गए! empty lines: ${result.emptyLinesRemoved}, spacers: ${result.spacersRemoved}`);
+                } else {
+                    updateFeedback('कोई गैप या खाली लाइन्स नहीं मिले जिन्हें हटाया जा सके।', false);
+                }
+            });
+        }
     }
 
     // Helper to escape HTML tags in text snippets

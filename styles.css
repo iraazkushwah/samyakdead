@@ -534,9 +534,9 @@ sub {
 /* Editor Panel (Left Sidebar) */
 .editor-panel {
     position: relative;
-    width: 8.5in; /* Sized exactly to Letter page width */
+    width: 210mm; /* Sized exactly to A4 page width */
     min-width: 380px;
-    max-width: 8.5in;
+    max-width: 210mm;
     flex-shrink: 0;
     background: rgba(12, 12, 20, 0.45);
     backdrop-filter: blur(12px);
@@ -1606,8 +1606,8 @@ body.light-mode .header-stats {
    5. REAL A4 PRINT-PERFECT CSS LAYOUT
    ========================================================================== */
 .a4-page {
-    width: 8.5in;
-    height: 11in;
+    width: 210mm;
+    height: 297mm;
     background-color: var(--page-bg);
     color: var(--text-color);
     box-shadow: var(--shadow-page);
@@ -1684,7 +1684,7 @@ body.light-mode .header-stats {
     bottom: var(--custom-page-margin-y, 6mm);
     left: var(--custom-page-margin-x, 8mm);
     right: var(--custom-page-margin-x, 8mm);
-    border: var(--custom-inner-border-thickness) solid var(--custom-inner-border-color); /* Dynamically customized inner border */
+    border: var(--custom-inner-border-thickness) var(--custom-inner-border-style, solid) var(--custom-inner-border-color); /* Dynamically customized inner border */
     padding: var(--custom-page-padding-y, 4mm) var(--custom-page-padding-x, 6mm) var(--custom-page-padding-y, 4mm) var(--custom-page-padding-x, 6mm); /* Core internal margins */
     box-sizing: border-box;
     display: flex;
@@ -1708,6 +1708,9 @@ body.light-mode .header-stats {
     pointer-events: none;
     z-index: 100;
     transition: var(--transition-smooth);
+    display: var(--custom-corner-display, block);
+    opacity: var(--custom-corner-opacity, 1);
+    visibility: var(--custom-corner-visibility, visible);
 }
 .top-left {
     top: calc(var(--custom-page-margin-y, 6mm) - 1mm);
@@ -2586,7 +2589,7 @@ strong {
 
     /* Force page-footer and border to black in print and shift down */
     .page-footer {
-        border-top: 1px solid #000000 !important;
+        border-top: 1px solid var(--custom-inner-border-color, var(--secondary-color)) !important;
         color: #000000 !important;
         padding-top: 14px !important;
     }
@@ -2655,8 +2658,8 @@ strong {
     }
     
     .a4-page {
-        width: 8.5in !important;
-        height: 11in !important;
+        width: 210mm !important;
+        height: 297mm !important;
         margin: 0 !important;
         padding: 0 !important;
         box-shadow: none !important;
@@ -2697,7 +2700,7 @@ strong {
         bottom: var(--custom-page-margin-y, 6mm) !important;
         left: var(--custom-page-margin-x, 8mm) !important;
         right: var(--custom-page-margin-x, 8mm) !important;
-        border: var(--custom-inner-border-thickness) solid var(--custom-inner-border-color) !important;
+        border: var(--custom-inner-border-thickness) var(--custom-inner-border-style, solid) var(--custom-inner-border-color) !important;
         padding: var(--custom-page-padding-y, 4mm) var(--custom-page-padding-x, 6mm) var(--custom-page-padding-y, 4mm) var(--custom-page-padding-x, 6mm) !important;
         box-sizing: border-box !important;
         display: flex !important;
@@ -2717,6 +2720,9 @@ strong {
         pointer-events: none !important;
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
+        display: var(--custom-corner-display, block) !important;
+        opacity: var(--custom-corner-opacity, 1) !important;
+        visibility: var(--custom-corner-visibility, visible) !important;
     }
     .top-left { 
         top: calc(var(--custom-page-margin-y, 6mm) - 1mm) !important; 
@@ -2753,7 +2759,7 @@ strong {
 
     /* Remove default headers/footers */
     @page {
-        size: letter;
+        size: a4;
         margin: 0 !important;
     }
     
@@ -3485,6 +3491,17 @@ body.light-mode .search-replace-panel {
 .page-content.layout-two-column > .bullet-list,
 .page-content.layout-two-column > .markdown-table {
     break-inside: auto;
+}
+
+/* Tables in two-column layouts are styled compactly to prevent excessive height inflation */
+.page-content.layout-two-column .markdown-table {
+    font-size: calc(var(--content-font-size) - 1.5px);
+    line-height: 1.25;
+    margin: 6px 0;
+}
+.page-content.layout-two-column .markdown-table th,
+.page-content.layout-two-column .markdown-table td {
+    padding: 4px 8px;
 }
 
 .markdown-table tr {
@@ -7714,7 +7731,7 @@ body.light-mode .premium-slider-group input[type="range"]::-webkit-slider-thumb 
 .page-thumbnail-wrapper {
     position: relative;
     width: 100%;
-    aspect-ratio: 8.5 / 11; /* Letter aspect ratio */
+    aspect-ratio: 210 / 297; /* A4 aspect ratio */
     background: #ffffff;
     border: 1px solid rgba(255, 255, 255, 0.05);
     border-radius: 6px;
@@ -9480,6 +9497,208 @@ body.light-mode .premium-slider-group input[type="range"]::-webkit-slider-thumb 
     .explanation-style-toggle {
         display: none !important;
     }
+}
+
+/* 15. PDF CHECK BUTTON & MODAL EXTENSIONS */
+.preview-header-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    z-index: 101;
+}
+
+.pdf-check-btn {
+    background-color: rgba(79, 70, 229, 0.15);
+    color: #a5b4fc;
+    border: 1px solid rgba(79, 70, 229, 0.4);
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    transition: all 0.2s ease;
+    font-family: var(--font-ui);
+    outline: none;
+}
+
+.pdf-check-btn:hover {
+    background-color: var(--ui-accent, #4f46e5);
+    color: white;
+    box-shadow: 0 0 10px rgba(79, 70, 229, 0.4);
+    border-color: var(--ui-accent, #4f46e5);
+}
+
+body.light-mode .pdf-check-btn {
+    background-color: #f1f5f9;
+    color: #4f46e5;
+    border: 1px solid #e2e8f0;
+}
+
+body.light-mode .pdf-check-btn:hover {
+    background-color: #4f46e5;
+    color: white;
+    border-color: #4f46e5;
+}
+
+/* Save PDF button styling */
+.pdf-print-btn {
+    background-color: rgba(16, 185, 129, 0.15);
+    color: #34d399;
+    border: 1px solid rgba(16, 185, 129, 0.4);
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    transition: all 0.2s ease;
+    font-family: var(--font-ui);
+    outline: none;
+}
+
+.pdf-print-btn:hover {
+    background-color: #10b981;
+    color: white;
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+    border-color: #10b981;
+}
+
+body.light-mode .pdf-print-btn {
+    background-color: #f1f5f9;
+    color: #10b981;
+    border: 1px solid #e2e8f0;
+}
+
+body.light-mode .pdf-print-btn:hover {
+    background-color: #10b981;
+    color: white;
+    border-color: #10b981;
+}
+
+/* Responsive styles to hide text on mobile screen */
+@media (max-width: 600px) {
+    .pdf-check-btn .btn-text, .pdf-print-btn .btn-text {
+        display: none !important;
+    }
+    .pdf-check-btn, .pdf-print-btn {
+        padding: 6px 10px;
+    }
+    .preview-header-right {
+        gap: 6px;
+    }
+}
+
+/* Modal audit details styling */
+.audit-resolution-box {
+    margin-top: 16px;
+    padding: 16px;
+    border: 1px dashed rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.02);
+}
+
+body.light-mode .audit-resolution-box {
+    border: 1px dashed rgba(0, 0, 0, 0.12);
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+/* Success box formatting updates */
+.audit-success-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 24px 16px;
+}
+
+/* Inline feedback classes for modal */
+.inline-feedback {
+    animation: fadeInSlide 0.3s ease-out forwards;
+    margin-bottom: 12px !important;
+}
+
+@keyframes fadeInSlide {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.btn-audit-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.btn-audit-action.shrink {
+    background: rgba(79, 70, 229, 0.2);
+    border-color: rgba(79, 70, 229, 0.4);
+    color: #a5b4fc;
+}
+.btn-audit-action.shrink:hover {
+    background: #4f46e5;
+    color: white;
+}
+
+.btn-audit-action.font-dec {
+    background: rgba(234, 179, 8, 0.1);
+    border-color: rgba(234, 179, 8, 0.3);
+    color: #fef08a;
+}
+.btn-audit-action.font-dec:hover {
+    background: #eab308;
+    color: black;
+}
+
+.btn-audit-action.gaps {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: rgba(239, 68, 68, 0.3);
+    color: #fca5a5;
+}
+.btn-audit-action.gaps:hover {
+    background: #ef4444;
+    color: white;
+}
+
+body.light-mode .btn-audit-action.shrink {
+    background: rgba(79, 70, 229, 0.1);
+    color: #4f46e5;
+    border-color: rgba(79, 70, 229, 0.2);
+}
+body.light-mode .btn-audit-action.shrink:hover {
+    background: #4f46e5;
+    color: white;
+}
+
+body.light-mode .btn-audit-action.font-dec {
+    background: rgba(234, 179, 8, 0.08);
+    color: #854d0e;
+    border-color: rgba(234, 179, 8, 0.18);
+}
+body.light-mode .btn-audit-action.font-dec:hover {
+    background: #eab308;
+    color: black;
+}
+
+body.light-mode .btn-audit-action.gaps {
+    background: rgba(239, 68, 68, 0.08);
+    color: #991b1b;
+    border-color: rgba(239, 68, 68, 0.18);
+}
+body.light-mode .btn-audit-action.gaps:hover {
+    background: #ef4444;
+    color: white;
 }
 
 

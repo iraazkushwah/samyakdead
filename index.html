@@ -736,13 +736,24 @@
                                             <label><span class="opt-icon">🎨</span> Corner Color:</label>
                                             <input type="color" id="design-corner-color" value="#c5a353" style="width: 100%; height: 32px; border: 1px solid var(--ui-border); background: none; cursor: pointer; border-radius: 4px;">
                                         </div>
+                                        <div class="option-item full-width-opt">
+                                            <label><span class="opt-icon">📏</span> Border Style (बॉर्डर स्टाइल):</label>
+                                            <select id="design-border-style" class="opt-select">
+                                                <option value="solid" selected>Solid (एकल रेखा)</option>
+                                                <option value="double">Elegant Double (डबल रेखा)</option>
+                                                <option value="dashed">Modern Dashed (डैश रेखा)</option>
+                                                <option value="dotted">Neat Dotted (बिंदु रेखा)</option>
+                                                <option value="groove">3D Groove (ग्रूव स्टाइल)</option>
+                                                <option value="ridge">3D Ridge (रिज स्टाइल)</option>
+                                            </select>
+                                        </div>
                                         <div class="option-item">
                                             <label><span class="opt-icon">➖</span> Border Thickness (<span id="design-border-thick-val">1px</span>):</label>
                                             <input type="range" id="design-border-thick" min="0" max="5" value="1" style="width: 100%; accent-color: var(--ui-accent);">
                                         </div>
                                         <div class="option-item">
                                             <label><span class="opt-icon">📐</span> Corner Bracket Size (<span id="design-corner-size-val">22px</span>):</label>
-                                            <input type="range" id="design-corner-size" min="10" max="40" value="22" style="width: 100%; accent-color: var(--ui-accent);">
+                                            <input type="range" id="design-corner-size" min="0" max="40" value="22" style="width: 100%; accent-color: var(--ui-accent);">
                                         </div>
                                     </div>
                                 </div>
@@ -831,7 +842,6 @@
             <div class="fab-container" id="editor-fab-container">
                 <!-- Speed Dial Sub-buttons -->
                 <div class="fab-menu-items">
-                    <button id="print-pdf-btn" class="fab-sub-btn btn-primary" title="Save as PDF">🖨️</button>
                     <button id="check-visibility-btn" class="fab-sub-btn btn-secondary" title="Check Text Visibility: जांचें कि कोई टेक्स्ट छिपा या गायब तो नहीं है">🔍</button>
                     <button id="smart-shrink-btn" class="fab-sub-btn btn-secondary" title="Smart Shrink: Auto-shrink spacing/size slightly to fit overflow content onto previous pages">🪄</button>
                     <button id="remove-gaps-btn" class="fab-sub-btn btn-secondary" title="Remove Gaps: Remove all blank lines and spacer tags from pages to make the layout tight">🗜️</button>
@@ -847,24 +857,29 @@
             <button id="sidebar-toggle-btn" class="sidebar-toggle-btn" title="Collapse Sidebar">◀</button>
         </div>
 
-        <!-- Right Panel: Live Letter Preview Canvas -->
+        <!-- Right Panel: Live A4 Preview Canvas -->
         <main class="preview-panel">
             <div class="preview-header">
                 <h2>Preview</h2>
                 <div class="header-stats" title="Page / Words">
                     <span id="active-page-label">Cover</span>, <span id="word-count">0</span>
                 </div>
-                <div class="preview-zoom-controls">
-                    <button id="zoom-out" class="zoom-btn" title="Zoom Out">-</button>
-                    <span id="zoom-level">100%</span>
-                    <button id="zoom-in" class="zoom-btn" title="Zoom In">+</button>
+                <div class="preview-header-right">
+                    <button id="pdf-check-btn" class="pdf-check-btn" title="PDF Overflow Check: जांचें कि PDF में कोई लाइन कटेगी तो नहीं">
+                        🔍 <span class="btn-text">PDF Check</span>
+                    </button>
+                    <div class="preview-zoom-controls">
+                        <button id="zoom-out" class="zoom-btn" title="Zoom Out">-</button>
+                        <span id="zoom-level">100%</span>
+                        <button id="zoom-in" class="zoom-btn" title="Zoom In">+</button>
+                    </div>
                 </div>
             </div>
             
             <div class="canvas-wrapper">
-                <!-- Letter Pages Container -->
+                <!-- A4 Pages Container -->
                 <div id="pages-container" class="pages-container">
-                    <!-- Dynamic Letter pages will be injected here by JS -->
+                    <!-- Dynamic A4 pages will be injected here by JS -->
                 </div>
             </div>
 
@@ -1298,7 +1313,7 @@
         <div class="page-grid-modal-container">
             <header class="page-grid-modal-header">
                 <div class="page-grid-modal-title-area">
-                    <h2>सम्यक् Letter Page Layout Manager</h2>
+                    <h2>सम्यक् A4 Page Layout Manager</h2>
                     <p>पेजों को री-ऑर्डर करने के लिए ड्रैग एंड ड्रॉप करें, या क्लोन/डिलीट करें (Drag & drop to reorder, clone or delete pages)</p>
                 </div>
                 <button id="close-grid-modal-btn" class="close-grid-modal-btn" title="Close Grid Manager">&times;</button>
