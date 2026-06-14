@@ -6438,6 +6438,47 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Helper to detect overflow in single and two-column layouts
+    function checkPageOverflow(contentEl, isTwoCol, maxHeight) {
+        const contentRect = contentEl.getBoundingClientRect();
+        // Fallback if the element is not in DOM or hidden (rect is 0)
+        if (contentRect.width === 0 || contentRect.height === 0) {
+            // Use estimated height check as fallback
+            if (!isTwoCol) {
+                const children = contentEl.children;
+                if (children.length > 0) {
+                    const lastChild = children[children.length - 1];
+                    const contentHeight = lastChild.offsetTop + lastChild.offsetHeight;
+                    return contentHeight > maxHeight;
+                }
+            }
+            return false;
+        }
+
+        const descendants = Array.from(contentEl.querySelectorAll('*'));
+        const directChildren = Array.from(contentEl.children);
+        const allElements = [...directChildren, ...descendants];
+
+        if (isTwoCol) {
+            // In 2-column mode, check if any element overflows the content area's right or bottom boundaries
+            return allElements.some(child => {
+                const childRect = child.getBoundingClientRect();
+                // Check horizontal overflow (spills into column 3)
+                const horizontalOverflow = childRect.right > (contentRect.right + 3);
+                // Check vertical overflow (spills below column 2 bottom)
+                const verticalOverflow = childRect.bottom > (contentRect.bottom + 3);
+                return horizontalOverflow || verticalOverflow;
+            });
+        } else {
+            // In single column mode, check if any element overflows the content area's bottom boundary
+            return allElements.some(child => {
+                const childRect = child.getBoundingClientRect();
+                return childRect.bottom > (contentRect.bottom + 3);
+            });
+        }
+    }
+
+
     // Render right-side actual A4 pages sequentially
     function renderPreview(forceStrictSplit = false) {
         // Save current scroll positions of the preview canvas scroll wrapper to prevent jumping
@@ -6573,25 +6614,16 @@ document.addEventListener('DOMContentLoaded', () => {
             currentPageHeight += estHeight;
 
             // Check if page overflows
-            let isOverflow = false;
-            if (isTwoCol) {
-                // In two column layouts, check actual scrollWidth with a 15px zoom-rounding-tolerance
-                const contentEl = currentPageStruct.contentElement;
-                isOverflow = contentEl.scrollWidth > (contentEl.clientWidth + 15);
-                if (!isOverflow) {
-                    // Double check if any child's right edge overflows column 2 (virtual column 3 overflow)
-                    isOverflow = Array.from(contentEl.children).some(child => child.offsetLeft + child.offsetWidth > contentEl.clientWidth + 15);
-                }
-            } else {
-                // In single column layouts, measure content height by the bottom of the last child
-                const children = currentPageStruct.contentElement.children;
+            const contentEl = currentPageStruct.contentElement;
+            let isOverflow = checkPageOverflow(contentEl, isTwoCol, MAX_CONTENT_HEIGHT);
+            if (!isTwoCol) {
+                const children = contentEl.children;
                 let contentHeight = 0;
                 if (children.length > 0) {
                     const lastChild = children[children.length - 1];
                     contentHeight = lastChild.offsetTop + lastChild.offsetHeight;
                 }
                 currentPageHeight = contentHeight;
-                isOverflow = contentHeight > MAX_CONTENT_HEIGHT;
             }
 
             if (isOverflow) {
@@ -6623,20 +6655,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         let separator = (block.type === 'table') ? '\n' : '';
                         let testMarkdown = words.slice(0, wordCount).join(separator);
                         updateNodeContent(node, block.type, testMarkdown);
-                        if (isTwoCol) {
-                            const contentEl = currentPageStruct.contentElement;
-                            const hasHScroll = contentEl.scrollWidth > (contentEl.clientWidth + 15);
-                            if (hasHScroll) return false;
-                            return !Array.from(contentEl.children).some(child => child.offsetLeft + child.offsetWidth > contentEl.clientWidth + 15);
-                        } else {
-                            const children = currentPageStruct.contentElement.children;
-                            let contentHeight = 0;
-                            if (children.length > 0) {
-                                const lastChild = children[children.length - 1];
-                                contentHeight = lastChild.offsetTop + lastChild.offsetHeight;
-                            }
-                            return contentHeight <= MAX_CONTENT_HEIGHT;
-                        }
+                        return !checkPageOverflow(currentPageStruct.contentElement, isTwoCol, MAX_CONTENT_HEIGHT);
                     };
 
                     // Binary search for the maximum number of words/rows that fit
@@ -6871,23 +6890,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!contentEl) return;
             
             const isTwoCol = contentEl.classList.contains('layout-two-column');
-            let isOverflow = false;
-            
-            if (isTwoCol) {
-                isOverflow = contentEl.scrollWidth > (contentEl.clientWidth + 15);
-                if (!isOverflow) {
-                    isOverflow = Array.from(contentEl.children).some(child => child.offsetLeft + child.offsetWidth > contentEl.clientWidth + 15);
-                }
-            } else {
-                // In single column layouts, measure content height by the bottom of the last child
-                const children = contentEl.children;
-                let contentHeight = 0;
-                if (children.length > 0) {
-                    const lastChild = children[children.length - 1];
-                    contentHeight = lastChild.offsetTop + lastChild.offsetHeight;
-                }
-                isOverflow = contentHeight > MAX_CONTENT_HEIGHT;
-            }
+            let isOverflow = checkPageOverflow(contentEl, isTwoCol, MAX_CONTENT_HEIGHT);
             
             // Remove old badge if any
             const oldBadge = page.querySelector('.overflow-badge');
