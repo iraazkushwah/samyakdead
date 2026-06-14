@@ -6012,6 +6012,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const lines = block.markdown.split('\n');
             
             let isFirstRow = true;
+            let firstColIsNo = false;
             
             for (let j = 0; j < lines.length; j++) {
                 const line = lines[j].trim();
@@ -6026,14 +6027,28 @@ document.addEventListener('DOMContentLoaded', () => {
                     .map(c => c.trim())
                     .slice(1, -1);
                 
+                if (isFirstRow && cells.length > 0) {
+                    const firstHeader = (cells[0] || '').replace(/\*/g, '').replace(/\s+/g, '').replace(/\./g, '').toLowerCase().trim();
+                    if (firstHeader === 'no' || firstHeader === 'sno' || firstHeader === 'sr' || firstHeader === 'srno' || firstHeader === '#') {
+                        firstColIsNo = true;
+                    }
+                }
+                
                 const tr = document.createElement('tr');
                 const isHeader = isFirstRow;
                 
+                let cellIdx = 0;
                 cells.forEach(cellText => {
                     const cell = document.createElement(isHeader ? 'th' : 'td');
                     let formattedText = formatMarkdownText(cellText);
                     cell.innerHTML = formattedText;
+                    
+                    if (cellIdx === 0 && firstColIsNo) {
+                        cell.classList.add('table-col-no');
+                    }
+                    
                     tr.appendChild(cell);
+                    cellIdx++;
                 });
                 
                 if (isHeader) {
@@ -6112,6 +6127,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const tbody = document.createElement('tbody');
             const lines = markdown.split('\n');
             let isFirstRow = true;
+            let firstColIsNo = false;
             
             for (let j = 0; j < lines.length; j++) {
                 const line = lines[j].trim();
@@ -6125,15 +6141,29 @@ document.addEventListener('DOMContentLoaded', () => {
                     .map(c => c.trim())
                     .slice(1, -1);
                 
+                if (isFirstRow && cells.length > 0) {
+                    const firstHeader = (cells[0] || '').replace(/\*/g, '').replace(/\s+/g, '').replace(/\./g, '').toLowerCase().trim();
+                    if (firstHeader === 'no' || firstHeader === 'sno' || firstHeader === 'sr' || firstHeader === 'srno' || firstHeader === '#') {
+                        firstColIsNo = true;
+                    }
+                }
+                
                 const tr = document.createElement('tr');
                 const isHeader = isFirstRow;
                 isFirstRow = false;
                 
+                let cellIdx = 0;
                 cells.forEach(cellText => {
                     const cell = document.createElement(isHeader ? 'th' : 'td');
                     let formattedText = formatMarkdownText(cellText);
                     cell.innerHTML = formattedText;
+                    
+                    if (cellIdx === 0 && firstColIsNo) {
+                        cell.classList.add('table-col-no');
+                    }
+                    
                     tr.appendChild(cell);
+                    cellIdx++;
                 });
                 
                 tbody.appendChild(tr);
@@ -7097,6 +7127,15 @@ document.addEventListener('DOMContentLoaded', () => {
         headerCenter.className = 'header-center';
         const centerSpan = document.createElement('span');
         centerSpan.textContent = coverData.subtitle; // Month / Subtitle of magazine
+        
+        // Dynamically shrink font size if header center text is long
+        const subtitleText = coverData.subtitle || '';
+        if (subtitleText.length > 20) {
+            // Default font size is 15px. Gradually shrink it down to a minimum of 9px.
+            const calculatedSize = Math.max(9, 15 - Math.floor((subtitleText.length - 20) / 6));
+            centerSpan.style.fontSize = `${calculatedSize}px`;
+        }
+        
         headerCenter.appendChild(centerSpan);
 
         const headerRight = document.createElement('div');

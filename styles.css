@@ -1786,6 +1786,7 @@ body.light-mode .header-stats {
     max-width: 50%;
     text-align: center;
     margin: 0 auto;
+    overflow: hidden;
 }
 
 .header-center span {
@@ -1794,6 +1795,11 @@ body.light-mode .header-stats {
     color: #000000;
     font-family: var(--font-body);
     line-height: 1.25;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+    max-width: 100%;
 }
 
 .header-right {
@@ -3505,6 +3511,14 @@ body.light-mode .search-replace-panel {
     word-break: break-word;
     overflow-wrap: break-word;
     white-space: normal;
+}
+.markdown-table th.table-col-no,
+.markdown-table td.table-col-no,
+.page-content.layout-two-column .markdown-table th.table-col-no,
+.page-content.layout-two-column .markdown-table td.table-col-no {
+    white-space: nowrap !important;
+    text-align: center;
+    min-width: 45px;
 }
 .page-content.layout-two-column .markdown-table tr {
     break-inside: auto;
