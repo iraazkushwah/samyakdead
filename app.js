@@ -6514,21 +6514,24 @@ document.addEventListener('DOMContentLoaded', () => {
         const directChildren = Array.from(contentEl.children);
         const allElements = [...directChildren, ...descendants];
 
+        // Use the safety boundary top + maxHeight for vertical overflow check
+        const maxAllowedBottom = contentRect.top + maxHeight;
+
         if (isTwoCol) {
-            // In 2-column mode, check if any element overflows the content area's right or bottom boundaries
+            // In 2-column mode, check if any element overflows the content area's right or bottom safety boundaries
             return allElements.some(child => {
                 const childRect = child.getBoundingClientRect();
                 // Check horizontal overflow (spills into column 3)
                 const horizontalOverflow = childRect.right > (contentRect.right + 3);
-                // Check vertical overflow (spills below column 2 bottom)
-                const verticalOverflow = childRect.bottom > (contentRect.bottom + 3);
+                // Check vertical overflow (spills below column 2 bottom safety threshold)
+                const verticalOverflow = childRect.bottom > (maxAllowedBottom + 3);
                 return horizontalOverflow || verticalOverflow;
             });
         } else {
-            // In single column mode, check if any element overflows the content area's bottom boundary
+            // In single column mode, check if any element overflows the content area's bottom boundary safety threshold
             return allElements.some(child => {
                 const childRect = child.getBoundingClientRect();
-                return childRect.bottom > (contentRect.bottom + 3);
+                return childRect.bottom > (maxAllowedBottom + 3);
             });
         }
     }
@@ -6560,8 +6563,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 cachedMaxContentHeight = measuredHeight;
             }
         }
-        // Apply a defensive 48px safety buffer (breathing room) in preview to accommodate font rendering differences and social media links in physical PDF printing
-        MAX_CONTENT_HEIGHT = (cachedMaxContentHeight ? (cachedMaxContentHeight - 48) : 862);
+        // Apply a defensive 58px safety buffer (breathing room) in preview to accommodate font rendering differences and social media links in physical PDF printing
+        MAX_CONTENT_HEIGHT = (cachedMaxContentHeight ? (cachedMaxContentHeight - 58) : 852);
 
         // Clear canvas
         pagesContainer.innerHTML = '';
@@ -9653,7 +9656,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!contentEl) return;
             
             const contentRect = contentEl.getBoundingClientRect();
-            const pageHeight = contentRect.height;
+            // Use the pagination safety MAX_CONTENT_HEIGHT for consistent overflow reporting in PDF Check
+            const pageHeight = MAX_CONTENT_HEIGHT;
             
             // Find all nodes with data-block-id on this page
             const blockNodes = contentEl.querySelectorAll('[data-block-id]');
@@ -9665,7 +9669,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const relativeTop = nodeRect.top - contentRect.top;
                 const relativeBottom = nodeRect.bottom - contentRect.top;
                 
-                // Check if element extends past the page boundary
+                // Check if element extends past the page safety boundary
                 // We add a 2px tolerance for sub-pixel layout rounding
                 if (relativeBottom > pageHeight + 2) {
                     const isCompletelyHidden = (relativeTop >= pageHeight - 2);
@@ -9913,5 +9917,12 @@ document.addEventListener('DOMContentLoaded', () => {
         triggerInitialRender();
     } else {
         window.addEventListener('load', triggerInitialRender);
+    }
+
+    // Handle web font loading race conditions to clear false overflow warnings
+    if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(() => {
+            triggerInitialRender();
+        });
     }
 });
