@@ -9742,6 +9742,157 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    function runSmartFix() {
+        const maxIterations = 30;
+        let iteration = 0;
+        let fixedCount = 0;
+
+        while (iteration < maxIterations) {
+            iteration++;
+            // 1. Get current unified markdown
+            let fullContentMarkdown = pagesData.slice(1).map(p => p.text).join('\n');
+            let lines = fullContentMarkdown.split('\n');
+            
+            // Re-parse text to blocks using parseTextToBlocks
+            let blocks = parseTextToBlocks(fullContentMarkdown);
+            
+            // Assign IDs to blocks
+            blocks.forEach((block, idx) => { block.id = idx; });
+            
+            // 2. Find the first page with overflow
+            const renderedPages = pagesContainer.querySelectorAll('.a4-page:not(.cover-page)');
+            let firstOverflowReport = null;
+            
+            for (let page of renderedPages) {
+                const pageNum = parseInt(page.getAttribute('data-page'));
+                const visualPageNum = pageNum - 1;
+                const contentEl = page.querySelector('.page-content');
+                if (!contentEl) continue;
+                
+                const isTwoCol = contentEl.classList.contains('layout-two-column');
+                let isOverflow = checkPageOverflow(contentEl, isTwoCol, MAX_CONTENT_HEIGHT);
+                
+                if (isOverflow) {
+                    // Find which block on this page is overflowing
+                    const blockNodes = contentEl.querySelectorAll('[data-block-id]');
+                    const pageRect = contentEl.getBoundingClientRect();
+                    const maxAllowedBottom = pageRect.top + MAX_CONTENT_HEIGHT;
+                    
+                    for (let node of blockNodes) {
+                        const nodeRect = node.getBoundingClientRect();
+                        const blockId = parseInt(node.getAttribute('data-block-id'));
+                        
+                        // In two-column mode, check if node is in column 2/spans all
+                        let isRelevant = true;
+                        if (isTwoCol) {
+                            const style = window.getComputedStyle(node);
+                            const isColumnSpanAll = style.columnSpan === 'all' || style.webkitColumnSpan === 'all' || node.classList.contains('chapter-header');
+                            // We use the same right edge boundary as checkPageOverflow to see if it is in Column 2 or spans all
+                            const hasContentInColumn2 = nodeRect.right > (pageRect.left + (pageRect.width / 2) + 3);
+                            if (!hasContentInColumn2 && !isColumnSpanAll) {
+                                isRelevant = false;
+                            }
+                        }
+                        
+                        if (isRelevant) {
+                            // Check vertical or horizontal overflow
+                            const vert = nodeRect.bottom > (maxAllowedBottom + 3);
+                            const horiz = isTwoCol && (nodeRect.right > pageRect.right + 12);
+                            
+                            if (vert || horiz) {
+                                firstOverflowReport = {
+                                    page: visualPageNum,
+                                    blockId: blockId,
+                                    block: blocks[blockId],
+                                    node: node,
+                                    vert,
+                                    horiz
+                                };
+                                break;
+                            }
+                        }
+                    }
+                    if (firstOverflowReport) break;
+                }
+            }
+            
+            if (!firstOverflowReport) {
+                // No more overflows detected!
+                break;
+            }
+            
+            // 3. Fix the first overflow report
+            const report = firstOverflowReport;
+            const block = report.block;
+            if (!block) break;
+            
+            // Check if this block is the first element on the page
+            const pageDOM = pagesContainer.querySelector(`.a4-page[data-page="${report.page + 1}"]`);
+            const firstNodeOnPage = pageDOM ? pageDOM.querySelector('.page-content [data-block-id]') : null;
+            const isFirstOnPage = firstNodeOnPage && parseInt(firstNodeOnPage.getAttribute('data-block-id')) === report.blockId;
+            
+            if (!isFirstOnPage) {
+                // Scenario A: The overflowing block is not the first block on the page.
+                // We insert a [pagebreak] before this block.
+                const startLineIdx = block.startLine;
+                lines.splice(startLineIdx, 0, '[pagebreak]');
+                fixedCount++;
+            } else {
+                // Scenario B: The block is already the first block on the page, and still overflows.
+                // We must split the block!
+                if (block.type === 'paragraph' || block.type === 'bullet') {
+                    // Let's do a word split:
+                    const words = block.markdown.split(/(\s+)/);
+                    if (words.length > 4) {
+                        // Split it in half
+                        const mid = Math.floor(words.length / 2);
+                        const part1 = words.slice(0, mid).join('');
+                        const part2 = words.slice(mid).join('');
+                        
+                        // Replace the block line with part1, [pagebreak], and part2
+                        const startLineIdx = block.startLine;
+                        let prefix = (block.type === 'bullet') ? (block.markdown.match(/^\s*(•|●|■|▪|▫|[\u2022\u25CF\u25AA\u25AB]|\-|\*|\(\d+\)|\d+\.)\s*/) || [""])[0] : "";
+                        
+                        let cleanPart2 = part2.trimStart();
+                        if (prefix && !cleanPart2.startsWith(prefix.trim())) {
+                            cleanPart2 = prefix + cleanPart2;
+                        }
+                        
+                        lines.splice(startLineIdx, 1, part1, '[pagebreak]', cleanPart2);
+                        fixedCount++;
+                    } else {
+                        // Too short to split, just insert a pagebreak before it anyway
+                        const startLineIdx = block.startLine;
+                        lines.splice(startLineIdx, 0, '[pagebreak]');
+                        fixedCount++;
+                    }
+                } else {
+                    // If it is not a paragraph or bullet (e.g. a large box or heading), we can't easily split it.
+                    // Just insert a pagebreak before it to be safe.
+                    const startLineIdx = block.startLine;
+                    lines.splice(startLineIdx, 0, '[pagebreak]');
+                    fixedCount++;
+                }
+            }
+            
+            // 4. Save the new markdown back to pagesData
+            const updatedText = lines.join('\n');
+            pagesData = [pagesData[0], { type: 'content', text: updatedText, layout: pagesData[1].layout || 'two-column' }];
+            
+            // Re-render preview
+            renderPreview(true); // forceStrictSplit
+        }
+        
+        if (fixedCount > 0) {
+            saveWorkspaceToLocalStorage();
+            if (activePageIndex > 0 && activePageIndex < pagesData.length) {
+                pageContentInput.value = pagesData[activePageIndex].text;
+            }
+        }
+        
+        return fixedCount;
+    }
+
     function runTextVisibilityAudit() {
         const fullContentMarkdown = pagesData.slice(1).map(p => p.text).join('\n');
         const blocks = parseTextToBlocks(fullContentMarkdown);
@@ -9923,6 +10074,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <h5 style="margin: 0 0 10px 0; color: #fde047; font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 6px;">💡 ऑटो-फ़िक्स विकल्प (Auto-Fix Solutions)</h5>
                     <p style="margin: 0 0 12px 0; font-size: 11px; color: var(--ui-text-muted);">निम्नलिखित विकल्पों का उपयोग करके आप ओवरफ़्लो को स्वतः ठीक कर सकते हैं:</p>
                     <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <button id="modal-smart-fix-overflows-btn" class="btn-audit-action fix-overflow" title="Smart Fix Overflows: स्वतः पेज ब्रेक या स्प्लिट जोड़कर ओवरफ़्लो ठीक करें">✨ Smart Fix Overflows</button>
                         <button id="modal-smart-shrink-btn" class="btn-audit-action shrink" title="Smart Shrink: स्वतः स्पेस/फ़ॉन्ट छोटा करके फिट करें">🪄 Smart Shrink</button>
                         <button id="modal-font-decrease-btn" class="btn-audit-action font-dec" title="Font Decrease: मैन्युअल फ़ॉन्ट साइज -0.5px छोटा करें">➖ फ़ॉन्ट छोटा करें</button>
                         <button id="modal-remove-gaps-btn" class="btn-audit-action gaps" title="Remove Gaps: पेजों से खाली लाइनें और स्पेसिंग हटाएं">🗜️ गैप हटाएँ</button>
@@ -9944,6 +10096,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Bind actions to dynamically generated buttons inside the modal
         const mPrintPdfBtn = document.getElementById('modal-print-pdf-btn');
         const mPrintWarningBtn = document.getElementById('modal-print-warning-btn');
+        const mSmartFixOverflowsBtn = document.getElementById('modal-smart-fix-overflows-btn');
         const mSmartShrinkBtn = document.getElementById('modal-smart-shrink-btn');
         const mFontDecreaseBtn = document.getElementById('modal-font-decrease-btn');
         const mRemoveGapsBtn = document.getElementById('modal-remove-gaps-btn');
@@ -9967,6 +10120,27 @@ document.addEventListener('DOMContentLoaded', () => {
             mPrintWarningBtn.addEventListener('click', () => {
                 hideIntegrityModal();
                 triggerPrintSequence();
+            });
+        }
+        if (mSmartFixOverflowsBtn) {
+            mSmartFixOverflowsBtn.addEventListener('click', () => {
+                mSmartFixOverflowsBtn.disabled = true;
+                mSmartFixOverflowsBtn.textContent = 'डिजिटल फ़िक्सिंग...';
+                
+                // Use setTimeout to allow the browser to paint the 'डिजिटल फ़िक्सिंग...' state
+                setTimeout(() => {
+                    const fixedCount = runSmartFix();
+                    
+                    mSmartFixOverflowsBtn.disabled = false;
+                    mSmartFixOverflowsBtn.textContent = '✨ Smart Fix Overflows';
+                    
+                    if (fixedCount > 0) {
+                        runTextVisibilityAudit();
+                        updateFeedback(`✨ ${fixedCount} ओवरफ़्लो सफलतापूर्वक ठीक किए गए!`);
+                    } else {
+                        updateFeedback('कोई ओवरफ़्लो समस्या नहीं मिली या ठीक नहीं की जा सकी।', false);
+                    }
+                }, 50);
             });
         }
         if (mSmartShrinkBtn) {

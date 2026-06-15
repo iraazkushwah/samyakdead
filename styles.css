@@ -9751,6 +9751,26 @@ body.light-mode .btn-audit-action.gaps:hover {
     color: white;
 }
 
+.btn-audit-action.fix-overflow {
+    background: rgba(16, 185, 129, 0.2);
+    border-color: rgba(16, 185, 129, 0.4);
+    color: #a7f3d0;
+}
+.btn-audit-action.fix-overflow:hover {
+    background: #10b981;
+    color: white;
+}
+body.light-mode .btn-audit-action.fix-overflow {
+    background: rgba(16, 185, 129, 0.1);
+    color: #047857;
+    border-color: rgba(16, 185, 129, 0.2);
+}
+body.light-mode .btn-audit-action.fix-overflow:hover {
+    background: #10b981;
+    color: white;
+}
+
+
 
 
 
