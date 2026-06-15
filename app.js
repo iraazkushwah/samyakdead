@@ -420,7 +420,7 @@ document.addEventListener('DOMContentLoaded', () => {
         zoomLevel = 60;
     }
     
-    let contentFontSize = 13.5; // Default body text font size is 13.5px
+    let contentFontSize = 16.1; // Default body text font size is 16.1px
     let MAX_CONTENT_HEIGHT = 910; // Measured dynamically inside renderPreview
     let cachedMaxContentHeight = null; // Cache to prevent layout thrashing
     let draggedTOCSectionName = null; // Store dragged section name for TOC reordering
@@ -1471,6 +1471,100 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Event listener for Phonetic Typing (English to Hindi) - Google Input Tools Emulation
     if (pageContentInput) {
+        // Helper to merge broken line wraps when pasting from PDFs
+        function cleanPastedText(text) {
+            if (!text) return '';
+            const lines = text.split('\n');
+            const joinedLines = [];
+            
+            for (let i = 0; i < lines.length; i++) {
+                let line = lines[i];
+                const trimmedCurrent = line.trim();
+                if (!trimmedCurrent) {
+                    joinedLines.push(line);
+                    continue;
+                }
+                
+                const isStartOfBox = trimmedCurrent.startsWith("[box");
+                const isEndOfBox = trimmedCurrent.startsWith("[/box]");
+                const isChapter = trimmedCurrent.startsWith("[chapter");
+                const isTable = trimmedCurrent.startsWith("|");
+                const isComment = trimmedCurrent.startsWith("<!--");
+                const isHtml = trimmedCurrent.startsWith("<");
+                const isHeading = trimmedCurrent.startsWith("#");
+                const isQuote = trimmedCurrent.startsWith(">");
+                const isPageBreak = trimmedCurrent.startsWith("[pagebreak") || 
+                                    trimmedCurrent.startsWith("[columnbreak") || 
+                                    trimmedCurrent.startsWith("[colbreak") || 
+                                    trimmedCurrent === "[thankyou]" ||
+                                    trimmedCurrent === "***" ||
+                                    trimmedCurrent === "* * *" ||
+                                    trimmedCurrent === "✦ ✦ ✦" ||
+                                    trimmedCurrent === "---";
+                                    
+                const canHaveContinuation = !isStartOfBox && !isEndOfBox && !isChapter && !isTable && !isComment && !isHtml && !isHeading && !isQuote && !isPageBreak;
+                
+                if (canHaveContinuation) {
+                    while (i + 1 < lines.length) {
+                        const nextLine = lines[i + 1];
+                        const trimmedNext = nextLine.trim();
+                        if (!trimmedNext) {
+                            break;
+                        }
+                        
+                        const isNextHeading = trimmedNext.startsWith("#");
+                        const isNextBullet = /^\s*(?:[•\u2022\u25CF\u25AA\u25AB➜⭐★]\s*|[-\*]\s+|🔶|🔷|🔸|🔹|♦️|💎|\d+[\.\)]|\(\d+\)|[a-zA-Z][\.\)]|\([a-zA-Z]\)|[ivxIVX]+[\.\)]|\([ivxIVX]+\))/i.test(trimmedNext);
+                        const isNextQuote = trimmedNext.startsWith(">");
+                        const isNextBox = trimmedNext.startsWith("[box") || trimmedNext.startsWith("[/box]");
+                        const isNextChapter = trimmedNext.startsWith("[chapter");
+                        const isNextPageBreak = trimmedNext.startsWith("[pagebreak") || 
+                                                trimmedNext.startsWith("[columnbreak") || 
+                                                trimmedNext.startsWith("[colbreak") || 
+                                                trimmedNext === "[thankyou]" ||
+                                                trimmedNext === "***" ||
+                                                trimmedNext === "* * *" ||
+                                                trimmedNext === "✦ ✦ ✦" ||
+                                                trimmedNext === "---";
+                        const isNextTable = trimmedNext.startsWith("|");
+                        const isNextComment = trimmedNext.startsWith("<!--");
+                        const isNextHtml = trimmedNext.startsWith("<");
+                        
+                        const isNextNewBlock = isNextHeading || isNextBullet || isNextQuote || isNextBox || isNextChapter || isNextPageBreak || isNextTable || isNextComment || isNextHtml;
+                        if (isNextNewBlock) {
+                            break;
+                        }
+                        
+                        const separator = line.endsWith(" ") ? "" : " ";
+                        line = line + separator + trimmedNext;
+                        i++;
+                    }
+                }
+                joinedLines.push(line);
+            }
+            return joinedLines.join('\n');
+        }
+
+        // Paste event listener to auto-join broken lines
+        pageContentInput.addEventListener('paste', (e) => {
+            e.preventDefault();
+            const clipboardData = e.clipboardData || window.clipboardData;
+            const pastedText = clipboardData.getData('text');
+            const cleanedText = cleanPastedText(pastedText);
+            
+            // Insert cleaned text at caret position
+            const start = pageContentInput.selectionStart;
+            const end = pageContentInput.selectionEnd;
+            const text = pageContentInput.value;
+            const newText = text.substring(0, start) + cleanedText + text.substring(end);
+            
+            pageContentInput.value = newText;
+            pageContentInput.selectionStart = pageContentInput.selectionEnd = start + cleanedText.length;
+            
+            // Dispatch input event to trigger automatic page updates and save
+            const inputEvent = new Event('input', { bubbles: true });
+            pageContentInput.dispatchEvent(inputEvent);
+        });
+
         // Keydown listener for controlling the floating suggestions dropdown
         pageContentInput.addEventListener('keydown', (e) => {
             if (!phoneticTypingToggle || !phoneticTypingToggle.checked) return;
@@ -2456,7 +2550,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         pagesData = state.pagesData;
                         lastPageData = state.lastPageData || { title: 'THANK YOU', subtitle: 'Samyak', tagline: 'कोचिंग नहीं क्रांति' };
                         activePageIndex = state.activePageIndex || 0;
-                        contentFontSize = state.contentFontSize || 13.5;
+                        contentFontSize = state.contentFontSize || 16.1;
                         watermarkSettings = state.watermarkSettings || watermarkSettings;
                         customDesignSettings = state.customDesignSettings || customDesignSettings;
                         if (customDesignSettings.compactMode === undefined) {
@@ -2540,7 +2634,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         // Restore font/spacing inputs
                         if (state.spacingSettings) {
                             globalFontStyleSelect.value = state.spacingSettings.fontStyle || 'modern-sans';
-                            globalFontWeightSelect.value = state.spacingSettings.fontWeight || '700';
+                            globalFontWeightSelect.value = state.spacingSettings.fontWeight || '500';
                             globalLineSpacingSelect.value = state.spacingSettings.lineSpacing || '1.45';
                             globalLetterSpacingSelect.value = state.spacingSettings.letterSpacing || '0px';
                         }
@@ -5491,13 +5585,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } 
             
             // 3. BULLET ITEM DETECTOR
-            else if (
-                trimmed.startsWith('•') || 
-                trimmed.startsWith('-') || 
-                trimmed.startsWith('*') || 
-                /^\(\d+\)/.test(trimmed) || 
-                /^\d+\./.test(trimmed)
-            ) {
+            else if (/^\s*(?:[•\u2022\u25CF\u25AA\u25AB➜⭐★]\s*|[-\*]\s+|🔶|🔷|🔸|🔹|♦️|💎|\d+[\.\)]|\(\d+\)|[a-zA-Z][\.\)]|\([a-zA-Z]\)|[ivxIVX]+[\.\)]|\([ivxIVX]+\))/i.test(trimmed)) {
                 const leadingSpaces = line.match(/^(\s+)/);
                 const isNested = leadingSpaces && leadingSpaces[1].length >= 2;
                 blocks.push({
@@ -6523,8 +6611,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 const childRect = child.getBoundingClientRect();
                 // Check horizontal overflow (spills into column 3)
                 const horizontalOverflow = childRect.right > (contentRect.right + 3);
-                // Check vertical overflow (spills below column 2 bottom safety threshold)
-                const verticalOverflow = childRect.bottom > (maxAllowedBottom + 3);
+                
+                // Only check vertical overflow if the element is in Column 2 or has column-span: all
+                let verticalOverflow = false;
+                const style = window.getComputedStyle(child);
+                const isColumnSpanAll = style.columnSpan === 'all' || style.webkitColumnSpan === 'all' || child.classList.contains('chapter-header');
+                const isInColumn2 = childRect.left > (contentRect.left + (contentRect.width / 2));
+                
+                if (isInColumn2 || isColumnSpanAll) {
+                    verticalOverflow = childRect.bottom > (maxAllowedBottom + 3);
+                }
                 return horizontalOverflow || verticalOverflow;
             });
         } else {
@@ -7892,7 +7988,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 pagesData = state.pagesData || [];
                 lastPageData = state.lastPageData || { title: 'THANK YOU', subtitle: 'Samyak', tagline: 'कोचिंग नहीं क्रांति' };
                 activePageIndex = (pagesData.length > 1) ? 1 : 0;
-                contentFontSize = state.contentFontSize || 13.5;
+                contentFontSize = state.contentFontSize || 16.1;
                 watermarkSettings = state.watermarkSettings || watermarkSettings;
                 customDesignSettings = state.customDesignSettings || customDesignSettings;
                 if (customDesignSettings.compactMode === undefined) {
@@ -8023,7 +8119,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Restore font/spacing inputs
                     if (state.spacingSettings) {
                         globalFontStyleSelect.value = state.spacingSettings.fontStyle || 'modern-sans';
-                        globalFontWeightSelect.value = state.spacingSettings.fontWeight || '700';
+                        globalFontWeightSelect.value = state.spacingSettings.fontWeight || '500';
                         globalLineSpacingSelect.value = state.spacingSettings.lineSpacing || '1.45';
                         globalLetterSpacingSelect.value = state.spacingSettings.letterSpacing || '0px';
                     }
@@ -8350,16 +8446,16 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         activePageIndex = 0;
-        contentFontSize = 13.5;
-        fontSizeValSpan.textContent = `13.5px`;
-        document.documentElement.style.setProperty('--content-font-size', `13.5px`);
+        contentFontSize = 16.1;
+        fontSizeValSpan.textContent = `16.1px`;
+        document.documentElement.style.setProperty('--content-font-size', `16.1px`);
         // Reset dynamic spacing options
         globalFontStyleSelect.value = 'modern-sans';
-        globalFontWeightSelect.value = '700';
+        globalFontWeightSelect.value = '500';
         globalLineSpacingSelect.value = '1.45';
         globalLetterSpacingSelect.value = '0px';
         
-        document.documentElement.style.setProperty('--content-font-weight', '700');
+        document.documentElement.style.setProperty('--content-font-weight', '500');
         document.documentElement.style.setProperty('--content-line-height', '1.45');
         document.documentElement.style.setProperty('--content-letter-spacing', '0px');
         
@@ -8644,10 +8740,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     pageContentInput.focus();
                     pageContentInput.setSelectionRange(startOfLine, endPos);
                     
-                    const textBefore = pageContentInput.value.substring(0, startOfLine);
-                    const linesBefore = textBefore.split('\n').length - 1;
-                    const estimatedLineHeight = parseFloat(window.getComputedStyle(pageContentInput).lineHeight) || 22.4;
-                    pageContentInput.scrollTop = Math.max(0, (linesBefore * estimatedLineHeight) - (pageContentInput.clientHeight / 2));
+                    setTimeout(() => {
+                        const textBefore = pageContentInput.value.substring(0, startOfLine);
+                        const linesBefore = textBefore.split('\n').length - 1;
+                        const estimatedLineHeight = parseFloat(window.getComputedStyle(pageContentInput).lineHeight) || 22.4;
+                        pageContentInput.scrollTop = Math.max(0, (linesBefore * estimatedLineHeight) - (pageContentInput.clientHeight / 2));
+                    }, 50);
                 }
             }
             return;
@@ -8669,11 +8767,13 @@ document.addEventListener('DOMContentLoaded', () => {
             pageContentInput.focus();
             pageContentInput.setSelectionRange(range.start, range.end);
             
-            // Scroll textarea to the line
-            const textBefore = pageContentInput.value.substring(0, range.start);
-            const linesBefore = textBefore.split('\n').length - 1;
-            const estimatedLineHeight = parseFloat(window.getComputedStyle(pageContentInput).lineHeight) || 22.4;
-            pageContentInput.scrollTop = Math.max(0, (linesBefore * estimatedLineHeight) - (pageContentInput.clientHeight / 2));
+            // Scroll textarea to the line inside a setTimeout to prevent browser focus scroll from overriding it
+            setTimeout(() => {
+                const textBefore = pageContentInput.value.substring(0, range.start);
+                const linesBefore = textBefore.split('\n').length - 1;
+                const estimatedLineHeight = parseFloat(window.getComputedStyle(pageContentInput).lineHeight) || 22.4;
+                pageContentInput.scrollTop = Math.max(0, (linesBefore * estimatedLineHeight) - (pageContentInput.clientHeight / 2));
+            }, 50);
         }
     });
 
@@ -9660,29 +9760,47 @@ document.addEventListener('DOMContentLoaded', () => {
             const pageHeight = MAX_CONTENT_HEIGHT;
             
             // Find all nodes with data-block-id on this page
+            const isTwoCol = contentEl.classList.contains('layout-two-column');
             const blockNodes = contentEl.querySelectorAll('[data-block-id]');
+            
             blockNodes.forEach(node => {
                 const blockId = parseInt(node.getAttribute('data-block-id'));
                 renderedBlockIds.add(blockId);
                 
                 const nodeRect = node.getBoundingClientRect();
-                const relativeTop = nodeRect.top - contentRect.top;
-                const relativeBottom = nodeRect.bottom - contentRect.top;
                 
-                // Check if element extends past the page safety boundary
-                // We add a 2px tolerance for sub-pixel layout rounding
-                if (relativeBottom > pageHeight + 2) {
-                    const isCompletelyHidden = (relativeTop >= pageHeight - 2);
-                    const block = blocks[blockId];
-                    if (block) {
-                        clippedReports.push({
-                            page: visualPageNum,
-                            lineStart: block.startLine + 1,
-                            lineEnd: block.endLine + 1,
-                            type: block.type,
-                            text: node.textContent.trim(),
-                            severity: isCompletelyHidden ? 'completely-hidden' : 'partially-clipped'
-                        });
+                // In two-column mode, verify if the block is actually in Column 2, wraps into Column 2, or spans all columns
+                let shouldCheckVerticalOverflow = true;
+                if (isTwoCol) {
+                    const style = window.getComputedStyle(node);
+                    const isColumnSpanAll = style.columnSpan === 'all' || style.webkitColumnSpan === 'all' || node.classList.contains('chapter-header');
+                    // A node is in Column 2 (or wraps into Column 2) if its right edge is past the divider (mid-point of page content width)
+                    const isInColumn2OrWraps = nodeRect.right > (contentRect.left + (contentRect.width / 2) + 2);
+                    
+                    if (!isInColumn2OrWraps && !isColumnSpanAll) {
+                        shouldCheckVerticalOverflow = false;
+                    }
+                }
+                
+                if (shouldCheckVerticalOverflow) {
+                    const relativeTop = nodeRect.top - contentRect.top;
+                    const relativeBottom = nodeRect.bottom - contentRect.top;
+                    
+                    // Check if element extends past the page safety boundary
+                    // We use a 3px tolerance for consistent layout checks matching checkPageOverflow
+                    if (relativeBottom > pageHeight + 3) {
+                        const isCompletelyHidden = (relativeTop >= pageHeight - 3);
+                        const block = blocks[blockId];
+                        if (block) {
+                            clippedReports.push({
+                                page: visualPageNum,
+                                lineStart: block.startLine + 1,
+                                lineEnd: block.endLine + 1,
+                                type: block.type,
+                                text: node.textContent.trim(),
+                                severity: isCompletelyHidden ? 'completely-hidden' : 'partially-clipped'
+                            });
+                        }
                     }
                 }
             });

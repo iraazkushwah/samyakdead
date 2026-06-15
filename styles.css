@@ -32,7 +32,8 @@
     
     --transition-smooth: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
     
-    --content-font-size: 13.5px;
+    --content-font-size: 16.1px;
+    --content-font-weight: 500;
     --content-line-height: 1.45;
     --content-letter-spacing: 0px;
     --table-header-font-size: 12.5px;
@@ -3515,6 +3516,7 @@ body.light-mode .search-replace-panel {
     margin: 6px 0;
     width: 100% !important;
     max-width: 100% !important;
+    table-layout: fixed; /* Force table to strictly respect column width */
 }
 .page-content.layout-two-column .markdown-table th {
     font-size: var(--table-header-font-size, calc(var(--content-font-size) - 2px));
@@ -3525,11 +3527,11 @@ body.light-mode .search-replace-panel {
 .page-content.layout-two-column .markdown-table th,
 .page-content.layout-two-column .markdown-table td {
     padding: 4px 8px;
-    word-break: normal;
+    word-break: break-word; /* Allow long words to break and wrap */
     overflow-wrap: break-word;
 }
 .page-content.layout-two-column .markdown-table th {
-    white-space: nowrap;
+    white-space: normal; /* Allow header text to wrap */
 }
 .page-content.layout-two-column .markdown-table td {
     white-space: normal;

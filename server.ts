@@ -266,12 +266,7 @@ Please format your response strictly as valid JSON matching the specified respon
             }
 
             const isNextHeading = trimmedNext.startsWith("#");
-            const isNextBullet = trimmedNext.startsWith("•") || 
-                                 trimmedNext.startsWith("-") || 
-                                 trimmedNext.startsWith("*") || 
-                                 /^[🔶🔷🔸🔹♦️💎]/u.test(trimmedNext) || 
-                                 /^\(\d+\)/.test(trimmedNext) || 
-                                 /^\d+\./.test(trimmedNext);
+            const isNextBullet = /^\s*(?:[•\u2022\u25CF\u25AA\u25AB➜⭐★]\s*|[-\*]\s+|🔶|🔷|🔸|🔹|♦️|💎|\d+[\.\)]|\(\d+\)|[a-zA-Z][\.\)]|\([a-zA-Z]\)|[ivxIVX]+[\.\)]|\([ivxIVX]+\))/i.test(trimmedNext);
             const isNextQuote = trimmedNext.startsWith(">");
             const isNextBox = trimmedNext.startsWith("[box") || trimmedNext.startsWith("[/box]");
             const isNextChapter = trimmedNext.startsWith("[chapter");
