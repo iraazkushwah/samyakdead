@@ -356,6 +356,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const designBulletStyle = document.getElementById('design-bullet-style');
     const designExplanationStyle = document.getElementById('design-explanation-style');
 
+    const designTableHeaderSize = document.getElementById('design-table-header-size');
+    const designTableHeaderSizeVal = document.getElementById('design-table-header-size-val');
+    const designTableBodySize = document.getElementById('design-table-body-size');
+    const designTableBodySizeVal = document.getElementById('design-table-body-size-val');
+
     const designInnerBorder = document.getElementById('design-inner-border');
     const designCornerColor = document.getElementById('design-corner-color');
     const designBorderThick = document.getElementById('design-border-thick');
@@ -488,6 +493,8 @@ document.addEventListener('DOMContentLoaded', () => {
         topicIcon: 'orange-diamond',
         bulletStyle: 'classic',
         explanationStyle: 'modern-accent',
+        tableHeaderFontSize: '12.5',
+        tableBodyFontSize: '11.5',
         
         // Page Spacings Customizations
         pageMarginX: '8',
@@ -3432,6 +3439,24 @@ document.addEventListener('DOMContentLoaded', () => {
             customDesignSettings.explanationStyle = e.target.value;
             renderPreview();
             saveWorkspaceToLocalStorage();
+        });
+    }
+    if (designTableHeaderSize) {
+        designTableHeaderSize.addEventListener('input', (e) => {
+            customDesignSettings.tableHeaderFontSize = e.target.value;
+            if (designTableHeaderSizeVal) designTableHeaderSizeVal.textContent = `${e.target.value}px`;
+            document.documentElement.style.setProperty('--table-header-font-size', `${e.target.value}px`);
+            cachedMaxContentHeight = null;
+            debouncedRenderAndSave();
+        });
+    }
+    if (designTableBodySize) {
+        designTableBodySize.addEventListener('input', (e) => {
+            customDesignSettings.tableBodyFontSize = e.target.value;
+            if (designTableBodySizeVal) designTableBodySizeVal.textContent = `${e.target.value}px`;
+            document.documentElement.style.setProperty('--table-body-font-size', `${e.target.value}px`);
+            cachedMaxContentHeight = null;
+            debouncedRenderAndSave();
         });
     }
 
@@ -6421,7 +6446,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const linesOfTable = text.split('\n').filter(l => l.trim());
                     let totalTableHeight = 20; // base padding/margin
                     
-                    const tblFontSize = isTwoCol ? (fontSize - 1.5) : (fontSize - 1);
+                    const tblFontSize = parseFloat(customDesignSettings.tableBodyFontSize) || (isTwoCol ? (fontSize - 1.5) : (fontSize - 1));
                     const tblLineSpacing = isTwoCol ? 1.25 : lineSpacing;
                     const tblLineHeight = tblFontSize * tblLineSpacing;
                     const tblCellPadding = isTwoCol ? 8 : 12;
@@ -7715,6 +7740,10 @@ document.addEventListener('DOMContentLoaded', () => {
         document.documentElement.style.setProperty('--custom-page-padding-x', `${customDesignSettings.pagePaddingX || 6}mm`);
         document.documentElement.style.setProperty('--custom-page-padding-y', `${customDesignSettings.pagePaddingY || 4}mm`);
 
+        // Table font size variables update
+        document.documentElement.style.setProperty('--table-header-font-size', `${customDesignSettings.tableHeaderFontSize || 12.5}px`);
+        document.documentElement.style.setProperty('--table-body-font-size', `${customDesignSettings.tableBodyFontSize || 11.5}px`);
+
         // End star divider variables
         const esc = customDesignSettings.endStarColor || secondary;
         document.documentElement.style.setProperty('--custom-end-star-color', esc);
@@ -7825,6 +7854,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (designExplanationStyle) {
             designExplanationStyle.value = customDesignSettings.explanationStyle || 'modern-accent';
+        }
+        if (designTableHeaderSize) {
+            designTableHeaderSize.value = customDesignSettings.tableHeaderFontSize || '12.5';
+            if (designTableHeaderSizeVal) designTableHeaderSizeVal.textContent = `${customDesignSettings.tableHeaderFontSize || 12.5}px`;
+        }
+        if (designTableBodySize) {
+            designTableBodySize.value = customDesignSettings.tableBodyFontSize || '11.5';
+            if (designTableBodySizeVal) designTableBodySizeVal.textContent = `${customDesignSettings.tableBodyFontSize || 11.5}px`;
         }
 
         if (headerLogoPreview && headerLogoPreviewGroup) {
@@ -8415,6 +8452,20 @@ document.addEventListener('DOMContentLoaded', () => {
         if (designExplanationStyle) {
             designExplanationStyle.value = 'modern-accent';
         }
+
+        customDesignSettings.tableHeaderFontSize = '12.5';
+        if (designTableHeaderSize) {
+            designTableHeaderSize.value = '12.5';
+            designTableHeaderSizeVal.textContent = '12.5px';
+        }
+        document.documentElement.style.setProperty('--table-header-font-size', '12.5px');
+
+        customDesignSettings.tableBodyFontSize = '11.5';
+        if (designTableBodySize) {
+            designTableBodySize.value = '11.5';
+            designTableBodySizeVal.textContent = '11.5px';
+        }
+        document.documentElement.style.setProperty('--table-body-font-size', '11.5px');
 
         designBorderThick.value = '2';
         designBorderThickVal.textContent = '2px';

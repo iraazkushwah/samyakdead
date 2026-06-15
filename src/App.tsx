@@ -84,6 +84,10 @@ export default function App() {
   const [copiedMessage, setCopiedMessage] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Table font size styling options
+  const [tableHeaderFontSize, setTableHeaderFontSize] = useState<number>(12);
+  const [tableBodyFontSize, setTableBodyFontSize] = useState<number>(11);
+
   // Stats helper to parse human readable size
   const formatBytes = (bytes: number): string => {
     if (bytes === 0) return "0 Bytes";
@@ -252,7 +256,11 @@ export default function App() {
           <thead>
             <tr className="bg-slate-800/80 border-b border-slate-700">
               {headerCells.map((cell, colIdx) => (
-                <th key={colIdx} className="px-4 py-3 font-semibold text-slate-100 border-r border-slate-700 last:border-r-0">
+                <th 
+                  key={colIdx} 
+                  style={{ fontSize: `${tableHeaderFontSize}px` }}
+                  className="px-4 py-3 font-semibold text-slate-100 border-r border-slate-700 last:border-r-0"
+                >
                   {parseInlineHighlights(cell)}
                 </th>
               ))}
@@ -262,7 +270,11 @@ export default function App() {
             {bodyRows.map((rowCells, rowIdx) => (
               <tr key={rowIdx} className="hover:bg-slate-800/50 transition-colors">
                 {rowCells.map((cell, colIdx) => (
-                  <td key={colIdx} className="px-4 py-3 text-slate-350 border-r border-slate-700 last:border-r-0 leading-relaxed font-sans">
+                  <td 
+                    key={colIdx} 
+                    style={{ fontSize: `${tableBodyFontSize}px` }}
+                    className="px-4 py-3 text-slate-350 border-r border-slate-700 last:border-r-0 leading-relaxed font-sans"
+                  >
                     {parseInlineHighlights(cell || "")}
                   </td>
                 ))}
@@ -644,6 +656,41 @@ export default function App() {
                     autoStructuringEnabled ? "translate-x-4" : "translate-x-0"
                   }`} />
                 </button>
+              </div>
+
+              {/* Table Font Settings */}
+              <div className="space-y-2 border-t border-slate-800 pt-3">
+                <div className="flex justify-between items-center text-xs">
+                  <span className="text-slate-350 font-bold">Table Header Font:</span>
+                  <span className="font-mono text-[10px] text-indigo-400 font-bold bg-indigo-950/60 border border-indigo-900/40 px-1 py-0.5 rounded">
+                    {tableHeaderFontSize}px
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min="8"
+                  max="18"
+                  value={tableHeaderFontSize}
+                  onChange={(e) => setTableHeaderFontSize(parseInt(e.target.value))}
+                  className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex justify-between items-center text-xs">
+                  <span className="text-slate-350 font-bold">Table Body Font:</span>
+                  <span className="font-mono text-[10px] text-indigo-400 font-bold bg-indigo-950/60 border border-indigo-900/40 px-1 py-0.5 rounded">
+                    {tableBodyFontSize}px
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min="8"
+                  max="18"
+                  value={tableBodyFontSize}
+                  onChange={(e) => setTableBodyFontSize(parseInt(e.target.value))}
+                  className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                />
               </div>
             </div>
 

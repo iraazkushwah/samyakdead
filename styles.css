@@ -35,6 +35,8 @@
     --content-font-size: 13.5px;
     --content-line-height: 1.45;
     --content-letter-spacing: 0px;
+    --table-header-font-size: 12.5px;
+    --table-body-font-size: 11.5px;
     
     --font-ui: 'Outfit', 'Poppins', 'Noto Sans Devanagari', sans-serif;
     --font-heading: 'Mukta', 'Poppins', sans-serif;
@@ -2388,7 +2390,7 @@ strong {
     border-collapse: collapse;
     margin: 8px 0;
     font-family: var(--font-body);
-    font-size: calc(var(--content-font-size) - 1px);
+    font-size: var(--table-body-font-size, calc(var(--content-font-size) - 1px));
     font-weight: var(--content-font-weight, 700);
     color: var(--text-dark);
     border: 1.5px solid var(--primary-color);
@@ -2401,6 +2403,10 @@ strong {
     border: 1px solid var(--primary-color);
 }
 
+.markdown-table td {
+    font-size: var(--table-body-font-size, calc(var(--content-font-size) - 1px));
+}
+
 .markdown-table th {
     background-color: rgba(133, 15, 15, 0.05); /* Light primary theme color tint */
     color: var(--primary-color);
@@ -2408,6 +2414,7 @@ strong {
     border-top: 2px solid var(--primary-color);
     border-bottom: 2px solid var(--primary-color);
     font-family: var(--font-heading);
+    font-size: var(--table-header-font-size, calc(var(--content-font-size) - 1px));
 }
 
 .markdown-table tr:nth-child(even) td {
@@ -3499,11 +3506,17 @@ body.light-mode .search-replace-panel {
 
 /* Tables in two-column layouts are styled compactly to prevent excessive height inflation */
 .page-content.layout-two-column .markdown-table {
-    font-size: calc(var(--content-font-size) - 2px);
+    font-size: var(--table-body-font-size, calc(var(--content-font-size) - 2px));
     line-height: 1.25;
     margin: 6px 0;
     width: 100% !important;
     max-width: 100% !important;
+}
+.page-content.layout-two-column .markdown-table th {
+    font-size: var(--table-header-font-size, calc(var(--content-font-size) - 2px));
+}
+.page-content.layout-two-column .markdown-table td {
+    font-size: var(--table-body-font-size, calc(var(--content-font-size) - 2px));
 }
 .page-content.layout-two-column .markdown-table th,
 .page-content.layout-two-column .markdown-table td {
