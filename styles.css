@@ -3552,8 +3552,14 @@ body.light-mode .search-replace-panel {
     break-inside: avoid;
 }
 
+.page-content.layout-two-column .bullet-list {
+    display: block !important;
+}
+
 .page-content.layout-two-column .bullet-list > .bullet-item {
     break-inside: auto; /* Allow individual list items to break across columns to fill gaps */
+    display: block !important;
+    margin-bottom: 5px;
 }
 
 /* Tight Compaction Mode: Removes all column break restrictions to eliminate blank spaces */
