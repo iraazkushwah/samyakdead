@@ -6613,15 +6613,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Use a 12px tolerance to avoid sub-pixel rounding false-positives while catching true column 3 spillovers (+20px gap).
                 const horizontalOverflow = childRect.right > (contentRect.right + 12);
                 
-                // Check vertical overflow if the element has content in Column 2 or has column-span: all
+                // Check vertical overflow if the element is in Column 2 or has column-span: all
                 let verticalOverflow = false;
                 const style = window.getComputedStyle(child);
                 const isColumnSpanAll = style.columnSpan === 'all' || style.webkitColumnSpan === 'all' || child.classList.contains('chapter-header');
                 
-                // A child has content in Column 2 if its right edge extends beyond the column divider (mid-point of content area width)
-                const hasContentInColumn2 = childRect.right > (contentRect.left + (contentRect.width / 2) + 3);
+                // Only check vertical overflow if the element's left edge is in Column 2
+                const isInColumn2 = childRect.left > (contentRect.left + (contentRect.width / 2));
                 
-                if (hasContentInColumn2 || isColumnSpanAll) {
+                if (isInColumn2 || isColumnSpanAll) {
                     verticalOverflow = childRect.bottom > (maxAllowedBottom + 3);
                 }
                 return horizontalOverflow || verticalOverflow;
