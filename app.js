@@ -6662,8 +6662,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 cachedMaxContentHeight = measuredHeight;
             }
         }
-        // Apply a defensive 58px safety buffer (breathing room) in preview to accommodate font rendering differences and social media links in physical PDF printing
-        MAX_CONTENT_HEIGHT = (cachedMaxContentHeight ? (cachedMaxContentHeight - 58) : 852);
+        // Apply a defensive 15px safety buffer (breathing room) in preview to accommodate font rendering differences and social media links in physical PDF printing
+        MAX_CONTENT_HEIGHT = (cachedMaxContentHeight ? (cachedMaxContentHeight - 15) : 895);
 
         // Clear canvas
         pagesContainer.innerHTML = '';
