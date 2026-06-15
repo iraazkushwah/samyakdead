@@ -2401,10 +2401,13 @@ strong {
     text-align: left;
     vertical-align: top;
     border: 1px solid var(--primary-color);
+    word-break: normal;
+    overflow-wrap: break-word;
 }
 
 .markdown-table td {
     font-size: var(--table-body-font-size, calc(var(--content-font-size) - 1px));
+    white-space: normal;
 }
 
 .markdown-table th {
@@ -2415,6 +2418,7 @@ strong {
     border-bottom: 2px solid var(--primary-color);
     font-family: var(--font-heading);
     font-size: var(--table-header-font-size, calc(var(--content-font-size) - 1px));
+    white-space: nowrap;
 }
 
 .markdown-table tr:nth-child(even) td {
@@ -3521,8 +3525,13 @@ body.light-mode .search-replace-panel {
 .page-content.layout-two-column .markdown-table th,
 .page-content.layout-two-column .markdown-table td {
     padding: 4px 8px;
-    word-break: break-word;
+    word-break: normal;
     overflow-wrap: break-word;
+}
+.page-content.layout-two-column .markdown-table th {
+    white-space: nowrap;
+}
+.page-content.layout-two-column .markdown-table td {
     white-space: normal;
 }
 .markdown-table th.table-col-no,

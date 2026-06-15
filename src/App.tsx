@@ -259,7 +259,7 @@ export default function App() {
                 <th 
                   key={colIdx} 
                   style={{ fontSize: `${tableHeaderFontSize}px` }}
-                  className="px-4 py-3 font-semibold text-slate-100 border-r border-slate-700 last:border-r-0"
+                  className="px-4 py-3 font-semibold text-slate-100 border-r border-slate-700 last:border-r-0 whitespace-nowrap break-normal"
                 >
                   {parseInlineHighlights(cell)}
                 </th>
@@ -273,7 +273,7 @@ export default function App() {
                   <td 
                     key={colIdx} 
                     style={{ fontSize: `${tableBodyFontSize}px` }}
-                    className="px-4 py-3 text-slate-350 border-r border-slate-700 last:border-r-0 leading-relaxed font-sans"
+                    className="px-4 py-3 text-slate-350 border-r border-slate-700 last:border-r-0 leading-relaxed font-sans break-normal"
                   >
                     {parseInlineHighlights(cell || "")}
                   </td>
