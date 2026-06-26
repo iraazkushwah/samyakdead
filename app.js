@@ -6405,6 +6405,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 const isHeader = isFirstRow;
                 isFirstRow = false;
                 
+                const dataWidths = node.getAttribute('data-widths');
+                let columnWidths = null;
+                if (dataWidths) {
+                    columnWidths = dataWidths.split(',').map(w => w.trim());
+                }
+
                 let cellIdx = 0;
                 cells.forEach(cellText => {
                     const cell = document.createElement(isHeader ? 'th' : 'td');
@@ -6413,6 +6419,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     
                     if (cellIdx === 0 && firstColIsNo) {
                         cell.classList.add('table-col-no');
+                    }
+                    
+                    if (isHeader && columnWidths && columnWidths[cellIdx]) {
+                        cell.style.width = columnWidths[cellIdx];
                     }
                     
                     tr.appendChild(cell);
@@ -7036,7 +7046,9 @@ document.addEventListener('DOMContentLoaded', () => {
                             blocks.splice(i + 1, 0, {
                                 type: block.type,
                                 markdown: remainingMarkdown,
-                                id: block.id
+                                id: block.id,
+                                config: block.config,
+                                configFormat: block.configFormat
                             });
 
                             splitSuccess = true;
