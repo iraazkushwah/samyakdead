@@ -3462,7 +3462,8 @@ body.light-mode .search-replace-panel {
     column-count: 2;
     column-gap: 20px;
     column-rule: none !important; /* Disable standard rule to allow persistent pseudo-element divider */
-    height: 100% !important; /* Enforce full height to make sure it fills the parent container */
+    flex-grow: 1 !important; /* Allow the flex container to control its height instead of hardcoding 100% */
+    height: auto !important;
     column-fill: auto;
     position: relative;
 }
