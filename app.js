@@ -7289,6 +7289,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             activePageLabel.textContent = activePageIndex;
         }
+        updateIndividualTablesListUI();
     }
 
     // Helper to append gold ornate corners to a page
@@ -8988,51 +8989,71 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    function mapGlobalLineToPageAndLocalLine(globalLine) {
+        let currentGlobalLine = 0;
+        for (let idx = 1; idx < pagesData.length; idx++) {
+            const pageLinesCount = (pagesData[idx].text || '').split('\n').length;
+            if (globalLine >= currentGlobalLine && globalLine < currentGlobalLine + pageLinesCount) {
+                return {
+                    pageIdx: idx,
+                    localLine: globalLine - currentGlobalLine
+                };
+            }
+            currentGlobalLine += pageLinesCount;
+        }
+        return {
+            pageIdx: Math.max(1, pagesData.length - 1),
+            localLine: pagesData[pagesData.length - 1] ? (pagesData[pagesData.length - 1].text || '').split('\n').length - 1 : 0
+        };
+    }
+
     function updateTableConfigInMarkdown(pageIdx, blockId, widthsStr, ths = null) {
-        const pageText = pagesData[pageIdx].text || '';
-        const lines = pageText.split('\n');
         let tableIndex = -1;
+        let targetPageIdx = pageIdx;
 
         if (blockId !== null && blockId !== undefined && !isNaN(blockId) && currentRenderedBlocks && currentRenderedBlocks[blockId]) {
             const block = currentRenderedBlocks[blockId];
             if (block.type === 'table') {
-                // Calculate line offset for pageIdx in unified content markdown
-                let lineOffset = 0;
-                for (let idx = 1; idx < pageIdx; idx++) {
-                    if (pagesData[idx] && pagesData[idx].text) {
-                        lineOffset += pagesData[idx].text.split('\n').length;
-                    }
-                }
-                tableIndex = block.startLine - lineOffset;
+                const mapped = mapGlobalLineToPageAndLocalLine(block.startLine);
+                targetPageIdx = mapped.pageIdx;
+                tableIndex = mapped.localLine;
             }
         }
 
         // Fallback: Heuristic search by matching headers (for nested tables in containers)
         if (tableIndex === -1 && ths && ths.length > 0) {
             const headers = ths.map(th => th.textContent.trim());
-            for (let i = 0; i < lines.length; i++) {
-                const lineTrim = lines[i].trim();
-                if (lineTrim.startsWith('|') && lineTrim.endsWith('|')) {
-                    const lineCells = lineTrim.split('|').map(c => c.trim()).slice(1, -1);
-                    let matchCount = 0;
-                    if (lineCells.length === headers.length) {
-                        for (let k = 0; k < headers.length; k++) {
-                            const cellClean = lineCells[k].replace(/[\*=_]/g, '').replace(/\s+/g, ' ').toLowerCase().trim();
-                            const headerClean = headers[k].toLowerCase().trim();
-                            if (cellClean === headerClean || cellClean.includes(headerClean) || headerClean.includes(cellClean)) {
-                                matchCount++;
+            for (let pIdx = 1; pIdx < pagesData.length; pIdx++) {
+                const pageLines = (pagesData[pIdx].text || '').split('\n');
+                for (let i = 0; i < pageLines.length; i++) {
+                    const lineTrim = pageLines[i].trim();
+                    if (lineTrim.startsWith('|') && lineTrim.endsWith('|')) {
+                        const lineCells = lineTrim.split('|').map(c => c.trim()).slice(1, -1);
+                        let matchCount = 0;
+                        if (lineCells.length === headers.length) {
+                            for (let k = 0; k < headers.length; k++) {
+                                const cellClean = lineCells[k].replace(/[\*=_]/g, '').replace(/\s+/g, ' ').toLowerCase().trim();
+                                const headerClean = headers[k].toLowerCase().trim();
+                                if (cellClean === headerClean || cellClean.includes(headerClean) || headerClean.includes(cellClean)) {
+                                    matchCount++;
+                                }
                             }
                         }
-                    }
-                    if (matchCount === headers.length) {
-                        tableIndex = i;
-                        break;
+                        if (matchCount === headers.length) {
+                            targetPageIdx = pIdx;
+                            tableIndex = i;
+                            break;
+                        }
                     }
                 }
+                if (tableIndex !== -1) break;
             }
         }
 
-        if (tableIndex < 0 || tableIndex >= lines.length) return;
+        if (tableIndex < 0 || targetPageIdx < 1 || targetPageIdx >= pagesData.length) return;
+
+        const pageText = pagesData[targetPageIdx].text || '';
+        const lines = pageText.split('\n');
 
         // Check if config line already exists at tableIndex
         const currentLineText = lines[tableIndex].trim();
@@ -9053,11 +9074,174 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const newText = lines.join('\n');
-        pagesData[pageIdx].text = newText;
-        pageContentInput.value = newText;
+        pagesData[targetPageIdx].text = newText;
+
+        if (activePageIndex !== targetPageIdx) {
+            switchActivePage(targetPageIdx);
+        }
         
+        pageContentInput.value = newText;
         const inputEvent = new Event('input', { bubbles: true });
         pageContentInput.dispatchEvent(inputEvent);
+    }
+
+    function updateIndividualTablesListUI() {
+        const section = document.getElementById('individual-tables-section');
+        const listContainer = document.getElementById('individual-tables-list');
+        if (!section || !listContainer) return;
+
+        const tableBlocks = currentRenderedBlocks.filter(b => b.type === 'table');
+
+        if (tableBlocks.length === 0) {
+            section.style.display = 'none';
+            return;
+        }
+
+        section.style.display = 'block';
+
+        const activeEl = document.activeElement;
+        const focusedId = (activeEl && activeEl.classList.contains('table-individual-width-input')) ? activeEl.getAttribute('id') : null;
+        const selStart = focusedId ? activeEl.selectionStart : null;
+        const selEnd = focusedId ? activeEl.selectionEnd : null;
+
+        listContainer.innerHTML = '';
+
+        const tableElements = pagesContainer.querySelectorAll('table.markdown-table');
+        const blockToVisualPage = {};
+        tableElements.forEach(tableEl => {
+            const blockId = tableEl.getAttribute('data-block-id');
+            const pageEl = tableEl.closest('.a4-page');
+            if (blockId && pageEl) {
+                const pageNum = pageEl.getAttribute('data-page');
+                if (pageNum) {
+                    blockToVisualPage[blockId] = pageNum;
+                }
+            }
+        });
+
+        tableBlocks.forEach(block => {
+            const blockId = block.id;
+            const mapped = mapGlobalLineToPageAndLocalLine(block.startLine);
+            const editorPageIdx = mapped.pageIdx;
+            const editorPageNum = editorPageIdx + 1;
+            const visualPageNum = blockToVisualPage[blockId] || 'Unknown';
+
+            const lines = block.markdown.split('\n');
+            let headersText = "Table (No Headers)";
+            if (lines.length > 0) {
+                const firstLine = lines[0].trim();
+                if (firstLine.startsWith('|') && firstLine.endsWith('|')) {
+                    const cells = firstLine.split('|').map(c => c.trim()).slice(1, -1);
+                    if (cells.length > 0) {
+                        headersText = cells.join(' | ');
+                        if (headersText.length > 35) {
+                            headersText = headersText.substring(0, 35) + '...';
+                        }
+                    }
+                }
+            }
+
+            let currentWidths = '';
+            if (block.config) {
+                if (block.configFormat === 'square' || (block.config.startsWith('[table') && block.config.endsWith(']'))) {
+                    const configText = block.config.slice(6, -1).trim();
+                    const regex = /cols=([^\s\]]+)/i;
+                    const match = regex.exec(configText);
+                    if (match) {
+                        currentWidths = match[1].replace(/['"]/g, '');
+                    }
+                }
+            }
+
+            const item = document.createElement('div');
+            item.className = 'individual-table-item';
+            item.style.backgroundColor = 'rgba(255, 255, 255, 0.02)';
+            item.style.border = '1px solid var(--ui-border)';
+            item.style.padding = '8px';
+            item.style.borderRadius = 'var(--border-radius-sm)';
+            item.style.display = 'flex';
+            item.style.flexDirection = 'column';
+            item.style.gap = '6px';
+
+            const headerRow = document.createElement('div');
+            headerRow.style.display = 'flex';
+            headerRow.style.justifyContent = 'space-between';
+            headerRow.style.alignItems = 'center';
+            headerRow.style.fontSize = '10px';
+            headerRow.style.color = 'var(--ui-text-muted)';
+
+            const pageLabel = document.createElement('span');
+            pageLabel.innerHTML = `Page <strong>${visualPageNum}</strong> (Ed. Page ${editorPageNum})`;
+
+            const locateBtn = document.createElement('button');
+            locateBtn.className = 'search-action-btn';
+            locateBtn.style.padding = '2px 6px';
+            locateBtn.style.fontSize = '9px';
+            locateBtn.style.borderRadius = '3px';
+            locateBtn.textContent = 'Go to Table';
+            locateBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                switchActivePage(editorPageIdx);
+                const tableEl = pagesContainer.querySelector(`table.markdown-table[data-block-id="${blockId}"]`);
+                if (tableEl) {
+                    tableEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    tableEl.style.outline = '2px solid var(--ui-accent)';
+                    setTimeout(() => {
+                        tableEl.style.outline = '';
+                    }, 2000);
+                }
+            });
+
+            headerRow.appendChild(pageLabel);
+            headerRow.appendChild(locateBtn);
+
+            const titleDiv = document.createElement('div');
+            titleDiv.style.fontSize = '11px';
+            titleDiv.style.fontWeight = 'bold';
+            titleDiv.style.whiteSpace = 'nowrap';
+            titleDiv.style.overflow = 'hidden';
+            titleDiv.style.textOverflow = 'ellipsis';
+            titleDiv.style.color = '#fff';
+            titleDiv.textContent = `📊 ${headersText}`;
+            titleDiv.title = headersText;
+
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.id = `table-width-input-${blockId}`;
+            input.className = 'opt-select table-individual-width-input';
+            input.style.width = '100%';
+            input.style.padding = '6px 8px';
+            input.style.fontFamily = 'monospace';
+            input.style.fontSize = '11px';
+            input.style.boxSizing = 'border-box';
+            input.style.backgroundColor = '#1a1a24';
+            input.style.border = '1px solid var(--ui-border)';
+            input.style.color = '#fff';
+            input.style.borderRadius = 'var(--border-radius-sm)';
+            input.value = currentWidths;
+            input.placeholder = 'e.g., 40%, 15%, 45%';
+
+            input.addEventListener('input', (e) => {
+                const newVal = e.target.value;
+                updateTableConfigInMarkdown(editorPageIdx, blockId, newVal, null);
+            });
+
+            item.appendChild(headerRow);
+            item.appendChild(titleDiv);
+            item.appendChild(input);
+
+            listContainer.appendChild(item);
+        });
+
+        if (focusedId) {
+            const restoredInput = document.getElementById(focusedId);
+            if (restoredInput) {
+                restoredInput.focus();
+                if (selStart !== null && selEnd !== null) {
+                    restoredInput.setSelectionRange(selStart, selEnd);
+                }
+            }
+        }
     }
 
     pagesContainer.addEventListener('dblclick', (e) => {
