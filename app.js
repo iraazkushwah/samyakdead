@@ -5273,6 +5273,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const qPart = block.qNum ? ` q="${block.qNum}"` : '';
             return `[explanation${qPart}]\n${block.markdown || ''}\n[/explanation]`;
         }
+        if (block.type === 'table' && block.config) {
+            return `${block.config}\n${block.markdown}`;
+        }
         return block.markdown !== undefined ? block.markdown : '';
     }
 
