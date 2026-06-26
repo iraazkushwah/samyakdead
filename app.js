@@ -6189,6 +6189,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (columnWidths) {
                 table.setAttribute('data-widths', columnWidths.join(', '));
+                table.style.tableLayout = 'fixed';
             }
             
             const thead = document.createElement('thead');
@@ -6233,6 +6234,70 @@ document.addEventListener('DOMContentLoaded', () => {
                     
                     if (isHeader && columnWidths && columnWidths[cellIdx]) {
                         cell.style.width = columnWidths[cellIdx];
+                    }
+                    
+                    if (isHeader) {
+                        cell.style.position = 'relative';
+                        // Add drag handle for resizing columns (except for the last one)
+                        if (cellIdx < cells.length - 1) {
+                            const handle = document.createElement('div');
+                            handle.className = 'table-resize-handle';
+                            
+                            handle.addEventListener('mousedown', (e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                
+                                const tableEl = cell.closest('table');
+                                tableEl.style.tableLayout = 'fixed';
+                                const pageEl = tableEl.closest('.a4-page');
+                                if (!pageEl) return;
+                                const pageNum = parseInt(pageEl.getAttribute('data-page'), 10);
+                                if (isNaN(pageNum)) return;
+
+                                // Switch to this page in the editor
+                                switchActivePage(pageNum - 1);
+                                
+                                const ths = Array.from(tableEl.querySelectorAll('thead th'));
+                                const startWidths = ths.map(th => th.getBoundingClientRect().width);
+                                const startX = e.clientX;
+                                const cellIndex = ths.indexOf(cell);
+                                
+                                handle.classList.add('active');
+
+                                const onMouseMove = (moveEvent) => {
+                                    const dx = moveEvent.clientX - startX;
+                                    const nextCellIndex = cellIndex + 1;
+                                    
+                                    const w1 = startWidths[cellIndex] + dx;
+                                    const w2 = startWidths[nextCellIndex] - dx;
+                                    
+                                    if (w1 > 30 && w2 > 30) {
+                                        ths[cellIndex].style.width = w1 + 'px';
+                                        ths[nextCellIndex].style.width = w2 + 'px';
+                                    }
+                                };
+                                
+                                const onMouseUp = () => {
+                                    document.removeEventListener('mousemove', onMouseMove);
+                                    document.removeEventListener('mouseup', onMouseUp);
+                                    
+                                    handle.classList.remove('active');
+                                    
+                                    // Calculate new percentages
+                                    const finalWidths = ths.map(th => th.getBoundingClientRect().width);
+                                    const totalWidth = finalWidths.reduce((a, b) => a + b, 0);
+                                    const percentageWidths = finalWidths.map(w => Math.round((w / totalWidth) * 100) + '%');
+                                    
+                                    // Update markdown
+                                    updateTableConfigInMarkdown(pageNum - 1, ths, percentageWidths.join(', '));
+                                };
+                                
+                                document.addEventListener('mousemove', onMouseMove);
+                                document.addEventListener('mouseup', onMouseUp);
+                            });
+                            
+                            cell.appendChild(handle);
+                        }
                     }
                     
                     tr.appendChild(cell);
@@ -8862,6 +8927,65 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    function updateTableConfigInMarkdown(pageIdx, ths, widthsStr) {
+        const pageText = pagesData[pageIdx].text || '';
+        const headers = ths.map(th => th.textContent.trim());
+        if (headers.length === 0) return;
+        
+        const lines = pageText.split('\n');
+        let tableIndex = -1;
+        for (let i = 0; i < lines.length; i++) {
+            const lineTrim = lines[i].trim();
+            if (lineTrim.startsWith('|') && lineTrim.endsWith('|')) {
+                const lineCells = lineTrim.split('|').map(c => c.trim()).slice(1, -1);
+                let matchCount = 0;
+                if (lineCells.length === headers.length) {
+                    for (let k = 0; k < headers.length; k++) {
+                        const cellClean = lineCells[k].replace(/[\*=_]/g, '').replace(/\s+/g, ' ').toLowerCase().trim();
+                        const headerClean = headers[k].toLowerCase().trim();
+                        if (cellClean === headerClean || cellClean.includes(headerClean) || headerClean.includes(cellClean)) {
+                            matchCount++;
+                        }
+                    }
+                }
+                if (matchCount === headers.length) {
+                    tableIndex = i;
+                    break;
+                }
+            }
+        }
+
+        if (tableIndex !== -1) {
+            let prevIndex = tableIndex - 1;
+            let hasConfig = false;
+            if (prevIndex >= 0) {
+                const prevLine = lines[prevIndex].trim();
+                if ((prevLine.startsWith('<!-- table|') && prevLine.endsWith('-->')) || 
+                    (prevLine.startsWith('[table') && prevLine.endsWith(']'))) {
+                    hasConfig = true;
+                }
+            }
+
+            const newConfig = `[table cols=${widthsStr.trim()}]`;
+            if (hasConfig) {
+                if (widthsStr.trim() === '') {
+                    lines.splice(prevIndex, 1);
+                } else {
+                    lines[prevIndex] = newConfig;
+                }
+            } else if (widthsStr.trim() !== '') {
+                lines.splice(tableIndex, 0, newConfig);
+            }
+
+            const newText = lines.join('\n');
+            pagesData[pageIdx].text = newText;
+            pageContentInput.value = newText;
+            
+            const inputEvent = new Event('input', { bubbles: true });
+            pageContentInput.dispatchEvent(inputEvent);
+        }
+    }
+
     pagesContainer.addEventListener('dblclick', (e) => {
         const tableEl = e.target.closest('.markdown-table');
         if (!tableEl) return;
@@ -8878,62 +9002,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const inputWidths = prompt("इस टेबल के कॉलम की चौड़ाई बदलें (उदा. 40%, 15%, 45% या 150px, 60px, auto):\nइसे खाली छोड़ने पर डिफ़ॉल्ट चौड़ाई लागू होगी।", currentWidths);
         
         if (inputWidths !== null) {
-            const pageText = pagesData[pageNum - 1].text || '';
-            const headers = Array.from(tableEl.querySelectorAll('th')).map(th => th.textContent.trim());
-            if (headers.length === 0) return;
-            
-            const lines = pageText.split('\n');
-            let tableIndex = -1;
-            for (let i = 0; i < lines.length; i++) {
-                const lineTrim = lines[i].trim();
-                if (lineTrim.startsWith('|') && lineTrim.endsWith('|')) {
-                    const lineCells = lineTrim.split('|').map(c => c.trim()).slice(1, -1);
-                    let matchCount = 0;
-                    if (lineCells.length === headers.length) {
-                        for (let k = 0; k < headers.length; k++) {
-                            const cellClean = lineCells[k].replace(/[\*=_]/g, '').replace(/\s+/g, ' ').toLowerCase().trim();
-                            const headerClean = headers[k].toLowerCase().trim();
-                            if (cellClean === headerClean || cellClean.includes(headerClean) || headerClean.includes(cellClean)) {
-                                matchCount++;
-                            }
-                        }
-                    }
-                    if (matchCount === headers.length) {
-                        tableIndex = i;
-                        break;
-                    }
-                }
-            }
-
-            if (tableIndex !== -1) {
-                let prevIndex = tableIndex - 1;
-                let hasConfig = false;
-                if (prevIndex >= 0) {
-                    const prevLine = lines[prevIndex].trim();
-                    if ((prevLine.startsWith('<!-- table|') && prevLine.endsWith('-->')) || 
-                        (prevLine.startsWith('[table') && prevLine.endsWith(']'))) {
-                        hasConfig = true;
-                    }
-                }
-
-                const newConfig = `[table cols=${inputWidths.trim()}]`;
-                if (hasConfig) {
-                    if (inputWidths.trim() === '') {
-                        lines.splice(prevIndex, 1);
-                    } else {
-                        lines[prevIndex] = newConfig;
-                    }
-                } else if (inputWidths.trim() !== '') {
-                    lines.splice(tableIndex, 0, newConfig);
-                }
-
-                const newText = lines.join('\n');
-                pagesData[pageNum - 1].text = newText;
-                pageContentInput.value = newText;
-                
-                const inputEvent = new Event('input', { bubbles: true });
-                pageContentInput.dispatchEvent(inputEvent);
-            }
+            const ths = Array.from(tableEl.querySelectorAll('thead th'));
+            updateTableConfigInMarkdown(pageNum - 1, ths, inputWidths);
         }
     });
 
