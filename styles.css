@@ -3492,7 +3492,7 @@ body.light-mode .search-replace-panel {
     top: calc(100% + 20px); /* Starts below the box (100% height + 20px bottom margin) */
     left: calc(50% - (var(--custom-divider-thickness, 1.5px) / 2));
     width: 0;
-    height: 800px; /* Extends to the bottom, clipped by overflow:hidden on container */
+    height: 1500px; /* Extends to the bottom, clipped by overflow:hidden on container */
     border-left: var(--custom-divider-thickness, 1.5px) var(--custom-divider-style, dashed) var(--custom-divider-color, var(--secondary-color));
     pointer-events: none;
     z-index: 10;

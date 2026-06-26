@@ -6093,6 +6093,7 @@ document.addEventListener('DOMContentLoaded', () => {
         else if (block.type === 'table') {
             const table = document.createElement('table');
             table.className = 'markdown-table';
+            let columnWidths = null;
 
             // Apply configuration if present
             if (block.config) {
@@ -6115,6 +6116,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                 table.style.marginLeft = '0';
                                 table.style.marginRight = 'auto';
                             }
+                        } else if (key === 'cols' || key === 'col-widths') {
+                            columnWidths = val.split(',').map(w => w.trim());
                         }
                     }
                 });
@@ -6158,6 +6161,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     
                     if (cellIdx === 0 && firstColIsNo) {
                         cell.classList.add('table-col-no');
+                    }
+                    
+                    if (isHeader && columnWidths && columnWidths[cellIdx]) {
+                        cell.style.width = columnWidths[cellIdx];
                     }
                     
                     tr.appendChild(cell);
