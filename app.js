@@ -3302,6 +3302,22 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    const editorColorHighlight = document.getElementById('editor-color-highlight');
+    if (editorColorHighlight) {
+        editorColorHighlight.addEventListener('change', (e) => {
+            const colorVal = e.target.value;
+            if (!colorVal) return;
+            if (activePageIndex > 0) {
+                insertWrappedAtCursor(pageContentInput, `==${colorVal}|`, `==`);
+                pagesData[activePageIndex].text = pageContentInput.value;
+                renderPreview();
+                updateStats();
+                saveWorkspaceToLocalStorage();
+            }
+            editorColorHighlight.selectedIndex = 0; // reset
+        });
+    }
+
     if (toolbarCustomizeTrigger) {
         toolbarCustomizeTrigger.addEventListener('click', () => {
             isCustomizeMode = !isCustomizeMode;
@@ -5196,11 +5212,12 @@ document.addEventListener('DOMContentLoaded', () => {
             'g': 'green', 'green': 'green',
             'p': 'pink', 'pink': 'pink',
             'b': 'blue', 'blue': 'blue',
-            'o': 'orange', 'orange': 'orange'
+            'o': 'orange', 'orange': 'orange',
+            'r': 'red', 'red': 'red'
         };
         let formatted = text
             .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-            .replace(/==(?:(yellow|green|pink|blue|orange|y|g|p|b|o)\|)?(.*?)==/gi, (match, color, content) => {
+            .replace(/==(?:(yellow|green|pink|blue|orange|red|y|g|p|b|o|r)\|)?(.*?)==/gi, (match, color, content) => {
                 const colorKey = (color || 'yellow').toLowerCase();
                 const normalizedColor = colorMap[colorKey] || 'yellow';
                 return `<mark class="text-highlight highlight-${normalizedColor}">${content}</mark>`;
@@ -6987,6 +7004,28 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
 
                     if (splitIndex > 0 && splitIndex < words.length) {
+                        // Check if splitting here breaks highlights (==) or bold (**) formatting tags
+                        if (block.type !== 'table') {
+                            const checkUnbalanced = (arr) => {
+                                const text = arr.join('');
+                                const equalCount = (text.match(/==/g) || []).length;
+                                const starCount = (text.match(/\*\*/g) || []).length;
+                                return (equalCount % 2 !== 0) || (starCount % 2 !== 0);
+                            };
+                            if (checkUnbalanced(words.slice(0, splitIndex))) {
+                                let tempIndex = splitIndex;
+                                while (tempIndex > 0 && checkUnbalanced(words.slice(0, tempIndex))) {
+                                    tempIndex--;
+                                }
+                                if (tempIndex > 0) {
+                                    splitIndex = tempIndex;
+                                } else {
+                                    // Fallback to not splitting this block at all, moving it to next page
+                                    splitIndex = 0;
+                                }
+                            }
+                        }
+
                         // We found a valid split point!
                         let fitSeparator = (block.type === 'table') ? '\n' : '';
                         let fitMarkdown = words.slice(0, splitIndex).join(fitSeparator);

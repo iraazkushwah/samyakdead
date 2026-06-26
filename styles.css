@@ -9805,6 +9805,11 @@ body.light-mode .btn-audit-action.fix-overflow:hover {
     background-color: var(--ui-accent, #c5a353) !important; /* Golden/accent color on direct hover/drag */
 }
 
+/* Red Highlight Color */
+.text-highlight.highlight-red {
+    background-color: rgba(239, 68, 68, 0.45); /* Soft Red */
+}
+
 
 
 
