@@ -6776,14 +6776,22 @@ document.addEventListener('DOMContentLoaded', () => {
             // In 2-column mode, check if any element overflows the content area's right or bottom safety boundaries
             return allElements.some(child => {
                 const childRect = child.getBoundingClientRect();
+                const style = window.getComputedStyle(child);
+                const isColumnSpanAll = style.columnSpan === 'all' || 
+                                        style.webkitColumnSpan === 'all' || 
+                                        child.classList.contains('chapter-header') || 
+                                        child.closest('.chapter-header') !== null;
+                
                 // Check horizontal overflow (spills into column 3).
                 // Use a 12px tolerance to avoid sub-pixel rounding false-positives while catching true column 3 spillovers (+20px gap).
-                const horizontalOverflow = childRect.right > (contentRect.right + 12);
+                // Skip horizontal overflow check for column-span: all elements as they span the full page width
+                let horizontalOverflow = false;
+                if (!isColumnSpanAll) {
+                    horizontalOverflow = childRect.right > (contentRect.right + 12);
+                }
                 
                 // Check vertical overflow if the element is in Column 2 or has column-span: all
                 let verticalOverflow = false;
-                const style = window.getComputedStyle(child);
-                const isColumnSpanAll = style.columnSpan === 'all' || style.webkitColumnSpan === 'all' || child.classList.contains('chapter-header');
                 
                 // Only check vertical overflow if the element's left edge is in Column 2
                 const isInColumn2 = childRect.left > (contentRect.left + (contentRect.width / 2));
@@ -10062,9 +10070,13 @@ document.addEventListener('DOMContentLoaded', () => {
                         
                         // In two-column mode, check if node is in column 2/spans all
                         let isRelevant = true;
+                        let isColumnSpanAll = false;
                         if (isTwoCol) {
                             const style = window.getComputedStyle(node);
-                            const isColumnSpanAll = style.columnSpan === 'all' || style.webkitColumnSpan === 'all' || node.classList.contains('chapter-header');
+                            isColumnSpanAll = style.columnSpan === 'all' || 
+                                              style.webkitColumnSpan === 'all' || 
+                                              node.classList.contains('chapter-header') ||
+                                              node.closest('.chapter-header') !== null;
                             // We use the same right edge boundary as checkPageOverflow to see if it is in Column 2 or spans all
                             const hasContentInColumn2 = nodeRect.right > (pageRect.left + (pageRect.width / 2) + 3);
                             if (!hasContentInColumn2 && !isColumnSpanAll) {
@@ -10075,7 +10087,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (isRelevant) {
                             // Check vertical or horizontal overflow
                             const vert = nodeRect.bottom > (maxAllowedBottom + 3);
-                            const horiz = isTwoCol && (nodeRect.right > pageRect.right + 12);
+                            const horiz = isTwoCol && !isColumnSpanAll && (nodeRect.right > pageRect.right + 12);
                             
                             if (vert || horiz) {
                                 firstOverflowReport = {
@@ -10205,7 +10217,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 let shouldCheckVerticalOverflow = true;
                 if (isTwoCol) {
                     const style = window.getComputedStyle(node);
-                    const isColumnSpanAll = style.columnSpan === 'all' || style.webkitColumnSpan === 'all' || node.classList.contains('chapter-header');
+                    const isColumnSpanAll = style.columnSpan === 'all' || 
+                                            style.webkitColumnSpan === 'all' || 
+                                            node.classList.contains('chapter-header') ||
+                                            node.closest('.chapter-header') !== null;
                     // A node is in Column 2 (or wraps into Column 2) if its right edge is past the divider (mid-point of page content width)
                     const isInColumn2OrWraps = nodeRect.right > (contentRect.left + (contentRect.width / 2) + 2);
                     
