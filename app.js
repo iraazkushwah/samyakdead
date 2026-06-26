@@ -360,6 +360,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const designTableHeaderSizeVal = document.getElementById('design-table-header-size-val');
     const designTableBodySize = document.getElementById('design-table-body-size');
     const designTableBodySizeVal = document.getElementById('design-table-body-size-val');
+    const designTableColWidths = document.getElementById('design-table-col-widths');
 
     const designInnerBorder = document.getElementById('design-inner-border');
     const designCornerColor = document.getElementById('design-corner-color');
@@ -495,6 +496,7 @@ document.addEventListener('DOMContentLoaded', () => {
         explanationStyle: 'modern-accent',
         tableHeaderFontSize: '12.5',
         tableBodyFontSize: '11.5',
+        tableColWidths: '',
         
         // Page Spacings Customizations
         pageMarginX: '8',
@@ -3553,6 +3555,13 @@ document.addEventListener('DOMContentLoaded', () => {
             debouncedRenderAndSave();
         });
     }
+    if (designTableColWidths) {
+        designTableColWidths.addEventListener('input', (e) => {
+            customDesignSettings.tableColWidths = e.target.value;
+            cachedMaxContentHeight = null;
+            debouncedRenderAndSave();
+        });
+    }
 
     // Group 2: Topic Heading
     designTopicText.addEventListener('input', (e) => {
@@ -6123,6 +6132,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
             
+            // Fallback to global setting if no specific table columns width config is provided
+            if (!columnWidths && customDesignSettings && customDesignSettings.tableColWidths) {
+                columnWidths = customDesignSettings.tableColWidths.split(',').map(w => w.trim());
+            }
+            
             const thead = document.createElement('thead');
             const tbody = document.createElement('tbody');
             const lines = block.markdown.split('\n');
@@ -7972,6 +7986,9 @@ document.addEventListener('DOMContentLoaded', () => {
             designTableBodySize.value = customDesignSettings.tableBodyFontSize || '11.5';
             if (designTableBodySizeVal) designTableBodySizeVal.textContent = `${customDesignSettings.tableBodyFontSize || 11.5}px`;
         }
+        if (designTableColWidths) {
+            designTableColWidths.value = customDesignSettings.tableColWidths || '';
+        }
 
         if (headerLogoPreview && headerLogoPreviewGroup) {
             if (customDesignSettings.headerLogoSrc) {
@@ -8575,6 +8592,10 @@ document.addEventListener('DOMContentLoaded', () => {
             designTableBodySizeVal.textContent = '11.5px';
         }
         document.documentElement.style.setProperty('--table-body-font-size', '11.5px');
+        customDesignSettings.tableColWidths = '';
+        if (designTableColWidths) {
+            designTableColWidths.value = '';
+        }
 
         designBorderThick.value = '2';
         designBorderThickVal.textContent = '2px';
