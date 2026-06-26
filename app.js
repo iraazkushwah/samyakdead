@@ -6143,6 +6143,7 @@ document.addEventListener('DOMContentLoaded', () => {
         else if (block.type === 'table') {
             const table = document.createElement('table');
             table.className = 'markdown-table';
+            table.setAttribute('data-block-id', block.id);
             let columnWidths = null;
 
             // Apply configuration if present
@@ -6305,8 +6306,9 @@ document.addEventListener('DOMContentLoaded', () => {
                                     const totalWidth = finalWidths.reduce((a, b) => a + b, 0);
                                     const percentageWidths = finalWidths.map(w => Math.round((w / totalWidth) * 100) + '%');
                                     
-                                    // Update markdown
-                                    updateTableConfigInMarkdown(pageNum - 1, ths, percentageWidths.join(', '));
+                                    // Update markdown using exact block ID and ths fallback
+                                    const blockId = parseInt(tableEl.getAttribute('data-block-id'), 10);
+                                    updateTableConfigInMarkdown(pageNum - 1, blockId, percentageWidths.join(', '), ths);
                                 };
                                 
                                 document.addEventListener('mousemove', onMouseMove);
@@ -8986,64 +8988,76 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    function updateTableConfigInMarkdown(pageIdx, ths, widthsStr) {
+    function updateTableConfigInMarkdown(pageIdx, blockId, widthsStr, ths = null) {
         const pageText = pagesData[pageIdx].text || '';
-        const headers = ths.map(th => th.textContent.trim());
-        if (headers.length === 0) return;
-        
         const lines = pageText.split('\n');
         let tableIndex = -1;
-        for (let i = 0; i < lines.length; i++) {
-            const lineTrim = lines[i].trim();
-            if (lineTrim.startsWith('|') && lineTrim.endsWith('|')) {
-                const lineCells = lineTrim.split('|').map(c => c.trim()).slice(1, -1);
-                let matchCount = 0;
-                if (lineCells.length === headers.length) {
-                    for (let k = 0; k < headers.length; k++) {
-                        const cellClean = lineCells[k].replace(/[\*=_]/g, '').replace(/\s+/g, ' ').toLowerCase().trim();
-                        const headerClean = headers[k].toLowerCase().trim();
-                        if (cellClean === headerClean || cellClean.includes(headerClean) || headerClean.includes(cellClean)) {
-                            matchCount++;
-                        }
+
+        if (blockId !== null && blockId !== undefined && !isNaN(blockId) && currentRenderedBlocks && currentRenderedBlocks[blockId]) {
+            const block = currentRenderedBlocks[blockId];
+            if (block.type === 'table') {
+                // Calculate line offset for pageIdx in unified content markdown
+                let lineOffset = 0;
+                for (let idx = 1; idx < pageIdx; idx++) {
+                    if (pagesData[idx] && pagesData[idx].text) {
+                        lineOffset += pagesData[idx].text.split('\n').length;
                     }
                 }
-                if (matchCount === headers.length) {
-                    tableIndex = i;
-                    break;
+                tableIndex = block.startLine - lineOffset;
+            }
+        }
+
+        // Fallback: Heuristic search by matching headers (for nested tables in containers)
+        if (tableIndex === -1 && ths && ths.length > 0) {
+            const headers = ths.map(th => th.textContent.trim());
+            for (let i = 0; i < lines.length; i++) {
+                const lineTrim = lines[i].trim();
+                if (lineTrim.startsWith('|') && lineTrim.endsWith('|')) {
+                    const lineCells = lineTrim.split('|').map(c => c.trim()).slice(1, -1);
+                    let matchCount = 0;
+                    if (lineCells.length === headers.length) {
+                        for (let k = 0; k < headers.length; k++) {
+                            const cellClean = lineCells[k].replace(/[\*=_]/g, '').replace(/\s+/g, ' ').toLowerCase().trim();
+                            const headerClean = headers[k].toLowerCase().trim();
+                            if (cellClean === headerClean || cellClean.includes(headerClean) || headerClean.includes(cellClean)) {
+                                matchCount++;
+                            }
+                        }
+                    }
+                    if (matchCount === headers.length) {
+                        tableIndex = i;
+                        break;
+                    }
                 }
             }
         }
 
-        if (tableIndex !== -1) {
-            let prevIndex = tableIndex - 1;
-            let hasConfig = false;
-            if (prevIndex >= 0) {
-                const prevLine = lines[prevIndex].trim();
-                if ((prevLine.startsWith('<!-- table|') && prevLine.endsWith('-->')) || 
-                    (prevLine.startsWith('[table') && prevLine.endsWith(']'))) {
-                    hasConfig = true;
-                }
-            }
+        if (tableIndex < 0 || tableIndex >= lines.length) return;
 
-            const cleanWidths = widthsStr.replace(/\s+/g, '');
-            const newConfig = `[table cols=${cleanWidths}]`;
-            if (hasConfig) {
-                if (cleanWidths === '') {
-                    lines.splice(prevIndex, 1);
-                } else {
-                    lines[prevIndex] = newConfig;
-                }
-            } else if (cleanWidths !== '') {
-                lines.splice(tableIndex, 0, newConfig);
-            }
+        // Check if config line already exists at tableIndex
+        const currentLineText = lines[tableIndex].trim();
+        const hasConfig = (currentLineText.startsWith('<!-- table|') && currentLineText.endsWith('-->')) || 
+                          (currentLineText.startsWith('[table') && currentLineText.endsWith(']'));
 
-            const newText = lines.join('\n');
-            pagesData[pageIdx].text = newText;
-            pageContentInput.value = newText;
-            
-            const inputEvent = new Event('input', { bubbles: true });
-            pageContentInput.dispatchEvent(inputEvent);
+        const cleanWidths = widthsStr.replace(/\s+/g, '');
+        const newConfig = `[table cols=${cleanWidths}]`;
+
+        if (hasConfig) {
+            if (cleanWidths === '') {
+                lines.splice(tableIndex, 1);
+            } else {
+                lines[tableIndex] = newConfig;
+            }
+        } else if (cleanWidths !== '') {
+            lines.splice(tableIndex, 0, newConfig);
         }
+
+        const newText = lines.join('\n');
+        pagesData[pageIdx].text = newText;
+        pageContentInput.value = newText;
+        
+        const inputEvent = new Event('input', { bubbles: true });
+        pageContentInput.dispatchEvent(inputEvent);
     }
 
     pagesContainer.addEventListener('dblclick', (e) => {
@@ -9062,8 +9076,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const inputWidths = prompt("इस टेबल के कॉलम की चौड़ाई बदलें (उदा. 40%, 15%, 45% या 150px, 60px, auto):\nइसे खाली छोड़ने पर डिफ़ॉल्ट चौड़ाई लागू होगी।", currentWidths);
         
         if (inputWidths !== null) {
+            const blockId = parseInt(tableEl.getAttribute('data-block-id'), 10);
             const ths = Array.from(tableEl.querySelectorAll('thead th'));
-            updateTableConfigInMarkdown(pageNum - 1, ths, inputWidths);
+            updateTableConfigInMarkdown(pageNum - 1, blockId, inputWidths, ths);
         }
     });
 
