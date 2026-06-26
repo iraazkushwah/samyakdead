@@ -9025,14 +9025,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
-            const newConfig = `[table cols=${widthsStr.trim()}]`;
+            const cleanWidths = widthsStr.replace(/\s+/g, '');
+            const newConfig = `[table cols=${cleanWidths}]`;
             if (hasConfig) {
-                if (widthsStr.trim() === '') {
+                if (cleanWidths === '') {
                     lines.splice(prevIndex, 1);
                 } else {
                     lines[prevIndex] = newConfig;
                 }
-            } else if (widthsStr.trim() !== '') {
+            } else if (cleanWidths !== '') {
                 lines.splice(tableIndex, 0, newConfig);
             }
 
