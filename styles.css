@@ -9778,18 +9778,31 @@ body.light-mode .btn-audit-action.fix-overflow:hover {
 .table-resize-handle {
     position: absolute;
     top: 0;
-    right: 0;
-    width: 6px;
+    right: -8px; /* Center it on the border */
+    width: 16px; /* Much wider target area for easy hovering even when zoomed */
     height: 100%;
     cursor: col-resize;
     user-select: none;
-    z-index: 20;
-    transition: background-color 0.15s ease, opacity 0.15s ease;
+    z-index: 9999; /* Ensure it stays on top */
+    pointer-events: auto !important;
 }
-.table-resize-handle:hover,
-.table-resize-handle.active {
-    background-color: var(--ui-accent, #c5a353) !important;
-    opacity: 0.8 !important;
+.table-resize-handle::after {
+    content: "";
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 7px; /* Center of the 16px wide handle */
+    width: 2px;
+    height: 100%;
+    background-color: transparent;
+    transition: background-color 0.15s ease;
+}
+.markdown-table th:hover .table-resize-handle::after {
+    background-color: rgba(133, 15, 15, 0.25); /* Faint highlight when hovering the header cell */
+}
+.table-resize-handle:hover::after,
+.table-resize-handle.active::after {
+    background-color: var(--ui-accent, #c5a353) !important; /* Golden/accent color on direct hover/drag */
 }
 
 
