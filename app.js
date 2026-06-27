@@ -75,6 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const applyLayoutAllBtn = document.getElementById('apply-layout-all-btn');
     const compactSpacingToggle = document.getElementById('compact-spacing-toggle');
     const tightCompactionToggle = document.getElementById('tight-compaction-toggle');
+    const showCoverPageToggle = document.getElementById('show-cover-page-toggle');
     const pageTemplateSelect = document.getElementById('page-template-select');
     const btnSearchToggle = document.getElementById('btn-search-toggle');
     const searchReplacePanel = document.getElementById('search-replace-panel');
@@ -2388,10 +2389,24 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Show Cover Page Toggle binding
+    if (showCoverPageToggle) {
+        showCoverPageToggle.addEventListener('change', () => {
+            if (pagesData[0]) {
+                pagesData[0].showCoverPage = showCoverPageToggle.checked;
+                if (!pagesData[0].showCoverPage && activePageIndex === 0) {
+                    activePageIndex = 1;
+                }
+            }
+            renderPreview();
+            saveWorkspaceToLocalStorage();
+        });
+    }
+
     // Page Template binding
     if (pageTemplateSelect) {
         pageTemplateSelect.addEventListener('change', () => {
-            if (activePageIndex === 0 || activePageIndex === pagesData.length) {
+            if (activePageIndex === 0) {
                 alert('Templates can only be applied to content pages (Page 2, Page 3...)!');
                 pageTemplateSelect.value = '';
                 return;
@@ -3887,7 +3902,14 @@ document.addEventListener('DOMContentLoaded', () => {
             saveCurrentInputState();
         }
 
-        // 2. Shift active index
+        // 2. Shift active index (bounded and cover-adjusted)
+        const showCover = (pagesData[0] && pagesData[0].showCoverPage !== false);
+        if (index === 0 && !showCover) {
+            index = 1;
+        }
+        if (index >= pagesData.length) {
+            index = pagesData.length - 1;
+        }
         activePageIndex = index;
 
         // 2.5 Sync global theme dropdown
@@ -3901,18 +3923,13 @@ document.addEventListener('DOMContentLoaded', () => {
         // Auto-switch dynamic horizontal sidebar tabs to editor panel
         switchSidebarTab('panel-editor');
 
-        const lastTabIdx = pagesData.length;
-        const totalPages = pagesData.length + 1;
-        
         // Dynamically show the current page inside the tab button itself
         const tabEditorBtn = document.getElementById('tab-editor-btn');
         if (tabEditorBtn) {
             if (index === 0) {
                 tabEditorBtn.innerHTML = '<span class="tab-icon">✍️</span> Ed. (Cover)';
-            } else if (index === lastTabIdx) {
-                tabEditorBtn.innerHTML = '<span class="tab-icon">✍️</span> Ed. (End)';
             } else {
-                tabEditorBtn.innerHTML = `<span class="tab-icon">✍️</span> Ed. (P. ${index + 1})`;
+                tabEditorBtn.innerHTML = `<span class="tab-icon">✍️</span> Ed. (P. ${index})`;
             }
         }
 
@@ -3963,21 +3980,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 coverSubtitleSizeVal.textContent = `${coverSubtitleSizeSlider.value}px`;
             }
             applyTheme(pagesData[0].theme);
-        } else if (index === lastTabIdx) {
-            // Display Last Page controls
-            coverEditorZone.classList.remove('active');
-            contentEditorZone.classList.remove('active');
-            lastEditorZone.classList.add('active');
-            activePageLabel.textContent = "End";
-
-            if (pageTemplateSelect) pageTemplateSelect.disabled = true;
-            if (pageLayoutSelect) pageLayoutSelect.disabled = true;
-            if (applyLayoutAllBtn) applyLayoutAllBtn.disabled = true;
-
-            // Sync values to last page fields
-            lastTitleInput.value = lastPageData.title;
-            lastSubtitleInput.value = lastPageData.subtitle;
-            lastTaglineInput.value = lastPageData.tagline;
         } else {
             // Display Content Text Area controls
             coverEditorZone.classList.remove('active');
@@ -4044,10 +4046,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        if (activePageIndex === pagesData.length) {
-            alert('The End Page cannot be deleted!');
-            return;
-        }
+
 
         if (pagesData.length <= 2) {
             alert('At least one Content Page is required!');
@@ -4072,7 +4071,9 @@ document.addEventListener('DOMContentLoaded', () => {
             pageTabsList.innerHTML = '';
         }
         
+        const showCover = (pagesData[0] && pagesData[0].showCoverPage !== false);
         pagesData.forEach((page, idx) => {
+            if (idx === 0 && !showCover) return;
             if (pageTabsList) {
                 const tab = document.createElement('div');
                 tab.className = 'page-tab';
@@ -4087,7 +4088,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 // Sync overflow warning style from A4 page to tab button
-                const previewPage = document.querySelector(`.a4-page[data-page="${idx + 1}"]`);
+                const pageNumAttr = idx === 0 ? 1 : idx + (showCover ? 1 : 0);
+                const previewPage = document.querySelector(`.a4-page[data-page="${pageNumAttr}"]`);
                 if (previewPage && previewPage.classList.contains('overflow-detected')) {
                     tab.classList.add('overflow');
                     tab.title = "Page overflow detected! Click to reduce text.";
@@ -4108,14 +4110,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         quickPageSelect.innerHTML = '';
         const lastTabIdx = pagesData.length;
+        const showCover = (pagesData[0] && pagesData[0].showCoverPage !== false);
 
-        for (let idx = 0; idx <= lastTabIdx; idx++) {
+        for (let idx = 0; idx < lastTabIdx; idx++) {
+            if (idx === 0 && !showCover) continue;
             const opt = document.createElement('option');
             opt.value = idx.toString();
             if (idx === 0) {
                 opt.textContent = '👑 Cover Page';
-            } else if (idx === lastTabIdx) {
-                opt.textContent = '🏁 End Page';
             } else {
                 opt.textContent = `📄 Page ${idx}`;
             }
@@ -4124,7 +4126,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 opt.selected = true;
             }
 
-            const previewPage = document.querySelector(`.a4-page[data-page="${idx + 1}"]`);
+            const pageNumAttr = idx === 0 ? 1 : idx + (showCover ? 1 : 0);
+            const previewPage = document.querySelector(`.a4-page[data-page="${pageNumAttr}"]`);
             if (previewPage && previewPage.classList.contains('overflow-detected')) {
                 opt.textContent += ' ⚠️ (Overflow)';
             }
@@ -4132,17 +4135,18 @@ document.addEventListener('DOMContentLoaded', () => {
             quickPageSelect.appendChild(opt);
         }
 
+        const firstTabIdx = showCover ? 0 : 1;
         const quickPrevPageBtn = document.getElementById('quick-prev-page-btn');
         const quickNextPageBtn = document.getElementById('quick-next-page-btn');
         if (quickPrevPageBtn) {
-            quickPrevPageBtn.disabled = (activePageIndex === 0);
-            quickPrevPageBtn.style.opacity = (activePageIndex === 0) ? '0.4' : '1';
-            quickPrevPageBtn.style.pointerEvents = (activePageIndex === 0) ? 'none' : 'auto';
+            quickPrevPageBtn.disabled = (activePageIndex === firstTabIdx);
+            quickPrevPageBtn.style.opacity = (activePageIndex === firstTabIdx) ? '0.4' : '1';
+            quickPrevPageBtn.style.pointerEvents = (activePageIndex === firstTabIdx) ? 'none' : 'auto';
         }
         if (quickNextPageBtn) {
-            quickNextPageBtn.disabled = (activePageIndex === lastTabIdx);
-            quickNextPageBtn.style.opacity = (activePageIndex === lastTabIdx) ? '0.4' : '1';
-            quickNextPageBtn.style.pointerEvents = (activePageIndex === lastTabIdx) ? 'none' : 'auto';
+            quickNextPageBtn.disabled = (activePageIndex === lastTabIdx - 1);
+            quickNextPageBtn.style.opacity = (activePageIndex === lastTabIdx - 1) ? '0.4' : '1';
+            quickNextPageBtn.style.pointerEvents = (activePageIndex === lastTabIdx - 1) ? 'none' : 'auto';
         }
     }
 
@@ -4162,7 +4166,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (quickPrevPageBtnEl) {
         quickPrevPageBtnEl.addEventListener('click', () => {
-            if (activePageIndex > 0) {
+            const showCover = (pagesData[0] && pagesData[0].showCoverPage !== false);
+            const firstIdx = showCover ? 0 : 1;
+            if (activePageIndex > firstIdx) {
                 switchActivePage(activePageIndex - 1);
             }
         });
@@ -4170,7 +4176,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (quickNextPageBtnEl) {
         quickNextPageBtnEl.addEventListener('click', () => {
-            if (activePageIndex < pagesData.length) {
+            const lastIdx = pagesData.length - 1;
+            if (activePageIndex < lastIdx) {
                 switchActivePage(activePageIndex + 1);
             }
         });
@@ -4225,9 +4232,13 @@ document.addEventListener('DOMContentLoaded', () => {
             gridTotalPagesLabel.textContent = `Total Content Pages: ${totalContentCount}`;
         }
 
-        // 1. Render Cover Page card (always index 0)
-        const coverCard = createGridCardDOM(0, 'cover');
-        pageGridItemsContainer.appendChild(coverCard);
+        const showCover = (pagesData[0] && pagesData[0].showCoverPage !== false);
+
+        // 1. Render Cover Page card (always index 0) if shown
+        if (showCover) {
+            const coverCard = createGridCardDOM(0, 'cover');
+            pageGridItemsContainer.appendChild(coverCard);
+        }
 
         // 2. Render Content Page cards (indices 1 to pagesData.length - 1)
         for (let idx = 1; idx < pagesData.length; idx++) {
@@ -4248,10 +4259,6 @@ document.addEventListener('DOMContentLoaded', () => {
             renderGridPages();
         });
         pageGridItemsContainer.appendChild(addCardPlaceholder);
-
-        // 4. Render End Page card (Index pagesData.length)
-        const endCard = createGridCardDOM(pagesData.length, 'end');
-        pageGridItemsContainer.appendChild(endCard);
 
         // Setup Drag & Drop handlers on items
         setupGridDragAndDrop();
@@ -4465,19 +4472,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const labelNum = document.createElement('span');
         labelNum.className = 'page-label-num';
         if (type === 'cover') {
-            labelNum.textContent = 'Page 1';
-        } else if (type === 'end') {
-            labelNum.textContent = `Page ${pagesData.length + 1}`;
+            labelNum.textContent = 'Cover Page';
         } else {
-            labelNum.textContent = `Page ${idx + 1}`;
+            labelNum.textContent = `Page ${idx}`;
         }
 
         const labelType = document.createElement('span');
         labelType.className = 'page-label-type';
         if (type === 'cover') {
             labelType.textContent = 'Cover';
-        } else if (type === 'end') {
-            labelType.textContent = 'End Page';
         } else {
             labelType.textContent = pagesData[idx].layout === 'two-column' ? '2 Cols' : '1 Col';
         }
@@ -4488,11 +4491,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Click on page card to switch and close modal
         card.addEventListener('click', () => {
-            if (type === 'end') {
-                switchActivePage(pagesData.length);
-            } else {
-                switchActivePage(idx);
-            }
+            switchActivePage(idx);
             if (pageGridModal) {
                 pageGridModal.classList.remove('active');
                 setTimeout(() => {
@@ -6849,9 +6848,19 @@ document.addEventListener('DOMContentLoaded', () => {
         pagesContainer.innerHTML = '';
 
         // 1. Render Cover Page (Page 1)
-        const coverPageElement = createCoverPageDOM();
-        // Prevent watermark on cover page as per user request
-        pagesContainer.appendChild(coverPageElement);
+        const showCover = (pagesData[0] && pagesData[0].showCoverPage !== false);
+        if (activePageIndex === 0 && !showCover) {
+            activePageIndex = 1;
+        }
+        if (activePageIndex >= pagesData.length) {
+            activePageIndex = pagesData.length - 1;
+        }
+
+        if (showCover) {
+            const coverPageElement = createCoverPageDOM();
+            // Prevent watermark on cover page as per user request
+            pagesContainer.appendChild(coverPageElement);
+        }
 
         // 1.5 Track cursor position in content pages
         const isEditorActive = (activePageIndex > 0 && activePageIndex < pagesData.length) && 
@@ -6888,7 +6897,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         let currentVisualPageNum = 1;
-        let currentPageStruct = createContentPageDOM(2, 1);
+        let currentPageStruct = createContentPageDOM(showCover ? 2 : 1, 1);
         injectWatermark(currentPageStruct.pageElement);
         pagesContainer.appendChild(currentPageStruct.pageElement);
 
@@ -6909,7 +6918,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 currentPageMarkdownLines = [];
                 
                 currentVisualPageNum++;
-                currentPageStruct = createContentPageDOM(currentVisualPageNum + 1, currentVisualPageNum);
+                currentPageStruct = createContentPageDOM(currentVisualPageNum + (showCover ? 1 : 0), currentVisualPageNum);
                 injectWatermark(currentPageStruct.pageElement);
                 pagesContainer.appendChild(currentPageStruct.pageElement);
                 activeBulletListElement = null;
@@ -7088,7 +7097,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                             // Start new page
                             currentVisualPageNum++;
-                            currentPageStruct = createContentPageDOM(currentVisualPageNum + 1, currentVisualPageNum);
+                            currentPageStruct = createContentPageDOM(currentVisualPageNum + (showCover ? 1 : 0), currentVisualPageNum);
                             injectWatermark(currentPageStruct.pageElement);
                             pagesContainer.appendChild(currentPageStruct.pageElement);
                             activeBulletListElement = null;
@@ -7141,7 +7150,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                         // Start new page
                         currentVisualPageNum++;
-                        currentPageStruct = createContentPageDOM(currentVisualPageNum + 1, currentVisualPageNum);
+                        currentPageStruct = createContentPageDOM(currentVisualPageNum + (showCover ? 1 : 0), currentVisualPageNum);
                         injectWatermark(currentPageStruct.pageElement);
                         pagesContainer.appendChild(currentPageStruct.pageElement);
                         activeBulletListElement = null;
@@ -7231,10 +7240,8 @@ document.addEventListener('DOMContentLoaded', () => {
         populateCoverPageTOC(sectionInfoList);
 
         // 5. Restore spotlight outline around active edited page
-        let pageSelectorIndex = activePageIndex + 1;
-        if (activePageIndex === pagesData.length) {
-            pageSelectorIndex = pagesData.length; // Spotlight the last content page where the inline thank you box is
-        }
+        const showCover = (pagesData[0] && pagesData[0].showCoverPage !== false);
+        let pageSelectorIndex = activePageIndex === 0 ? 1 : activePageIndex + (showCover ? 1 : 0);
         const activeA4Page = document.querySelector(`.a4-page[data-page="${pageSelectorIndex}"]`);
         if (activeA4Page) {
             document.querySelectorAll('.a4-page').forEach(page => {
@@ -7986,6 +7993,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (tightCompactionToggle) {
             tightCompactionToggle.checked = !!isTightCompaction;
         }
+        if (showCoverPageToggle) {
+            showCoverPageToggle.checked = (pagesData[0] && pagesData[0].showCoverPage !== false);
+        }
         document.body.classList.toggle('compact-mode', !!customDesignSettings.compactMode);
 
         // Dynamically fetch computed theme colors to act as fallbacks instead of hardcoding Maroon/Gold/Blue
@@ -8404,6 +8414,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (tightCompactionToggle) {
             tightCompactionToggle.checked = false;
         }
+        if (showCoverPageToggle) {
+            showCoverPageToggle.checked = true;
+        }
 
         // Keep the cover page metadata as is, enforcing the active theme
         const currentCover = {
@@ -8420,7 +8433,8 @@ document.addEventListener('DOMContentLoaded', () => {
             classificationSize: 24,
             taglineSize: 20,
             subtitleSize: 21,
-            showTOC: true
+            showTOC: true,
+            showCoverPage: true
         };
         currentCover.theme = activeTheme;
 
