@@ -5432,12 +5432,23 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
 
-            // Match '[chapter <number>] <title> | <subtitle>'
-            const chapterMatch = trimmed.match(/^\[chapter(?:\s+(\d+))?\]\s*([^|]*?)(?:\s*\|\s*(.*))?$/i);
+            // Match '[chapter <attrs>] <title> | <subtitle>' where attrs can have chapter number and size=XX
+            const chapterMatch = trimmed.match(/^\[chapter\s*([^\]]*?)\]\s*([^|]*?)(?:\s*\|\s*(.*))?$/i);
             if (chapterMatch) {
+                let attrs = chapterMatch[1];
+                let fontSize = null;
+                const sizeMatch = attrs.match(/size=(\d+)/i);
+                if (sizeMatch) {
+                    fontSize = parseInt(sizeMatch[1], 10);
+                    attrs = attrs.replace(/size=\d+/i, '').trim();
+                }
+                const numMatch = attrs.match(/(?:\b|^)(\d+)(?:\b|$)/);
+                const chapterNum = numMatch ? numMatch[1] : null;
+
                 blocks.push({
                     type: 'chapter-header',
-                    chapterNum: chapterMatch[1] || null,
+                    chapterNum: chapterNum,
+                    fontSize: fontSize,
                     mainTitle: chapterMatch[2].trim(),
                     subTitle: chapterMatch[3] ? chapterMatch[3].trim() : null,
                     markdown: line,
@@ -5766,6 +5777,9 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const mainTitle = document.createElement('h2');
             mainTitle.className = 'chapter-main-title';
+            if (block.fontSize) {
+                mainTitle.style.fontSize = `${block.fontSize}px`;
+            }
             mainTitle.innerHTML = parseInlineHighlightsToHtml(block.mainTitle);
             titleGroup.appendChild(mainTitle);
             
@@ -6683,7 +6697,7 @@ document.addEventListener('DOMContentLoaded', () => {
             case 'section':
                 return 55; // 18px font size + padding/margin
             case 'chapter-header':
-                return 85; // 22px font size + ribbon wrapper + margins
+                return 85 * ((block.fontSize || 22) / 22); // adjusted for custom font size if specified
             case 'topic':
                 return 45; // 15px font size + padding/margin
             case 'empty':
