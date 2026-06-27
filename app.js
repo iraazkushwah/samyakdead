@@ -768,6 +768,23 @@ document.addEventListener('DOMContentLoaded', () => {
     let lastActiveBlockId = null;
     let scrollSyncPending = false;
 
+    function safeScrollToElement(targetElement, behavior = 'smooth') {
+        const canvasWrapper = document.querySelector('.canvas-wrapper');
+        if (!canvasWrapper || !targetElement) return;
+        
+        const wrapperRect = canvasWrapper.getBoundingClientRect();
+        const elementRect = targetElement.getBoundingClientRect();
+        
+        // Calculate target scrollTop relative to canvas-wrapper scrollable area
+        const relativeTop = elementRect.top - wrapperRect.top + canvasWrapper.scrollTop;
+        const targetScrollTop = relativeTop - (wrapperRect.height / 2) + (elementRect.height / 2);
+        
+        canvasWrapper.scrollTo({
+            top: Math.max(0, targetScrollTop),
+            behavior: behavior
+        });
+    }
+
     // Scroll preview to match the current line in the editor (Lag-free requestAnimationFrame backed performance version)
     function syncPreviewScroll(forceScroll = false) {
         if (scrollSyncPending && !forceScroll) return; // Throttled within frame rate limits to eliminate keystroke typing lag
@@ -819,7 +836,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     // Scroll the block into the center of the preview viewport only if forced or the block changed
                     if (forceScroll || activeBlockChanged) {
-                        previewElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        safeScrollToElement(previewElement);
                     }
                 }
             }
@@ -3904,11 +3921,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 2. Shift active index (bounded and cover-adjusted)
         const showCover = (pagesData[0] && pagesData[0].showCoverPage !== false);
+        const lastTabIdx = pagesData.length - 1;
         if (index === 0 && !showCover) {
             index = 1;
         }
         if (index >= pagesData.length) {
-            index = pagesData.length - 1;
+            index = lastTabIdx;
         }
         activePageIndex = index;
 
@@ -4014,7 +4032,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Scroll to element center or block center
             if (index === 0 || index === lastTabIdx) {
-                targetPageElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                safeScrollToElement(targetPageElement);
             } else {
                 // Let syncPreviewScroll align smoothly to the active editing block
                 setTimeout(() => syncPreviewScroll(true), 80);
@@ -6186,6 +6204,9 @@ document.addEventListener('DOMContentLoaded', () => {
         else if (block.type === 'table') {
             const table = document.createElement('table');
             table.className = 'markdown-table';
+            if (block.isContinuation) {
+                table.classList.add('table-continuation');
+            }
             table.setAttribute('data-block-id', block.id);
             let columnWidths = null;
 
@@ -6795,7 +6816,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Helper to detect overflow in single and two-column layouts
-    function checkPageOverflow(contentEl, isTwoCol, maxHeight) {
+    function checkPageOverflow(contentEl, isTwoCol, maxHeight, ignoreHorizontal = false) {
         const contentRect = contentEl.getBoundingClientRect();
         // Fallback if the element is not in DOM or hidden (rect is 0)
         if (contentRect.width === 0 || contentRect.height === 0) {
@@ -6828,12 +6849,9 @@ document.addEventListener('DOMContentLoaded', () => {
                                         child.classList.contains('chapter-header') || 
                                         child.closest('.chapter-header') !== null;
                 
-                // Check horizontal overflow (spills into column 3).
-                // Use a 12px tolerance to avoid sub-pixel rounding false-positives while catching true column 3 spillovers (+20px gap).
-                // Skip horizontal overflow check for column-span: all elements as they span the full page width
                 let horizontalOverflow = false;
-                if (!isColumnSpanAll) {
-                    horizontalOverflow = childRect.right > (contentRect.right + 12);
+                if (!isColumnSpanAll && !ignoreHorizontal) {
+                    horizontalOverflow = childRect.right > (contentRect.right + 30);
                 }
                 
                 // Check vertical overflow if the element is in Column 2 or has column-span: all
@@ -6883,8 +6901,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 cachedMaxContentHeight = measuredHeight;
             }
         }
-        // Apply a defensive 15px safety buffer (breathing room) in preview to accommodate font rendering differences and social media links in physical PDF printing
-        MAX_CONTENT_HEIGHT = (cachedMaxContentHeight ? (cachedMaxContentHeight - 15) : 895);
+        // Apply a tight 20px safety buffer (breathing room) in preview to fill columns completely and eliminate blank spaces
+        MAX_CONTENT_HEIGHT = (cachedMaxContentHeight ? (cachedMaxContentHeight - 20) : 875);
 
         // Clear canvas
         pagesContainer.innerHTML = '';
@@ -7043,13 +7061,12 @@ document.addEventListener('DOMContentLoaded', () => {
                         let separator = (block.type === 'table') ? '\n' : '';
                         let testMarkdown = words.slice(0, wordCount).join(separator);
                         updateNodeContent(node, block.type, testMarkdown);
-                        return !checkPageOverflow(currentPageStruct.contentElement, isTwoCol, MAX_CONTENT_HEIGHT);
+                        return !checkPageOverflow(currentPageStruct.contentElement, isTwoCol, MAX_CONTENT_HEIGHT, true);
                     };
 
-                    // Binary search for the maximum number of words/rows that fit
                     let low = 1;
                     if (block.type === 'table') {
-                        low = 3; // Table needs header (0), separator (1), and at least 1 data row (2)
+                        low = 2; // Table needs at least header (0) and separator (1) to split
                     }
                     let high = words.length;
                     let splitIndex = 0;
@@ -7095,7 +7112,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         let fitMarkdown = words.slice(0, splitIndex).join(fitSeparator);
                         let remainingMarkdown = words.slice(splitIndex).join(fitSeparator);
 
-                        let canSplitTable = (block.type === 'table' && splitIndex >= 3);
+                        let canSplitTable = (block.type === 'table' && splitIndex >= 2);
                         let canSplitText = false;
                         
                         if (block.type !== 'table') {
@@ -7151,7 +7168,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                 markdown: remainingMarkdown,
                                 id: block.id,
                                 config: block.config,
-                                configFormat: block.configFormat
+                                configFormat: block.configFormat,
+                                isContinuation: true
                             });
 
                             splitSuccess = true;
@@ -8916,10 +8934,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function findTextIndexInMarkdown(markdown, searchStr) {
+        console.log("findTextIndexInMarkdown called with searchStr:", searchStr);
         if (!markdown || !searchStr) return -1;
         
         // Clean search text to alphanumeric/Devanagari characters, cap at 40 chars for precision matching
         const cleanSearch = searchStr.replace(/[^a-zA-Z0-9\u0900-\u097F]/g, '').trim().substring(0, 40);
+        console.log("cleanSearch:", cleanSearch);
         if (!cleanSearch) return -1;
 
         let cleanMarkdown = "";
@@ -8932,13 +8952,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 indexMap.push(i);
             }
         }
+        console.log("cleanMarkdown substring (first 100):", cleanMarkdown.substring(0, 100));
         
         let cleanMatchIndex = cleanMarkdown.indexOf(cleanSearch);
+        console.log("cleanMatchIndex:", cleanMatchIndex);
         if (cleanMatchIndex === -1) {
             // Try matching a shorter 15 char sequence
             const shortSearch = cleanSearch.substring(0, 15);
+            console.log("Trying shortSearch:", shortSearch);
             if (shortSearch.length >= 5) {
                 cleanMatchIndex = cleanMarkdown.indexOf(shortSearch);
+                console.log("shortSearch match index:", cleanMatchIndex);
                 if (cleanMatchIndex !== -1) {
                     const start = indexMap[cleanMatchIndex];
                     const end = indexMap[cleanMatchIndex + shortSearch.length - 1] + 1;
@@ -9034,7 +9058,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const searchText = cleanTextForSearch(targetText);
+        console.log("pagesContainer click targetText:", targetText, "searchText:", searchText);
         const range = findTextIndexInMarkdown(pageContentInput.value, searchText);
+        console.log("findTextIndexInMarkdown range result:", range);
         if (range && range !== -1) {
             pageContentInput.focus();
             pageContentInput.setSelectionRange(range.start, range.end);
@@ -9244,7 +9270,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 switchActivePage(editorPageIdx);
                 const tableEl = pagesContainer.querySelector(`table.markdown-table[data-block-id="${blockId}"]`);
                 if (tableEl) {
-                    tableEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    safeScrollToElement(tableEl);
                     tableEl.style.outline = '2px solid var(--ui-accent)';
                     setTimeout(() => {
                         tableEl.style.outline = '';
@@ -10160,6 +10186,64 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // 1.5 Dashboard Card and Back Navigation Logic for Design Panel
+    const designTabCards = document.querySelectorAll('.design-tab-card');
+    const designTabsGrid = document.querySelector('.design-tabs-grid');
+    const designBackBtn = document.getElementById('design-back-btn');
+    
+    function openDesignSection(targetId) {
+        // Hide the grid of cards
+        designTabsGrid.style.display = 'none';
+        // Show the back button
+        designBackBtn.style.display = 'block';
+        // Show the settings container
+        settingsAccordionContainer.style.display = 'block';
+        
+        // Show only the selected section content
+        collapsibleSections.forEach(section => {
+            const content = section.querySelector('.collapsible-content');
+            if (section.id === targetId) {
+                section.style.display = 'block';
+                if (content) content.style.display = 'block';
+                section.classList.add('active');
+            } else {
+                section.style.display = 'none';
+                if (content) content.style.display = 'none';
+                section.classList.remove('active');
+            }
+        });
+    }
+    
+    function closeDesignSection() {
+        // Hide the settings container & back button
+        settingsAccordionContainer.style.display = 'none';
+        designBackBtn.style.display = 'none';
+        // Show the grid of cards
+        designTabsGrid.style.display = 'grid';
+        
+        // Hide all sections
+        collapsibleSections.forEach(section => {
+            section.style.display = 'none';
+            section.classList.remove('active');
+        });
+    }
+    
+    // Add click listeners to cards
+    designTabCards.forEach(card => {
+        card.addEventListener('click', () => {
+            const targetId = card.getAttribute('data-target');
+            openDesignSection(targetId);
+        });
+    });
+    
+    // Add click listener to back button
+    if (designBackBtn) {
+        designBackBtn.addEventListener('click', closeDesignSection);
+    }
+    
+    // Make sure we start in the grid view (all closed)
+    closeDesignSection();
+
     // 2. HTML5 Drag-and-Drop Reordering
     let draggedElement = null;
 
@@ -10349,7 +10433,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (isRelevant) {
                             // Check vertical or horizontal overflow
                             const vert = nodeRect.bottom > (maxAllowedBottom + 3);
-                            const horiz = isTwoCol && !isColumnSpanAll && (nodeRect.right > pageRect.right + 12);
+                            const horiz = isTwoCol && !isColumnSpanAll && (nodeRect.right > pageRect.right + 30);
                             
                             if (vert || horiz) {
                                 firstOverflowReport = {

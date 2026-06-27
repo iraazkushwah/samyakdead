@@ -642,15 +642,17 @@ sub {
 
 .sidebar-tabs-nav {
     display: flex;
+    justify-content: center;
     background-color: rgba(0, 0, 0, 0.2);
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-    padding: 4px;
-    gap: 4px;
+    padding: 6px 4px;
+    gap: 8px;
     flex-shrink: 0;
 }
 
 .sidebar-tab-btn {
-    flex: 1;
+    flex: 0 1 auto;
+    min-width: 100px;
     background: none;
     border: none;
     outline: none;
@@ -658,14 +660,14 @@ sub {
     font-family: var(--font-ui);
     font-size: 11px;
     font-weight: 600;
-    padding: 8px 6px;
+    padding: 8px 16px;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 6px;
     transition: var(--transition-smooth);
-    border-radius: var(--border-radius-sm);
+    border-radius: 20px;
     position: relative;
 }
 
@@ -705,6 +707,206 @@ sub {
 
 .sidebar-panel.active {
     display: flex;
+}
+
+/* Dynamic Design Tab Grid & Dashboard Card Styles */
+#panel-design {
+    height: 100%;
+    box-sizing: border-box;
+}
+
+#panel-design .settings-section {
+    height: calc(100% - 15px);
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+}
+
+.design-tabs-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(5, 1fr);
+    gap: 5px;
+    padding: 5px 4px;
+    flex-grow: 1;
+    box-sizing: border-box;
+}
+
+.design-tab-card {
+    /* Cylinder / Capsule Shape — fills full grid cell */
+    width: 100%;
+    height: 100%;
+    border-radius: 28px;
+    place-self: stretch;
+
+    /* Zinc-dark theme matching the app's cyber-slate palette */
+    background: linear-gradient(
+        170deg,
+        #1e1e22 0%,
+        #141417 55%,
+        #0e0e10 100%
+    );
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+
+    /* Amber gold subtle border — matches --ui-accent #f59e0b */
+    border: 1px solid rgba(245, 158, 11, 0.18);
+
+    /* Deep 3D zinc shadows with amber inner warmth */
+    box-shadow:
+        0 6px 18px rgba(0, 0, 0, 0.6),
+        0 2px 4px rgba(0, 0, 0, 0.45),
+        inset 0 2px 0 rgba(255, 255, 255, 0.07),
+        inset 0 -3px 8px rgba(0, 0, 0, 0.55),
+        inset 0 1px 18px rgba(245, 158, 11, 0.04);
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    cursor: pointer;
+    outline: none;
+    flex-shrink: 0;
+    text-align: center;
+    box-sizing: border-box;
+    transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+    overflow: hidden;
+    /* Mobile: instant tap, no 300ms delay */
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+/* Top gloss sheen pseudo-element — warm white glint */
+.design-tab-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 10%;
+    width: 80%;
+    height: 38%;
+    background: linear-gradient(
+        180deg,
+        rgba(255, 248, 220, 0.09) 0%,
+        rgba(255, 255, 255, 0.0) 100%
+    );
+    border-radius: 28px 28px 60% 60%;
+    pointer-events: none;
+}
+
+.design-tab-card:hover {
+    background: linear-gradient(
+        170deg,
+        #232320 0%,
+        #18180f 55%,
+        #111109 100%
+    );
+    /* Amber gold glow border on hover */
+    border-color: rgba(245, 158, 11, 0.55);
+    transform: translateY(-3px) scale(1.04);
+    box-shadow:
+        0 10px 26px rgba(245, 158, 11, 0.2),
+        0 4px 8px rgba(0, 0, 0, 0.45),
+        inset 0 2px 0 rgba(255, 248, 200, 0.12),
+        inset 0 -2px 6px rgba(0, 0, 0, 0.4),
+        0 0 0 1px rgba(245, 158, 11, 0.25);
+}
+
+.design-tab-card:active {
+    transform: translateY(2px) scale(0.97);
+    box-shadow:
+        0 2px 6px rgba(0, 0, 0, 0.6),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06),
+        inset 0 3px 10px rgba(0, 0, 0, 0.5);
+}
+
+.design-tab-card .card-icon {
+    font-size: 32px;
+    filter:
+        drop-shadow(0 0 5px rgba(245, 158, 11, 0.3))
+        drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+    z-index: 1;
+    line-height: 1;
+}
+
+.design-tab-card:hover .card-icon {
+    transform: scale(1.18) translateY(-1px);
+    filter:
+        drop-shadow(0 0 10px rgba(245, 158, 11, 0.65))
+        drop-shadow(0 2px 6px rgba(0, 0, 0, 0.5));
+}
+
+.design-tab-card .card-label {
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 800;
+    /* Muted warm zinc text — matches --ui-text-muted #a1a1aa */
+    color: rgba(161, 161, 170, 0.9);
+    letter-spacing: 0.3px;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+    transition: color 0.2s ease;
+    width: 90%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    position: relative;
+    z-index: 1;
+}
+
+.design-tab-card:hover .card-label {
+    /* Warm amber-white on hover */
+    color: rgba(255, 240, 190, 1);
+    text-shadow: 0 0 8px rgba(245, 158, 11, 0.4), 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+.design-back-btn {
+    width: 100%;
+    background: rgba(79, 70, 229, 0.12);
+    border: 1px solid var(--ui-accent);
+    color: #fff;
+    padding: 8px 15px;
+    border-radius: var(--border-radius-sm);
+    font-family: var(--font-body);
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-bottom: 12px;
+    transition: all 0.2s ease;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+.design-back-btn:hover {
+    background: var(--ui-accent);
+    box-shadow: 0 0 10px rgba(79, 70, 229, 0.35);
+}
+
+/* Hide the old collapsible headers */
+#panel-design .collapsible-header {
+    display: none !important;
+}
+
+/* Reset collapsible-section borders and styling so it renders as a clean integrated panel */
+#panel-design .collapsible-section {
+    border: none !important;
+    background: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    animation: none !important;
+    transform: none !important;
+}
+
+#panel-design .collapsible-content {
+    background: none !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
 }
 
 /* Custom premium scrollbar for sidebar panels */
@@ -2395,6 +2597,10 @@ strong {
     font-weight: var(--content-font-weight, 700);
     color: var(--text-dark);
     border: 1.5px solid var(--primary-color);
+}
+
+.table-continuation thead {
+    display: none !important;
 }
 
 .markdown-table th, .markdown-table td {
@@ -6464,6 +6670,43 @@ body.theme-raaz-compact .page-content p.body-text {
         position: static !important;
         transform: none !important;
         margin-left: 8px !important;
+    }
+
+    /* ── Design Tab Cards: Mobile Responsive ── */
+    .design-tabs-grid {
+        /* On narrow screens, 3 columns may be too tight — keep 3 but tighten gap */
+        gap: 4px !important;
+        padding: 4px 3px !important;
+    }
+
+    .design-tab-card {
+        /* Ensure minimum touch target of 44px (Apple/Google HIG guidelines) */
+        min-width: 44px;
+        min-height: 44px;
+        /* Slightly reduce border-radius on small screens */
+        border-radius: 22px !important;
+        gap: 3px !important;
+        /* Hover effects should not fire on touch (use active instead) */
+        transform: none !important;
+    }
+
+    .design-tab-card:active {
+        /* Tactile press feedback on touch */
+        transform: scale(0.93) !important;
+        box-shadow:
+            0 2px 6px rgba(0, 0, 0, 0.6),
+            inset 0 1px 0 rgba(255, 255, 255, 0.06),
+            inset 0 3px 10px rgba(0, 0, 0, 0.5) !important;
+    }
+
+    .design-tab-card .card-icon {
+        /* Slightly smaller icon on very narrow screens */
+        font-size: 24px !important;
+    }
+
+    .design-tab-card .card-label {
+        font-size: 10px !important;
+        letter-spacing: 0 !important;
     }
 }
 

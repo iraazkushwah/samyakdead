@@ -84,7 +84,7 @@
 
             <!-- Sidebar Tab Navigation (Premium Header Slider) -->
             <nav class="sidebar-tabs-nav">
-                <button id="tab-ocr-btn" class="sidebar-tab-btn" data-target="panel-ocr">
+                <button id="tab-ocr-btn" class="sidebar-tab-btn" data-target="panel-ocr" style="display: none !important;">
                     <span class="tab-icon">🧠</span> OCR
                 </button>
                 <button id="tab-editor-btn" class="sidebar-tab-btn active" data-target="panel-editor">
@@ -297,7 +297,68 @@
                 <!-- Tab Panel 4: Custom Design Panel (डिज़ाइन) - Unified and Collapsible -->
                 <div id="panel-design" class="sidebar-panel">
                     <section class="settings-section" style="padding-top: 15px;">
-                        <div id="settings-accordion-container">
+                        <div class="design-tabs-grid">
+                            <button class="design-tab-card" data-target="opt-sec-layout" type="button">
+                                <span class="card-icon">📄</span>
+                                <span class="card-label">Layout</span>
+                            </button>
+                            <button class="design-tab-card" data-target="opt-sec-margins" type="button">
+                                <span class="card-icon">📐</span>
+                                <span class="card-label">Margins</span>
+                            </button>
+                            <button class="design-tab-card" data-target="opt-sec-typography" type="button">
+                                <span class="card-icon">✍️</span>
+                                <span class="card-label">Fonts</span>
+                            </button>
+                            <button class="design-tab-card" data-target="opt-sec-watermark" type="button">
+                                <span class="card-icon">💧</span>
+                                <span class="card-label">Watermark</span>
+                            </button>
+                            <button class="design-tab-card" data-target="opt-sec-chapter" type="button">
+                                <span class="card-icon">🔖</span>
+                                <span class="card-label">Chapter</span>
+                            </button>
+                            <button class="design-tab-card" data-target="opt-sec-heading" type="button">
+                                <span class="card-icon">🏷️</span>
+                                <span class="card-label">Heading</span>
+                            </button>
+                            <button class="design-tab-card" data-target="opt-sec-topic" type="button">
+                                <span class="card-icon">🔸</span>
+                                <span class="card-label">Topic</span>
+                            </button>
+                            <button class="design-tab-card" data-target="opt-sec-bullets" type="button">
+                                <span class="card-icon">🟢</span>
+                                <span class="card-label">Bullets</span>
+                            </button>
+                            <button class="design-tab-card" data-target="opt-sec-table" type="button">
+                                <span class="card-icon">📊</span>
+                                <span class="card-label">Tables</span>
+                            </button>
+                            <button class="design-tab-card" data-target="opt-sec-explanation" type="button">
+                                <span class="card-icon">📖</span>
+                                <span class="card-label">Cards</span>
+                            </button>
+                            <button class="design-tab-card" data-target="opt-sec-borders" type="button">
+                                <span class="card-icon">🖼️</span>
+                                <span class="card-label">Borders</span>
+                            </button>
+                            <button class="design-tab-card" data-target="opt-sec-divider" type="button">
+                                <span class="card-icon">⚖️</span>
+                                <span class="card-label">Divider</span>
+                            </button>
+                            <button class="design-tab-card" data-target="opt-sec-pagination" type="button">
+                                <span class="card-icon">🔢</span>
+                                <span class="card-label">Footer</span>
+                            </button>
+                            <button class="design-tab-card" data-target="opt-sec-social" type="button">
+                                <span class="card-icon">📱</span>
+                                <span class="card-label">Social</span>
+                            </button>
+                        </div>
+                        <button id="design-back-btn" class="design-back-btn" type="button" style="display: none;">
+                            ← Back to Design Menu
+                        </button>
+                        <div id="settings-accordion-container" style="display: none;">
 
                             <div class="collapsible-section" draggable="true" id="opt-sec-layout">
                                 <div class="collapsible-header">
@@ -872,12 +933,8 @@
                     </section>
                 </div>
 
-                <!-- Tab Panel 5: OCR Handwriting Extractor (Embedded Live Web App) -->
-                <div id="panel-ocr" class="sidebar-panel" style="padding: 0; height: 100%; overflow: hidden;">
-                    <iframe src="https://untitled-1038614782118.asia-southeast1.run.app/" 
-                            style="width: 100%; height: 100%; border: none; background: #0b0f19;" 
-                            title="Samyak OCR Scanner">
-                    </iframe>
+                <!-- Tab Panel 5: OCR Handwriting Extractor (Embedded Live Web App - disabled) -->
+                <div id="panel-ocr" class="sidebar-panel" style="padding: 0; height: 100%; overflow: hidden; display: none !important;">
                 </div>
             </div>
 
