@@ -5610,8 +5610,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // 1. SECTION BAR DETECTOR
             if (trimmed.startsWith('# ') || (trimmed.startsWith('#') && !trimmed.startsWith('##'))) {
+                let fontSize = null;
+                const sizeMatch = trimmed.match(/\[size=(\d+)\]/i);
+                if (sizeMatch) {
+                    fontSize = parseInt(sizeMatch[1], 10);
+                }
                 blocks.push({
                     type: 'section',
+                    fontSize: fontSize,
                     markdown: line,
                     startLine: start,
                     endLine: i
@@ -5624,8 +5630,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     return cleanLine === cleanSec || trimmed === sec;
                 })
             ) {
+                let fontSize = null;
+                const sizeMatch = trimmed.match(/\[size=(\d+)\]/i);
+                if (sizeMatch) {
+                    fontSize = parseInt(sizeMatch[1], 10);
+                }
                 blocks.push({
                     type: 'section',
+                    fontSize: fontSize,
                     markdown: line,
                     startLine: start,
                     endLine: i
@@ -5639,8 +5651,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 /^[🔶🔷🔸🔹♦️💎]/u.test(trimmed) ||
                 /^##\s*[🔶🔷🔸🔹♦️💎]/u.test(trimmed)
             ) {
+                let fontSize = null;
+                const sizeMatch = trimmed.match(/\[size=(\d+)\]/i);
+                if (sizeMatch) {
+                    fontSize = parseInt(sizeMatch[1], 10);
+                }
                 blocks.push({
                     type: 'topic',
+                    fontSize: fontSize,
                     markdown: line,
                     startLine: start,
                     endLine: i
@@ -6004,10 +6022,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 1. SECTION BAR RENDER
         if (block.type === 'section') {
-            const sectionTitle = line.replace(/^#+\s*/, '').replace(/^[?？\s]+/, '').trim();
+            let sectionTitle = line.replace(/^#+\s*/, '').replace(/^[?？\s]+/, '').trim();
+            sectionTitle = sectionTitle.replace(/\[size=\d+\]/gi, '').trim();
             const sectionEl = document.createElement('h1');
             sectionEl.className = 'section-heading-bar';
             sectionEl.setAttribute('data-shape', customDesignSettings.sectionShape || 'rectangle');
+            if (block.fontSize) {
+                sectionEl.style.fontSize = `${block.fontSize}px`;
+            }
             sectionEl.textContent = sectionTitle;
             return sectionEl;
         } 
@@ -6018,6 +6040,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (topicTitle.startsWith('##')) {
                 topicTitle = topicTitle.replace(/^##+\s*/, '');
             }
+            topicTitle = topicTitle.replace(/\[size=\d+\]/gi, '').trim();
             
             let icon = '🔶'; // Default icon
             const emojiMatch = topicTitle.match(/^([\uD800-\uDBFF][\uDC00-\uDFFF]|\p{Emoji_Presentation}|\p{Emoji}|\S)\s*/u);
@@ -6061,6 +6084,9 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const titleEl = document.createElement('h3');
             titleEl.className = 'topic-title';
+            if (block.fontSize) {
+                titleEl.style.fontSize = `${block.fontSize}px`;
+            }
             titleEl.innerHTML = `<span class="diamond">${icon}</span> ${topicTitle}`;
 
             const divider = document.createElement('div');
@@ -6695,11 +6721,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     return innerHeight + extraHeight;
                 }
             case 'section':
-                return 55; // 18px font size + padding/margin
+                return 55 * ((block.fontSize || 18) / 18); // 18px font size + padding/margin
             case 'chapter-header':
                 return 85 * ((block.fontSize || 22) / 22); // adjusted for custom font size if specified
             case 'topic':
-                return 45; // 15px font size + padding/margin
+                return 45 * ((block.fontSize || 15) / 15); // 15px font size + padding/margin
             case 'empty':
                 return lineHeight;
             case 'spacer':
