@@ -306,46 +306,52 @@
                                     <span class="collapse-arrow">▼</span>
                                 </div>
                                 <div class="collapsible-content" style="display: none;">
-                                    <div class="options-grid">
-                                        <div class="option-item">
-                                            <label><span class="opt-icon">📄</span> Page Template:</label>
-                                            <select id="page-template-select" class="opt-select">
-                                                <option value="" disabled selected>Select Page Template...</option>
-                                                <option value="standard">Standard Content</option>
-                                                <option value="personality">Personality Feature</option>
-                                                <option value="stats-table">Comparison & Stats</option>
-                                                <option value="facts-grid">Quick Facts Grid</option>
-                                                <option value="announcement">Highlights & Alert</option>
-                                                <option value="blank">Blank Page</option>
-                                            </select>
-                                        </div>
-                                        <div class="option-item">
-                                            <label><span class="opt-icon">📐</span> Page Layout:</label>
-                                            <div style="display: flex; gap: 4px; align-items: center; width: 100%;">
-                                                <select id="page-layout-select" class="opt-select" style="flex: 1;">
-                                                    <option value="single">Single Column</option>
-                                                    <option value="two-column" selected>Two Columns</option>
-                                                </select>
-                                                <button id="apply-layout-all-btn" class="search-action-btn" style="font-size: 9px; padding: 6px 8px; border-radius: var(--border-radius-sm); white-space: nowrap;" title="Apply this layout to all content pages">Apply to All</button>
-                                            </div>
-                                        </div>
-                                        <div class="option-item full-width-opt" style="margin-top: 10px;">
-                                            <label style="cursor: pointer; display: flex; align-items: center; gap: 8px; user-select: none;">
-                                                <input type="checkbox" id="compact-spacing-toggle" style="width: 16px; height: 16px; accent-color: var(--ui-accent); cursor: pointer; margin: 0;">
-                                                <span>Compact Spacing (कॉम्पैक्ट लेआउट)</span>
-                                            </label>
-                                        </div>
-                                        <div class="option-item full-width-opt" style="margin-top: 5px;">
-                                            <label style="cursor: pointer; display: flex; align-items: center; gap: 8px; user-select: none;">
-                                                <input type="checkbox" id="tight-compaction-toggle" style="width: 16px; height: 16px; accent-color: var(--ui-accent); cursor: pointer; margin: 0;">
-                                                <span>Tight Compaction (टाईट कॉम्पैक्शन)</span>
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
+                                     <div class="options-grid">
+                                         <div class="option-item" style="display: none !important;">
+                                             <label><span class="opt-icon">📄</span> Page Template:</label>
+                                             <select id="page-template-select" class="opt-select">
+                                                 <option value="" disabled selected>Select Page Template...</option>
+                                                 <option value="standard">Standard Content</option>
+                                                 <option value="personality">Personality Feature</option>
+                                                 <option value="stats-table">Comparison & Stats</option>
+                                                 <option value="facts-grid">Quick Facts Grid</option>
+                                                 <option value="announcement">Highlights & Alert</option>
+                                                 <option value="blank">Blank Page</option>
+                                             </select>
+                                         </div>
+                                         <div class="option-item">
+                                             <label><span class="opt-icon">📐</span> Page Layout:</label>
+                                             <div style="display: flex; gap: 4px; align-items: center; width: 100%;">
+                                                 <select id="page-layout-select" class="opt-select" style="flex: 1;">
+                                                     <option value="single">Single Column</option>
+                                                     <option value="two-column" selected>Two Columns</option>
+                                                 </select>
+                                                 <button id="apply-layout-all-btn" class="search-action-btn" style="font-size: 9px; padding: 6px 8px; border-radius: var(--border-radius-sm); white-space: nowrap;" title="Apply this layout to all content pages">Apply to All</button>
+                                             </div>
+                                         </div>
+                                         <div class="option-item full-width-opt" style="margin-top: 10px; display: none !important;">
+                                             <label style="cursor: pointer; display: flex; align-items: center; gap: 8px; user-select: none;">
+                                                 <input type="checkbox" id="compact-spacing-toggle" style="width: 16px; height: 16px; accent-color: var(--ui-accent); cursor: pointer; margin: 0;">
+                                                 <span>Compact Spacing (कॉम्पैक्ट लेआउट)</span>
+                                             </label>
+                                         </div>
+                                         <div class="option-item full-width-opt" style="margin-top: 5px; display: none !important;">
+                                             <label style="cursor: pointer; display: flex; align-items: center; gap: 8px; user-select: none;">
+                                                 <input type="checkbox" id="tight-compaction-toggle" style="width: 16px; height: 16px; accent-color: var(--ui-accent); cursor: pointer; margin: 0;">
+                                                 <span>Tight Compaction (टाईट कॉम्पैक्शन)</span>
+                                             </label>
+                                         </div>
+                                         <div class="option-item full-width-opt" style="margin-top: 5px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 8px;">
+                                             <label style="cursor: pointer; display: flex; align-items: center; gap: 8px; user-select: none;">
+                                                 <input type="checkbox" id="show-cover-page-toggle" checked style="width: 16px; height: 16px; accent-color: var(--ui-accent); cursor: pointer; margin: 0;">
+                                                 <span style="font-weight: bold; color: var(--ui-accent);">Show Cover Page (कवर पेज दिखाएं)</span>
+                                             </label>
+                                         </div>
+                                     </div>
+                                 </div>
                             </div>
-
-                            <!-- 3. Page Margins & Spacing -->
+                             
+<!-- 3. Page Margins & Spacing -->
                             <div class="collapsible-section" draggable="true" id="opt-sec-margins">
                                 <div class="collapsible-header">
                                     <span class="drag-grip">☰</span>
