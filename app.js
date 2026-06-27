@@ -7240,7 +7240,6 @@ document.addEventListener('DOMContentLoaded', () => {
         populateCoverPageTOC(sectionInfoList);
 
         // 5. Restore spotlight outline around active edited page
-        const showCover = (pagesData[0] && pagesData[0].showCoverPage !== false);
         let pageSelectorIndex = activePageIndex === 0 ? 1 : activePageIndex + (showCover ? 1 : 0);
         const activeA4Page = document.querySelector(`.a4-page[data-page="${pageSelectorIndex}"]`);
         if (activeA4Page) {
