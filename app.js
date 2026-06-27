@@ -4002,7 +4002,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // 4. Scroll A4 preview smoothly to corresponding page and spotlight it
-        const targetPageElement = document.querySelector(`.a4-page[data-page="${index + 1}"]`);
+        const showCover = (pagesData[0] && pagesData[0].showCoverPage !== false);
+        const pageSelectorIndex = index === 0 ? 1 : index + (showCover ? 1 : 0);
+        const targetPageElement = document.querySelector(`.a4-page[data-page="${pageSelectorIndex}"]`);
         if (targetPageElement) {
             // Remove previous active highlights
             document.querySelectorAll('.a4-page').forEach(page => {
@@ -6315,7 +6317,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                 if (isNaN(pageNum)) return;
 
                                 // Switch to this page in the editor
-                                switchActivePage(pageNum - 1);
+                                const showCover = (pagesData[0] && pagesData[0].showCoverPage !== false);
+                                switchActivePage(showCover ? pageNum - 1 : pageNum);
                                 
                                 const ths = Array.from(tableEl.querySelectorAll('thead th'));
                                 const startWidths = ths.map(th => th.getBoundingClientRect().width);
@@ -8959,8 +8962,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const pageNum = parseInt(pageEl.getAttribute('data-page'), 10);
         if (isNaN(pageNum)) return;
 
-        // 1. Cover Page Redirect
-        if (pageNum === 1) {
+        const showCover = (pagesData[0] && pagesData[0].showCoverPage !== false);
+
+        // 1. Cover Page Redirect (only if showCover is true)
+        if (showCover && pageNum === 1) {
             switchActivePage(0);
             if (e.target.closest('.cover-title')) {
                 docTitleInput.focus();
@@ -8981,7 +8986,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 3. Content Pages Redirect & Substring Sync Highlight
         // Switch editing panel to corresponding content page
-        switchActivePage(pageNum - 1);
+        switchActivePage(showCover ? pageNum - 1 : pageNum);
 
         // Find the specific container block that was clicked
         const targetBlock = e.target.closest('.section-heading-bar, .topic-container, .bullet-item, .highlight-box, .inserted-image-container, .markdown-table, p.body-text');
@@ -9310,7 +9315,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const pageNum = parseInt(pageEl.getAttribute('data-page'), 10);
         if (isNaN(pageNum)) return;
 
-        switchActivePage(pageNum - 1);
+        const showCover = (pagesData[0] && pagesData[0].showCoverPage !== false);
+        switchActivePage(showCover ? pageNum - 1 : pageNum);
 
         const currentWidths = tableEl.getAttribute('data-widths') || '';
         const inputWidths = prompt("इस टेबल के कॉलम की चौड़ाई बदलें (उदा. 40%, 15%, 45% या 150px, 60px, auto):\nइसे खाली छोड़ने पर डिफ़ॉल्ट चौड़ाई लागू होगी।", currentWidths);
@@ -10307,7 +10313,8 @@ document.addEventListener('DOMContentLoaded', () => {
             
             for (let page of renderedPages) {
                 const pageNum = parseInt(page.getAttribute('data-page'));
-                const visualPageNum = pageNum - 1;
+                const showCover = (pagesData[0] && pagesData[0].showCoverPage !== false);
+                const visualPageNum = showCover ? pageNum - 1 : pageNum;
                 const contentEl = page.querySelector('.page-content');
                 if (!contentEl) continue;
                 
@@ -10373,7 +10380,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!block) break;
             
             // Check if this block is the first element on the page
-            const pageDOM = pagesContainer.querySelector(`.a4-page[data-page="${report.page + 1}"]`);
+            const showCover = (pagesData[0] && pagesData[0].showCoverPage !== false);
+            const dataPageNum = report.page + (showCover ? 1 : 0);
+            const pageDOM = pagesContainer.querySelector(`.a4-page[data-page="${dataPageNum}"]`);
             const firstNodeOnPage = pageDOM ? pageDOM.querySelector('.page-content [data-block-id]') : null;
             const isFirstOnPage = firstNodeOnPage && parseInt(firstNodeOnPage.getAttribute('data-block-id')) === report.blockId;
             
@@ -10451,7 +10460,8 @@ document.addEventListener('DOMContentLoaded', () => {
         
         contentPages.forEach(page => {
             const pageNum = page.getAttribute('data-page');
-            const visualPageNum = pageNum ? (parseInt(pageNum) - 1) : 1;
+            const showCover = (pagesData[0] && pagesData[0].showCoverPage !== false);
+            const visualPageNum = pageNum ? (showCover ? (parseInt(pageNum) - 1) : parseInt(pageNum)) : 1;
             const contentEl = page.querySelector('.page-content');
             if (!contentEl) return;
             
