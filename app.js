@@ -8988,7 +8988,7 @@ document.addEventListener('DOMContentLoaded', () => {
         switchActivePage(showCover ? pageNum - 1 : pageNum);
 
         // Find the specific container block that was clicked
-        const targetBlock = e.target.closest('.section-heading-bar, .topic-container, .bullet-item, .highlight-box, .inserted-image-container, .markdown-table, p.body-text');
+        const targetBlock = e.target.closest('.section-heading-bar, .chapter-header, .chapter-main-title, .chapter-title-group, .topic-container, .bullet-item, .highlight-box, .inserted-image-container, .markdown-table, p.body-text');
         if (!targetBlock) return;
 
         // Special handling for Images
