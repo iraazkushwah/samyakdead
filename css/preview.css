@@ -1,0 +1,1957 @@
+/* ==========================================================================
+   SAMYAK - PREVIEW CANVAS AND REAL A4 PRINT-PERFECT CSS LAYOUT
+   ========================================================================== */
+
+/* PREVIEW PANEL (Right Side Canvas) */
+.preview-panel {
+    position: relative;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-width: 0;
+    background-color: #09090b;
+}
+
+.preview-header {
+    padding: 12px 30px;
+    background-color: var(--ui-sidebar-bg);
+    border-bottom: 1px solid var(--ui-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+}
+
+.preview-header h2 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ui-text);
+    letter-spacing: 0.5px;
+}
+
+.preview-zoom-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background-color: var(--ui-bg);
+    padding: 4px 12px;
+    border-radius: 20px;
+    border: 1px solid var(--ui-border);
+}
+
+.zoom-btn {
+    background: none;
+    border: none;
+    color: #fff;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#zoom-level {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ui-text-muted);
+    min-width: 32px;
+    text-align: center;
+}
+
+/* Preview Canvas Scroll Wrapper */
+.canvas-wrapper {
+    flex: 1;
+    overflow: auto; /* Contains both vertical and horizontal scroll */
+    padding: 20px;
+    display: flex;
+    justify-content: flex-start; /* flex-start + margin auto is the best cross-browser centering + scroll overflow fix */
+    align-items: flex-start;
+    scroll-behavior: smooth;
+}
+
+/* A4 Page Layout Container */
+.pages-container {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    transform-origin: top center;
+    transition: zoom 0.15s ease-out;
+    zoom: 1.0; /* Modern dynamic layout scaling to prevent any overlaps */
+    margin: 0 auto; /* Centers A4 pages when they fit, and enables perfect scrolling on overflow */
+}
+
+/* 5. REAL A4 PRINT-PERFECT CSS LAYOUT */
+.a4-page {
+    width: 210mm;
+    height: 297mm;
+    background-color: var(--page-bg);
+    color: var(--text-color);
+    box-shadow: var(--shadow-page);
+    position: relative;
+    box-sizing: border-box;
+    overflow: hidden;
+    page-break-after: always;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.a4-page:last-child {
+    page-break-after: avoid;
+    break-after: avoid;
+}
+
+/* Elegant Inset Double Borders - HIDDEN BY USER REQUEST */
+.a4-page::before {
+    content: '';
+    position: absolute;
+    top: 10mm;
+    bottom: 10mm;
+    left: 10mm;
+    right: 10mm;
+    border: none !important;
+    pointer-events: none;
+    opacity: 0.95;
+    z-index: 99;
+    display: none !important;
+}
+
+/* Highlight the active page in workspace */
+.a4-page.active-page-spotlight {
+    box-shadow: 0 0 0 4px var(--ui-accent), 0 20px 45px rgba(79, 70, 229, 0.25);
+}
+
+/* Page has content overflow inside preview */
+.a4-page.overflow-detected {
+    box-shadow: 0 0 0 3px var(--ui-danger), var(--shadow-page);
+}
+
+.a4-page.overflow-detected::before {
+    border-color: var(--ui-danger);
+}
+
+/* Absolute overflow warning badge inside preview page container */
+.overflow-badge {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background-color: var(--ui-danger);
+    color: white;
+    font-weight: 700;
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    z-index: 101;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'Poppins', sans-serif;
+    animation: flash 1.5s infinite alternate;
+}
+
+@keyframes flash {
+    0% { opacity: 0.85; }
+    100% { opacity: 1; transform: scale(1.03); }
+}
+
+/* Inner Gold Border container enclosing all text elements */
+.inner-border-wrapper {
+    position: absolute;
+    top: var(--custom-page-margin-y, 6mm);
+    bottom: var(--custom-page-margin-y, 6mm);
+    left: var(--custom-page-margin-x, 8mm);
+    right: var(--custom-page-margin-x, 8mm);
+    border: var(--custom-inner-border-thickness) var(--custom-inner-border-style, solid) var(--custom-inner-border-color); /* Dynamically customized inner border */
+    padding: var(--custom-page-padding-y, 4mm) var(--custom-page-padding-x, 6mm) var(--custom-page-padding-y, 4mm) var(--custom-page-padding-x, 6mm); /* Core internal margins */
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    z-index: 10;
+}
+
+.a4-page.overflow-detected .inner-border-wrapper {
+    border-color: rgba(239, 68, 68, 0.6) !important;
+}
+
+/* Ornate corner brackets (Ornamental Corners) */
+.corner-decor {
+    position: absolute;
+    width: var(--custom-corner-size); /* Dynamically scaled corner ornament size */
+    height: var(--custom-corner-size);
+    border-color: var(--custom-corner-color); /* Dynamically colored corner ornament */
+    border-style: solid;
+    border-width: 0;
+    pointer-events: none;
+    z-index: 100;
+    transition: var(--transition-smooth);
+    display: var(--custom-corner-display, block);
+    opacity: var(--custom-corner-opacity, 1);
+    visibility: var(--custom-corner-visibility, visible);
+}
+.top-left {
+    top: calc(var(--custom-page-margin-y, 6mm) - 1mm);
+    left: calc(var(--custom-page-margin-x, 8mm) - 1mm);
+    border-top-width: calc(3 * var(--custom-inner-border-thickness)) !important;
+    border-left-width: calc(3 * var(--custom-inner-border-thickness)) !important;
+}
+.top-right {
+    top: calc(var(--custom-page-margin-y, 6mm) - 1mm);
+    right: calc(var(--custom-page-margin-x, 8mm) - 1mm);
+    border-top-width: calc(3 * var(--custom-inner-border-thickness)) !important;
+    border-right-width: calc(3 * var(--custom-inner-border-thickness)) !important;
+}
+.bottom-left {
+    bottom: calc(var(--custom-page-margin-y, 6mm) - 1mm);
+    left: calc(var(--custom-page-margin-x, 8mm) - 1mm);
+    border-bottom-width: calc(3 * var(--custom-inner-border-thickness)) !important;
+    border-left-width: calc(3 * var(--custom-inner-border-thickness)) !important;
+}
+.bottom-right {
+    bottom: calc(var(--custom-page-margin-y, 6mm) - 1mm);
+    right: calc(var(--custom-page-margin-x, 8mm) - 1mm);
+    border-bottom-width: calc(3 * var(--custom-inner-border-thickness)) !important;
+    border-right-width: calc(3 * var(--custom-inner-border-thickness)) !important;
+}
+
+/* When overflow is detected, let the corners adapt color */
+.a4-page.overflow-detected .corner-decor {
+    border-color: var(--ui-danger);
+}
+
+/* Page Headers & Footers */
+.page-header {
+    display: flex;
+    align-items: flex-end;
+    width: 100%;
+    border-bottom: 3px solid var(--primary-color);
+    padding-bottom: 4px;
+    margin-bottom: 12px;
+    z-index: 102;
+}
+
+.header-left {
+    flex: 1;
+    font-size: var(--custom-header-font-size, 15px);
+    font-weight: 800;
+    color: var(--primary-color);
+    font-family: var(--font-heading);
+    letter-spacing: 0 !important;
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-start;
+    text-align: left;
+    line-height: 1;
+}
+
+.header-logo-img {
+    height: 24px;
+    max-width: 80px;
+    object-fit: contain;
+    margin-right: 8px;
+    display: inline-block;
+}
+
+.header-center {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1.5px solid #000000;
+    border-radius: 24px;
+    padding: 3px 16px;
+    max-width: 50%;
+    text-align: center;
+    margin: 0 auto;
+    overflow: hidden;
+}
+
+.header-center span {
+    font-size: var(--custom-header-font-size, 15px);
+    font-weight: 800;
+    color: #000000;
+    font-family: var(--font-body);
+    line-height: 1.25;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+    max-width: 100%;
+}
+
+.header-right {
+    flex: 1;
+    font-size: var(--custom-header-font-size, 15px);
+    font-weight: 800;
+    color: #000000;
+    font-family: var(--font-ui);
+    letter-spacing: 0.5px !important;
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
+    text-align: right;
+    line-height: 1;
+}
+
+.header-line {
+    display: none;
+}
+
+.page-content {
+    position: relative;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow: hidden; /* Prevent text spilling outside boundaries */
+    font-size: var(--content-font-size);
+}
+
+.page-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    padding-top: 14px;
+    margin-top: auto; /* Push footer to the absolute page bottom */
+    width: 100%;
+    z-index: 102;
+    gap: 20px;
+}
+
+.page-footer.placement-split {
+    justify-content: space-between;
+}
+
+.page-footer.placement-center {
+    justify-content: center;
+}
+
+.page-footer.placement-left {
+    justify-content: flex-start;
+}
+
+.page-footer.placement-right {
+    justify-content: flex-end;
+}
+
+.footer-line {
+    display: none;
+}
+
+a.footer-social-link, .footer-social-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--primary-color);
+    font-family: var(--font-body);
+    text-decoration: none;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+}
+
+a.footer-social-link:hover {
+    text-decoration: underline;
+    opacity: 0.8;
+}
+
+.social-svg-icon {
+    display: inline-block;
+    vertical-align: middle;
+    color: var(--primary-color);
+}
+
+.page-number-text {
+    font-size: 16px;
+    font-weight: 800;
+    color: #000000;
+    font-family: var(--font-ui);
+    letter-spacing: 0.5px !important;
+    z-index: 101;
+}
+
+/* ==========================================================================
+   6. CUSTOM BRAND STYLES (100% MATCHING INSTA.TXT & TYPOGRAPHY)
+   ========================================================================== */
+
+/* Main Section Heading (Solid flag-tag maroon bar) */
+.section-heading-bar {
+    background-color: var(--custom-section-bg);
+    color: var(--custom-section-text);
+    font-size: var(--custom-section-size);
+    font-weight: 700;
+    padding: 6px 15px;
+    border-left: 6px solid var(--custom-section-border-left); /* Dynamic Left Border */
+    border-right: var(--custom-section-border-right); /* Dynamic Right Border */
+    border-radius: var(--custom-section-border-radius);
+    margin: 9px 0 9px 0;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+    display: var(--custom-section-display);
+    width: var(--custom-section-width);
+    max-width: 100%;
+    align-self: var(--custom-section-align-self);
+    text-align: var(--custom-section-align);
+    font-family: var(--font-heading);
+    letter-spacing: 0 !important;
+    box-sizing: border-box; /* Crucial to prevent horizontal scrollbars on 100% width */
+}
+
+/* Custom Section Heading Shapes */
+.section-heading-bar[data-shape="rounded"] {
+    border-radius: 6px !important;
+}
+.section-heading-bar[data-shape="pill"] {
+    border-radius: 30px !important;
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+}
+.section-heading-bar[data-shape="left-stripe"] {
+    background-color: transparent !important;
+    color: var(--custom-section-bg) !important;
+    box-shadow: none !important;
+    border-left: 6px solid var(--custom-section-bg) !important;
+    border-bottom: 1.5px solid rgba(0, 0, 0, 0.08) !important;
+    border-radius: 0 !important;
+    padding-left: 10px !important;
+    padding-right: 0 !important;
+    padding-bottom: 4px !important;
+}
+.section-heading-bar[data-shape="underline"] {
+    background-color: transparent !important;
+    color: var(--custom-section-bg) !important;
+    box-shadow: none !important;
+    border-left: none !important;
+    border-bottom: 3px solid var(--custom-section-bg) !important;
+    border-radius: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    padding-bottom: 4px !important;
+}
+
+/* Premium Ribbon Banner Shape */
+.section-heading-bar[data-shape="ribbon-banner"] {
+    position: relative !important;
+    clip-path: polygon(12px 0%, calc(100% - 12px) 0%, 100% 50%, calc(100% - 12px) 100%, 12px 100%, 0% 50%) !important;
+    padding-left: 24px !important;
+    padding-right: 24px !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-radius: 0 !important;
+}
+
+/* Premium Editorial Double Line Shape */
+.section-heading-bar[data-shape="editorial-double"] {
+    background-color: transparent !important;
+    color: var(--custom-section-bg) !important;
+    box-shadow: none !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-top: 3px double var(--custom-section-bg) !important;
+    border-bottom: 3px double var(--custom-section-bg) !important;
+    border-radius: 0 !important;
+    padding: 6px 0 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.5px !important;
+}
+
+/* Premium Bracket Frame Shape */
+.section-heading-bar[data-shape="bracket-frame"] {
+    background-color: transparent !important;
+    color: var(--custom-section-bg) !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    padding: 6px 18px !important;
+    border-left: 3px solid var(--custom-section-bg) !important;
+    border-right: 3px solid var(--custom-section-bg) !important;
+    background-image: 
+        linear-gradient(to right, var(--custom-section-bg) 10px, transparent 10px),
+        linear-gradient(to right, var(--custom-section-bg) 10px, transparent 10px),
+        linear-gradient(to left, var(--custom-section-bg) 10px, transparent 10px),
+        linear-gradient(to left, var(--custom-section-bg) 10px, transparent 10px) !important;
+    background-position: 
+        top left, 
+        bottom left, 
+        top right, 
+        bottom right !important;
+    background-size: 100% 3px !important;
+    background-repeat: no-repeat !important;
+}
+
+/* Premium Skewed Diagonal Cut Shape */
+.section-heading-bar[data-shape="diagonal-cut"] {
+    clip-path: polygon(14px 0, 100% 0, calc(100% - 14px) 100%, 0 100%) !important;
+    padding-left: 24px !important;
+    padding-right: 24px !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-radius: 0 !important;
+}
+
+/* Topic Heading (Fully customizable via the 4th Control Panel Section) */
+.topic-container {
+    margin-top: var(--custom-topic-margin-top);
+    margin-bottom: var(--custom-topic-margin-bottom);
+    display: flex;
+    justify-content: var(--custom-topic-alignment); /* Dynamic alignment (left/center/right) */
+    width: 100%;
+}
+
+/* Auto-collapsing empty lines adjacent to topic containers to maintain a neat layout */
+.empty-line:has(+ .topic-container) {
+    height: 0px !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    line-height: 0 !important;
+    display: none !important;
+}
+
+.topic-container + .empty-line {
+    height: 0px !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    line-height: 0 !important;
+    display: none !important;
+}
+
+.topic-title {
+    font-size: var(--custom-topic-size);
+    font-weight: 800;
+    color: var(--custom-topic-text);
+    padding-bottom: 3px;
+    border-bottom: var(--custom-topic-border-thickness) var(--custom-topic-border-style) var(--custom-topic-border-color); /* Customizable border thickness, style, color */
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    line-height: 1.3;
+    font-family: var(--font-heading);
+    letter-spacing: 0 !important;
+    width: auto;
+    justify-content: var(--custom-topic-alignment);
+}
+
+.topic-title span.diamond {
+    display: inline-flex; /* Keep dynamic emoji icon visible */
+    align-items: center;
+    justify-content: center;
+    color: var(--custom-topic-border-color); /* Matches theme secondary / custom border color */
+    font-size: calc(var(--custom-topic-size) - 0.5px);
+    line-height: 1;
+}
+
+.topic-divider {
+    display: none;
+}
+
+/* Red Bullet Point lists */
+.bullet-list {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding-left: 5px;
+}
+
+.bullet-item {
+    font-size: calc(var(--content-font-size) - 0.5px);
+    line-height: var(--content-line-height, 1.45);
+    font-weight: var(--content-font-weight, 700);
+    color: var(--text-dark);
+    position: relative;
+    padding-left: 15px;
+    text-align: justify;
+    font-family: var(--font-body);
+    letter-spacing: var(--content-letter-spacing, 0px) !important;
+    display: block;
+}
+
+.bullet-item::before {
+    content: "•";
+    color: var(--primary-color);
+    font-size: 18px;
+    position: absolute;
+    left: 2px;
+    top: -1px;
+    font-weight: 900;
+}
+
+/* Custom Bullet List Styles */
+.bullet-list[data-bullet-style="diamond"] .bullet-item::before {
+    content: "◆";
+    font-size: 12px;
+    top: 2px;
+}
+.bullet-list[data-bullet-style="square"] .bullet-item::before {
+    content: "■";
+    font-size: 11px;
+    top: 2px;
+}
+.bullet-list[data-bullet-style="arrow"] .bullet-item::before {
+    content: "➜";
+    font-size: 12px;
+    top: 1px;
+}
+.bullet-list[data-bullet-style="checkmark"] .bullet-item::before {
+    content: "✔";
+    font-size: 12px;
+    top: 1px;
+}
+
+/* ==========================================
+   NESTED SUB-BULLET STYLES (STAR & ARROW)
+   ========================================== */
+
+/* 1. Indentation for Nested Sub-Bullets */
+.bullet-list .bullet-item-nested {
+    margin-left: 20px !important;
+    padding-left: 15px !important;
+}
+
+/* Multi-level indentation classes if needed */
+.bullet-list .bullet-indent-2 {
+    margin-left: 40px !important;
+}
+.bullet-list .bullet-indent-3 {
+    margin-left: 60px !important;
+}
+
+/* 2. Sub-Bullet Arrow Icon Style */
+.bullet-list .bullet-item-nested::before {
+    content: "➜" !important;
+    font-size: 11px !important;
+    top: 2px !important;
+    left: 2px !important;
+    color: var(--secondary-color, #c5a353) !important;
+}
+
+/* 3. Automatic Star Icon for Parent Bullets (when nested bullets are present in the list) */
+.bullet-list:has(.bullet-item-nested) .bullet-item:not(.bullet-item-nested)::before {
+    content: "★" !important;
+    font-size: 13px !important;
+    top: 1px !important;
+    left: 2px !important;
+    color: var(--primary-color, #850f0f) !important;
+}
+
+/* Highlight boxes */
+.highlight-box {
+    background: rgba(197, 163, 83, 0.08);
+    border: 1px solid var(--secondary-color);
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: calc(var(--content-font-size) - 0.5px);
+    font-weight: var(--content-font-weight, 700);
+    color: var(--text-dark);
+    margin: 4px 0;
+    font-family: var(--font-body);
+    letter-spacing: var(--content-letter-spacing, 0px) !important;
+    line-height: var(--content-line-height, 1.45);
+}
+
+/* Premium Container Box Styles */
+.premium-box {
+    margin: 8px 0;
+    padding: 12px 16px;
+    border-radius: 6px;
+    font-family: var(--font-body);
+    font-size: calc(var(--content-font-size) - 0.5px);
+    line-height: var(--content-line-height, 1.45);
+    color: var(--text-dark);
+    background-color: transparent;
+    transition: var(--transition-smooth);
+}
+
+/* 1. Simple Solid Border Box */
+.premium-box.box {
+    border: 1.5px solid var(--secondary-color, #c5a353);
+    background-color: rgba(197, 163, 83, 0.02);
+}
+
+/* 2. Elegant Double Border Box */
+.premium-box.box-double {
+    border: 4px double var(--secondary-color, #c5a353);
+    background-color: rgba(197, 163, 83, 0.02);
+}
+
+/* 3. Dashed Border Box */
+.premium-box.box-dashed {
+    border: 1.5px dashed var(--secondary-color, #c5a353);
+    background-color: rgba(197, 163, 83, 0.01);
+}
+
+/* 4. Background Accent Box */
+.premium-box.box-bg {
+    background-color: rgba(197, 163, 83, 0.09);
+    border-left: 4px solid var(--secondary-color, #c5a353);
+    border-radius: 0 6px 6px 0;
+}
+
+/* 5. Royal Border Box with decorative corners */
+.premium-box.box-royal {
+    border: 1.5px solid var(--secondary-color, #c5a353);
+    background-color: rgba(197, 163, 83, 0.04);
+    position: relative;
+    border-radius: 4px;
+}
+.premium-box.box-royal::before {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    right: 3px;
+    bottom: 3px;
+    border: 0.5px solid rgba(197, 163, 83, 0.4);
+    pointer-events: none;
+}
+
+/* 6. UPSC Dynamic GS Syllabus Tag */
+.premium-box.box-upsc-syllabus {
+    background: rgba(37, 99, 235, 0.04) !important;
+    border: 1px solid rgba(37, 99, 235, 0.15) !important;
+    border-left: 5px solid #2563eb !important;
+    border-radius: 4px;
+    padding: 8px 12px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #1e293b;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-sizing: border-box;
+}
+
+/* 7. UPSC Editorial Quote Box */
+.premium-box.box-upsc-editorial {
+    background: #f8fafc !important;
+    border: none !important;
+    border-left: 4px solid #f59e0b !important;
+    border-radius: 0 8px 8px 0;
+    padding: 14px 18px;
+    font-style: italic;
+    color: #334155;
+    position: relative;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.01);
+}
+
+/* 8. UPSC Mains Answer Frame Box */
+.premium-box.box-upsc-mains {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-top: 4px solid #10b981 !important;
+    border-radius: 6px;
+    padding: 16px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+.premium-box.box-upsc-mains p {
+    margin-bottom: 6px;
+}
+
+/* 9. UPSC Cornell Marginal Note */
+.premium-box.box-upsc-marginal {
+    background: #fffdf5 !important;
+    border: 1.5px dashed #d97706 !important;
+    border-radius: 6px;
+    padding: 12px;
+    font-size: 11px;
+    color: #78350f;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.02);
+}
+
+.premium-box .bullet-item {
+    margin-bottom: 4px;
+}
+.premium-box .bullet-item:last-child {
+    margin-bottom: 0;
+}
+.premium-box p, .premium-box h1, .premium-box h3 {
+    margin-top: 0;
+}
+
+/* Normal Paragraphs */
+p.body-text {
+    font-size: calc(var(--content-font-size) - 0.5px);
+    color: var(--text-dark);
+    font-weight: var(--content-font-weight, 700);
+    font-family: var(--font-body);
+    margin-bottom: 4px;
+    line-height: var(--content-line-height, 1.45);
+    letter-spacing: var(--content-letter-spacing, 0px) !important;
+}
+
+/* Custom Text Highlight (🖍️ Highlighting) */
+.text-highlight {
+    background-color: rgba(253, 224, 71, 0.45); /* Bright semi-transparent yellow */
+    color: inherit;
+    padding: 0 4px;
+    border-radius: 3px;
+    font-weight: inherit;
+}
+
+/* Bold Label utility */
+strong {
+    color: #000;
+    font-weight: 700;
+}
+
+/* 7. PAGE 1: COVER PAGE LAYOUT */
+.cover-page-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    height: 100%;
+    padding: 10px;
+    text-align: center;
+}
+
+.cover-title {
+    font-family: var(--font-cover);
+    font-size: 72px;
+    color: var(--primary-color);
+    line-height: 1.1;
+    margin-bottom: 5px;
+    text-shadow: 2px 2px 0px rgba(197, 160, 89, 0.3);
+    letter-spacing: 0 !important;
+    margin-top: 20mm;
+}
+
+.cover-tagline-box {
+    border: none;
+    box-shadow: none;
+    margin-bottom: 0px;
+    padding: 0;
+}
+
+.cover-tagline-box h3 {
+    font-size: 22px;
+    color: var(--secondary-color);
+    font-weight: 700;
+    border-top: 2px double var(--accent-color);
+    border-bottom: 2px double var(--accent-color);
+    padding: 4px 25px;
+    display: inline-block;
+    margin-top: 10px;
+    font-family: var(--font-body);
+    letter-spacing: 0 !important;
+}
+
+.cover-subtitle {
+    font-size: 24px;
+    color: var(--primary-color);
+    font-weight: 800;
+    margin-top: 25px;
+    background: rgba(197, 160, 89, 0.1);
+    padding: 8px 30px;
+    border-radius: 4px;
+    border: 1px dashed var(--accent-color);
+    font-family: var(--font-heading);
+    width: auto;
+    margin-bottom: 25px;
+    display: inline-block;
+    letter-spacing: 0 !important;
+}
+
+.cover-page-content.tagline-empty .cover-subtitle {
+    margin-top: 8px !important;
+}
+
+/* Premium Markdown Table styles */
+.markdown-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 8px 0;
+    font-family: var(--font-body);
+    font-size: var(--table-body-font-size, calc(var(--content-font-size) - 1px));
+    font-weight: var(--content-font-weight, 700);
+    color: var(--text-dark);
+    border: 1.5px solid var(--primary-color);
+}
+
+.table-continuation thead {
+    display: none !important;
+}
+
+.markdown-table th, .markdown-table td {
+    padding: 6px 10px;
+    text-align: left;
+    vertical-align: top;
+    border: 1px solid var(--primary-color);
+    word-break: normal;
+    overflow-wrap: break-word;
+}
+
+.markdown-table td {
+    font-size: var(--table-body-font-size, calc(var(--content-font-size) - 1px));
+    white-space: normal;
+}
+
+.markdown-table th {
+    background-color: rgba(133, 15, 15, 0.05); /* Light primary theme color tint */
+    color: var(--primary-color);
+    font-weight: 800;
+    border-top: 2px solid var(--primary-color);
+    border-bottom: 2px solid var(--primary-color);
+    font-family: var(--font-heading);
+    font-size: var(--table-header-font-size, calc(var(--content-font-size) - 1px));
+    white-space: nowrap;
+}
+
+.markdown-table tr:nth-child(even) td {
+    background-color: rgba(0, 0, 0, 0.015);
+}
+
+/* Table of contents wrapper (विषयवस्तु) */
+.toc-container {
+    width: 100%;
+    max-width: 480px;
+    border: 2px solid var(--secondary-color);
+    background: #fffdf9;
+    padding: 20px;
+    border-radius: 6px;
+    box-shadow: inset 0 0 10px rgba(197, 160, 89, 0.1);
+    margin-top: 15mm;
+    margin-bottom: 30px;
+}
+
+.toc-title {
+    font-size: 20px;
+    color: var(--primary-color);
+    font-weight: 800;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-family: var(--font-heading);
+    border-bottom: none;
+    padding: 0;
+}
+
+.toc-title::before, .toc-title::after {
+    content: '✿';
+    color: var(--accent-color);
+}
+
+.toc-title-divider {
+    display: none;
+}
+
+.toc-header {
+    background-color: var(--primary-color);
+    color: #fff;
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 700;
+    font-family: var(--font-heading);
+    border: 1px solid var(--secondary-color);
+}
+
+.toc-rows {
+    display: flex;
+    flex-direction: column;
+    background-color: #fff;
+}
+
+.toc-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 16px;
+    font-size: 13.5px;
+    font-weight: 600;
+    border-left: 1px solid var(--secondary-color);
+    border-right: 1px solid var(--secondary-color);
+    border-bottom: 1px solid var(--secondary-color);
+    color: var(--text-dark);
+    font-family: var(--font-body);
+    transition: background-color 0.2s;
+}
+
+.toc-row:nth-child(even) {
+    background-color: rgba(197, 160, 89, 0.05);
+}
+
+.cover-footer {
+    font-size: 18px;
+    color: var(--primary-color);
+    font-weight: 700;
+    margin-top: auto;
+    font-family: var(--font-body);
+    letter-spacing: 0 !important;
+}
+
+/* 8. PAGE LAST: THANK YOU END PAGE */
+.end-page-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+}
+
+/* Highly visible magazine end star divider (***) */
+.end-page-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    margin: 25px auto;
+    width: 100%;
+    color: var(--custom-end-star-color, var(--secondary-color, #c5a353));
+    user-select: none;
+    box-sizing: border-box;
+}
+
+.end-page-divider .star-symbol {
+    font-size: var(--custom-end-star-size, 18px);
+    color: var(--custom-end-star-color, var(--secondary-color, #c5a353));
+    animation: var(--custom-end-star-animation, pulseStar 3s ease-in-out infinite);
+    text-shadow: 0 0 8px var(--custom-end-star-shadow, rgba(197, 162, 83, 0.35));
+    display: inline-block;
+    transition: transform 0.2s ease;
+}
+
+.end-page-divider .star-symbol:nth-child(2) {
+    font-size: calc(var(--custom-end-star-size, 18px) + 4px);
+    margin: 0 -2px;
+}
+
+@keyframes pulseStar {
+    0% { transform: scale(1); opacity: 0.8; }
+    50% { transform: scale(1.15); opacity: 1; }
+    100% { transform: scale(1); opacity: 0.8; }
+}
+
+/* 9. PRINT STYLESHEET (MEDIA PRINT - EXTREMELY CRITICAL) */
+@media print {
+    /* Hide warning badges and restore normal borders for overflow pages in print */
+    .overflow-badge {
+        display: none !important;
+    }
+    
+    .a4-page.overflow-detected {
+        border-color: var(--primary-color) !important;
+        box-shadow: none !important;
+    }
+    
+    .a4-page.overflow-detected::before {
+        border-color: var(--primary-color) !important;
+    }
+    
+    html, body {
+        background-color: #ffffff !important;
+        background: #ffffff !important;
+        color: #000000 !important;
+        overflow: visible !important;
+        height: auto !important;
+        width: auto !important;
+        position: static !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* Explicitly force all A4 text to black for high-contrast print legibility regardless of dark active themes */
+    .a4-page {
+        color: #000000 !important;
+        --text-color: #000000 !important;
+        --text-dark: #000000 !important;
+    }
+
+    .a4-page p, .a4-page span:not(.diamond):not(.ocr-dash-card-badge), .a4-page li, .a4-page td, .a4-page div:not(.section-heading-bar):not(.chapter-num-main-bg):not(.chapter-num-accent-bg) {
+        color: #000000 !important;
+    }
+
+    /* Overwrite bright yellow high alert text color to dark, legible amber for white paper printing */
+    .high-alert-highlight {
+        color: #78350f !important;
+        background-color: rgba(245, 158, 11, 0.15) !important;
+        border: 1px solid rgba(245, 158, 11, 0.45) !important;
+        box-shadow: none !important;
+        text-shadow: none !important;
+    }
+
+    /* Force page-footer and border to black in print and shift down */
+    .page-footer {
+        border-top: 1px solid var(--custom-inner-border-color, var(--secondary-color)) !important;
+        color: #000000 !important;
+        padding-top: 14px !important;
+    }
+
+    /* Print footer social links and SVGs in their matching theme color (primary-color) rather than blue or black */
+    .footer-social-link, .footer-social-link *, .social-svg-icon {
+        color: var(--primary-color) !important;
+        fill: var(--primary-color) !important;
+        text-decoration: none !important;
+    }
+
+    /* General standard links in text can remain black and clean in print */
+    a:not(.footer-social-link), a:not(.footer-social-link) * {
+        color: #000000 !important;
+        text-decoration: none !important;
+    }
+    
+    .app-container {
+        display: block !important;
+        height: auto !important;
+        width: auto !important;
+        position: static !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    
+    .editor-panel, .preview-header, .floating-stats, .floating-editor-controls, .fab-container, .fab-trigger-btn, .fab-sub-btn, .resize-handle, .sidebar-toggle-btn, .mobile-preview-toggle-btn, .mobile-preview-close-btn {
+        display: none !important;
+    }
+
+    /* Kill all GPU hints, animations and transitions for clean PDF rendering */
+    *, *::before, *::after {
+        will-change: auto !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        animation: none !important;
+        transition: none !important;
+    }
+    
+    .preview-panel {
+        display: block !important;
+        position: static !important;
+        transform: none !important;
+        background-color: #fff !important;
+        background: none !important;
+        height: auto !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    
+    .canvas-wrapper {
+        overflow: visible !important;
+        padding: 0 !important;
+        display: block !important;
+        height: auto !important;
+        width: auto !important;
+    }
+    
+    .pages-container {
+        display: block !important;
+        transform: scale(1.0) !important;
+        zoom: 1 !important;
+        width: 100% !important;
+        gap: 0 !important;
+    }
+    
+    .a4-page {
+        width: 210mm !important;
+        height: 297mm !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+        page-break-after: always !important;
+        display: block !important;
+        position: relative !important;
+        overflow: hidden !important;
+        background-color: #fff !important;
+        box-sizing: border-box !important;
+        border: none !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    .a4-page:last-child {
+        page-break-after: avoid !important;
+        break-after: avoid !important;
+    }
+
+    .a4-page::before {
+        content: '' !important;
+        position: absolute !important;
+        top: 10mm !important;
+        bottom: 10mm !important;
+        left: 10mm !important;
+        right: 10mm !important;
+        border: none !important;
+        pointer-events: none !important;
+        z-index: 99 !important;
+        display: none !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    .inner-border-wrapper {
+        position: absolute !important;
+        top: var(--custom-page-margin-y, 6mm) !important;
+        bottom: var(--custom-page-margin-y, 6mm) !important;
+        left: var(--custom-page-margin-x, 8mm) !important;
+        right: var(--custom-page-margin-x, 8mm) !important;
+        border: var(--custom-inner-border-thickness) var(--custom-inner-border-style, solid) var(--custom-inner-border-color) !important;
+        padding: var(--custom-page-padding-y, 4mm) var(--custom-page-padding-x, 6mm) var(--custom-page-padding-y, 4mm) var(--custom-page-padding-x, 6mm) !important;
+        box-sizing: border-box !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: flex-start !important;
+        z-index: 10 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    .corner-decor {
+        position: absolute !important;
+        width: var(--custom-corner-size) !important;
+        height: var(--custom-corner-size) !important;
+        border-color: var(--custom-corner-color) !important;
+        z-index: 100 !important;
+        pointer-events: none !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        display: var(--custom-corner-display, block) !important;
+        opacity: var(--custom-corner-opacity, 1) !important;
+        visibility: var(--custom-corner-visibility, visible) !important;
+    }
+    .top-left { 
+        top: calc(var(--custom-page-margin-y, 6mm) - 1mm) !important; 
+        left: calc(var(--custom-page-margin-x, 8mm) - 1mm) !important; 
+        border-top: calc(3 * var(--custom-inner-border-thickness)) solid var(--custom-corner-color) !important; 
+        border-left: calc(3 * var(--custom-inner-border-thickness)) solid var(--custom-corner-color) !important; 
+        border-right: none !important; 
+        border-bottom: none !important; 
+    }
+    .top-right { 
+        top: calc(var(--custom-page-margin-y, 6mm) - 1mm) !important; 
+        right: calc(var(--custom-page-margin-x, 8mm) - 1mm) !important; 
+        border-top: calc(3 * var(--custom-inner-border-thickness)) solid var(--custom-corner-color) !important; 
+        border-right: calc(3 * var(--custom-inner-border-thickness)) solid var(--custom-corner-color) !important; 
+        border-left: none !important; 
+        border-bottom: none !important; 
+    }
+    .bottom-left { 
+        bottom: calc(var(--custom-page-margin-y, 6mm) - 1mm) !important; 
+        left: calc(var(--custom-page-margin-x, 8mm) - 1mm) !important; 
+        border-bottom: calc(3 * var(--custom-inner-border-thickness)) solid var(--custom-corner-color) !important; 
+        border-left: calc(3 * var(--custom-inner-border-thickness)) solid var(--custom-corner-color) !important; 
+        border-right: none !important; 
+        border-top: none !important; 
+    }
+    .bottom-right { 
+        bottom: calc(var(--custom-page-margin-y, 6mm) - 1mm) !important; 
+        right: calc(var(--custom-page-margin-x, 8mm) - 1mm) !important; 
+        border-bottom: calc(3 * var(--custom-inner-border-thickness)) solid var(--custom-corner-color) !important; 
+        border-right: calc(3 * var(--custom-inner-border-thickness)) solid var(--custom-corner-color) !important; 
+        border-left: none !important; 
+        border-top: none !important; 
+    }
+
+    /* Remove default headers/footers */
+    @page {
+        size: a4;
+        margin: 0 !important;
+    }
+}
+
+/* 10. PREMIUM WATERMARK OVERLAY STYLING (LIVE PREVIEW & PRINT READY) */
+.page-watermark {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    pointer-events: none;
+    z-index: 1; /* Sits directly behind text, inside inner border wrapper */
+    user-select: none;
+    overflow: hidden;
+}
+
+.watermark-text-el {
+    font-family: var(--font-heading);
+    font-weight: 900;
+    white-space: nowrap;
+    text-transform: uppercase;
+    pointer-events: none;
+    user-select: none;
+}
+
+/* Ensure all page content items sit on top of the watermark */
+.cover-page-content,
+.page-header,
+.page-content,
+.page-footer,
+.end-page-content {
+    position: relative;
+    z-index: 5; /* Forces content to render above watermark, enabling selection */
+}
+
+/* Inserted Images in notes styling */
+.inserted-image-container {
+    display: flex;
+    flex-direction: column;
+    margin: 8px 0;
+    max-width: 100%;
+    border: 1px dashed var(--secondary-color);
+    padding: 6px;
+    border-radius: 6px;
+    background-color: rgba(197, 163, 83, 0.03);
+    width: 100%;
+}
+
+.inserted-image {
+    max-height: 250px;
+    object-fit: contain;
+    border-radius: 4px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+
+.inserted-image-caption {
+    font-size: 11px;
+    color: var(--primary-color);
+    font-weight: 700;
+    margin-top: 4px;
+    font-family: var(--font-ui);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    text-align: center;
+    width: 100%;
+}
+
+
+/* --- APPENDED TWO COLUMN LAYOUTS --- */
+.page-content.layout-two-column {
+    display: block !important; /* Override flex layout so column-count works! */
+    column-count: 2;
+    column-gap: 20px;
+    column-rule: none !important; /* Disable standard rule to allow persistent pseudo-element divider */
+    flex-grow: 1 !important; /* Allow the flex container to control its height instead of hardcoding 100% */
+    height: auto !important;
+    column-fill: auto;
+    position: relative;
+}
+
+.page-content.layout-two-column::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: calc(50% - (var(--custom-divider-thickness, 1.5px) / 2));
+    width: 0;
+    border-left: var(--custom-divider-thickness, 1.5px) var(--custom-divider-style, dashed) var(--custom-divider-color, var(--secondary-color));
+    pointer-events: none;
+    z-index: 10;
+}
+
+/* Hide default divider when page contains a chapter header */
+.page-content.layout-two-column:has(.chapter-header)::after {
+    display: none !important;
+}
+
+/* Draw divider starting exactly below the chapter header on chapter pages */
+.page-content.layout-two-column .chapter-header::after {
+    content: "";
+    position: absolute;
+    top: calc(100% + 20px); /* Starts below the box (100% height + 20px bottom margin) */
+    left: calc(50% - (var(--custom-divider-thickness, 1.5px) / 2));
+    width: 0;
+    height: 1500px; /* Extends to the bottom, clipped by overflow:hidden on container */
+    border-left: var(--custom-divider-thickness, 1.5px) var(--custom-divider-style, dashed) var(--custom-divider-color, var(--secondary-color));
+    pointer-events: none;
+    z-index: 10;
+}
+
+.page-content.layout-two-column > * {
+    margin-bottom: 12px;
+    break-inside: avoid-column; /* Prevent elements from splitting halfway across columns */
+}
+
+/* Allow paragraphs, bullet lists, and tables to break across columns to fill gaps and look compact */
+.page-content.layout-two-column > p.body-text,
+.page-content.layout-two-column > .bullet-list,
+.page-content.layout-two-column > .markdown-table {
+    break-inside: auto;
+}
+
+/* Tables in two-column layouts are styled compactly to prevent excessive height inflation */
+.page-content.layout-two-column .markdown-table {
+    font-size: var(--table-body-font-size, calc(var(--content-font-size) - 2px));
+    line-height: 1.25;
+    margin: 6px 0;
+    width: 100% !important;
+    max-width: 100% !important;
+    table-layout: fixed; /* Force table to strictly respect column width */
+}
+.page-content.layout-two-column .markdown-table th {
+    font-size: var(--table-header-font-size, calc(var(--content-font-size) - 2px));
+}
+.page-content.layout-two-column .markdown-table td {
+    font-size: var(--table-body-font-size, calc(var(--content-font-size) - 2px));
+}
+.page-content.layout-two-column .markdown-table th,
+.page-content.layout-two-column .markdown-table td {
+    padding: 4px 8px;
+    word-break: break-word; /* Allow long words to break and wrap */
+    overflow-wrap: break-word;
+}
+.page-content.layout-two-column .markdown-table th {
+    white-space: normal; /* Allow header text to wrap */
+}
+.page-content.layout-two-column .markdown-table td {
+    white-space: normal;
+}
+.markdown-table th.table-col-no,
+.markdown-table td.table-col-no,
+.page-content.layout-two-column .markdown-table th.table-col-no,
+.page-content.layout-two-column .markdown-table td.table-col-no {
+    white-space: nowrap !important;
+    text-align: center;
+    min-width: 45px;
+}
+.page-content.layout-two-column .markdown-table tr {
+    break-inside: auto;
+}
+
+.markdown-table tr {
+    break-inside: avoid;
+}
+
+.page-content.layout-two-column .bullet-list {
+    display: block !important;
+}
+
+.page-content.layout-two-column .bullet-list > .bullet-item {
+    break-inside: auto; /* Allow individual list items to break across columns to fill gaps */
+    display: block !important;
+    margin-bottom: 5px;
+}
+
+/* Tight Compaction Mode: Removes all column break restrictions to eliminate blank spaces */
+body.tight-compaction .page-content.layout-two-column > * {
+    break-inside: auto !important;
+    break-after: auto !important;
+    break-before: auto !important;
+}
+
+body.tight-compaction .topic-container {
+    break-after: auto !important;
+    break-inside: auto !important;
+}
+
+body.tight-compaction .topic-container + .bullet-list,
+body.tight-compaction .topic-container + p.body-text,
+body.tight-compaction .topic-container + .highlight-box,
+body.tight-compaction .topic-container + .inserted-image-container,
+body.tight-compaction .topic-container + .markdown-table {
+    break-before: auto !important;
+}
+
+body.tight-compaction .page-content.layout-two-column .bullet-list > .bullet-item {
+    break-inside: auto !important;
+}
+
+body.tight-compaction .highlight-box,
+body.tight-compaction .premium-box,
+body.tight-compaction .personality-feature-card,
+body.tight-compaction .stats-callout-grid,
+body.tight-compaction .quick-facts-grid,
+body.tight-compaction .announcement-alert-box {
+    break-inside: auto !important;
+    break-after: auto !important;
+    break-before: auto !important;
+}
+
+.page-content.layout-two-column .section-heading-bar {
+    column-span: none;
+    display: block !important; /* Ensure it is a block container */
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+/* Manual Column Break element */
+.column-break {
+    break-before: column !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+}
+
+
+
+/* --- APPENDED CUSTOM PAGE TEMPLATES --- */
+/* ==========================================
+   CUSTOM PAGE TEMPLATE COMPONENTS (PREMIUM STYLES)
+   ========================================== */
+
+/* 1. Personality Feature Component */
+.personality-feature-card {
+    display: flex;
+    gap: 20px;
+    background: rgba(197, 163, 83, 0.04);
+    border: 1.5px solid var(--custom-inner-border-color);
+    border-radius: var(--border-radius-md);
+    padding: 16px;
+    margin: 12px 0;
+    align-items: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+}
+.personality-avatar-wrapper {
+    flex-shrink: 0;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 3px solid var(--custom-corner-color);
+    background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    font-size: 32px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+.personality-info {
+    flex-grow: 1;
+}
+.personality-name {
+    font-family: var(--font-heading);
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--custom-section-bg);
+    margin-bottom: 4px;
+}
+.personality-title {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--custom-topic-text);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+}
+.personality-description {
+    font-size: 12.5px;
+    line-height: 1.4;
+    color: #333333;
+}
+body.light-mode .personality-description {
+    color: #475569;
+}
+
+/* 2. Stats Callout Grid */
+.stats-callout-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 12px;
+    margin: 12px 0;
+}
+.stat-card {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.8), rgba(250, 250, 250, 0.9));
+    border: 1px solid var(--custom-inner-border-color);
+    border-radius: var(--border-radius-sm);
+    padding: 12px;
+    text-align: center;
+    transition: transform 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+.stat-card:hover {
+    transform: translateY(-2px);
+}
+.stat-number {
+    font-size: 26px;
+    font-weight: 900;
+    color: var(--custom-section-bg);
+    margin-bottom: 2px;
+    font-family: var(--font-heading);
+}
+.stat-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--custom-topic-text);
+    text-transform: uppercase;
+}
+.stat-desc {
+    font-size: 11px;
+    color: #64748b;
+    margin-top: 4px;
+}
+
+/* 3. Quick Facts Grid */
+.quick-facts-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin: 12px 0;
+}
+.fact-card {
+    background: #ffffff;
+    border-left: 4.5px solid var(--custom-section-border-left);
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+    border-right: 1px solid rgba(0, 0, 0, 0.06);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    border-radius: 4px;
+    padding: 10px 12px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+}
+.fact-title {
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--custom-topic-text);
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.fact-desc {
+    font-size: 11.5px;
+    color: #475569;
+    line-height: 1.35;
+}
+
+/* 4. Special Announcement Box */
+.announcement-alert-box {
+    background: linear-gradient(135deg, rgba(197, 163, 83, 0.05), rgba(29, 110, 165, 0.02));
+    border-left: 6px solid var(--custom-section-bg);
+    border-top: 1px solid rgba(197, 163, 83, 0.2);
+    border-right: 1px solid rgba(197, 163, 83, 0.2);
+    border-bottom: 1px solid rgba(197, 163, 83, 0.2);
+    border-radius: var(--border-radius-sm);
+    padding: 15px;
+    margin: 15px 0;
+    position: relative;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+}
+.announcement-title {
+    font-family: var(--font-heading);
+    font-size: 14.5px;
+    font-weight: 800;
+    color: var(--custom-section-bg);
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.announcement-content {
+    font-size: 12.5px;
+    line-height: 1.45;
+    color: #334155;
+}
+
+#smart-shrink-btn {
+    border: 1px dashed var(--ui-accent);
+    color: var(--ui-accent);
+    background-color: rgba(245, 158, 11, 0.08);
+    transition: var(--transition-smooth);
+}
+#smart-shrink-btn:hover {
+    background-color: var(--ui-accent);
+    color: white;
+    transform: translateY(-1px);
+}
+
+
+#remove-gaps-btn {
+    border: 1px dashed var(--ui-accent);
+    color: var(--ui-accent);
+    background-color: rgba(16, 185, 129, 0.08);
+    transition: var(--transition-smooth);
+}
+#remove-gaps-btn:hover {
+    background-color: var(--ui-accent);
+    color: white;
+    transform: translateY(-1px);
+}
+
+
+
+/* --- APPENDED SPOTLIGHT & MOBILE DRAWER --- */
+/* Smooth ambient spotlight glow for active text blocks in preview */
+.active-block-highlight {
+    outline: 2px dashed var(--ui-accent, #f59e0b) !important;
+    outline-offset: 4px !important;
+    border-radius: 4px !important;
+    background-color: rgba(245, 158, 11, 0.05) !important;
+    transition: outline-color 0.2s ease, background-color 0.2s ease;
+    animation: active-block-glow 2s infinite alternate;
+}
+
+@keyframes active-block-glow {
+    0% {
+        outline-color: rgba(245, 158, 11, 0.8);
+        box-shadow: 0 0 8px rgba(245, 158, 11, 0.15);
+    }
+    100% {
+        outline-color: rgba(245, 158, 11, 0.3);
+        box-shadow: 0 0 2px rgba(245, 158, 11, 0.02);
+    }
+}
+
+/* ==========================================================================
+   MOBILE-FRIENDLY PREVIEW DRAWER (SLIDE-OVER PREVIEW)
+   ========================================================================== */
+
+/* Hide mobile-specific buttons by default on desktop */
+.mobile-preview-toggle-btn {
+    display: none;
+}
+.mobile-preview-close-btn {
+    display: none;
+}
+
+@media screen and (max-width: 768px) {
+    /* Align floating editor controls on the exact same line as the mobile preview toggle button */
+    .floating-editor-controls {
+        position: fixed !important;
+        bottom: calc(30px + env(safe-area-inset-bottom, 0px)) !important;
+        left: calc(24px + env(safe-area-inset-left, 0px)) !important;
+        right: auto !important;
+        top: auto !important;
+        transform: none !important;
+        z-index: 1800 !important;
+    }
+
+    /* Make options settings layout single-column to prevent overflow on mobile devices */
+    .options-grid {
+        grid-template-columns: 1fr !important;
+        gap: 16px !important;
+    }
+
+    .option-item.full-width-opt {
+        grid-column: span 1 !important;
+    }
+
+    /* Hide resizer handle on mobile */
+    .resize-handle {
+        display: none !important;
+    }
+
+    /* Make editor panel fill screen width */
+    .editor-panel {
+        width: 100vw !important;
+        max-width: 100vw !important;
+        border-right: none !important;
+    }
+
+    /* Redesign editor header on mobile: 2-row layout */
+    .editor-header {
+        display: grid !important;
+        grid-template-columns: 1fr auto !important;
+        grid-template-rows: auto auto !important;
+        row-gap: 8px !important;
+        column-gap: 12px !important;
+        padding: 10px 12px !important;
+    }
+
+    .logo-area {
+        grid-column: 1 !important;
+        grid-row: 1 !important;
+        justify-self: start !important;
+    }
+
+    .author-credit {
+        grid-column: 2 !important;
+        grid-row: 1 !important;
+        justify-self: end !important;
+        padding-right: 0 !important;
+    }
+
+    .header-global-actions {
+        grid-column: 1 / span 2 !important;
+        grid-row: 2 !important;
+        justify-self: center !important;
+        width: 100% !important;
+        justify-content: center !important;
+        margin: 0 !important;
+        padding-top: 4px !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.04) !important;
+    }
+
+    /* Format A4 preview panel as a slide-over drawer */
+    .preview-panel {
+        position: fixed !important;
+        top: 0;
+        right: 0;
+        width: 100vw !important;
+        height: 100vh !important;
+        height: 100dvh !important; /* Dynamic viewport height to size above keyboard/bars */
+        z-index: 2500 !important;
+        transform: translateX(100%);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: -8px 0 24px rgba(0, 0, 0, 0.5);
+    }
+
+    .preview-panel.drawer-open {
+        transform: translateX(0);
+    }
+
+    /* Style the floating action button to open preview (compact circle) */
+    .mobile-preview-toggle-btn {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        position: fixed;
+        bottom: calc(30px + env(safe-area-inset-bottom, 0px)) !important;
+        right: calc(24px + env(safe-area-inset-right, 0px)) !important;
+        width: 50px !important;
+        height: 50px !important;
+        z-index: 1800 !important;
+        background: linear-gradient(135deg, var(--ui-accent) 0%, #818cf8 100%);
+        border: none;
+        color: white;
+        padding: 0 !important;
+        border-radius: 50% !important;
+        font-size: 20px !important;
+        cursor: pointer;
+        box-shadow: 0 4px 16px rgba(245, 158, 11, 0.4),
+                    inset 0 -2.5px 0 rgba(0,0,0,0.2),
+                    inset 0 2px 0 rgba(255,255,255,0.3);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        animation: mobile-preview-pulse 2s infinite alternate;
+    }
+
+    .mobile-preview-toggle-btn:hover {
+        transform: translateY(-2px) scale(1.05);
+        box-shadow: 0 6px 20px rgba(245, 158, 11, 0.6);
+    }
+
+    .mobile-preview-toggle-btn:active {
+        transform: scale(0.95);
+    }
+
+    @keyframes mobile-preview-pulse {
+        0% { box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3); }
+        100% { box-shadow: 0 4px 22px rgba(245, 158, 11, 0.6); }
+    }
+
+    /* Style the close button inside mobile preview panel (as a floating 3D close button at the bottom-right) */
+    .mobile-preview-close-btn {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        position: absolute !important;
+        bottom: calc(30px + env(safe-area-inset-bottom, 0px)) !important;
+        right: calc(24px + env(safe-area-inset-right, 0px)) !important;
+        width: 50px !important;
+        height: 50px !important;
+        z-index: 2800 !important; /* Higher than preview panel contents */
+        background: linear-gradient(135deg, var(--ui-danger, #ef4444) 0%, #f43f5e 100%) !important;
+        border: none !important;
+        color: white !important;
+        padding: 0 !important;
+        border-radius: 50% !important;
+        font-size: 24px !important;
+        font-weight: bold !important;
+        cursor: pointer;
+        box-shadow: 0 4px 16px rgba(239, 68, 68, 0.45),
+                    inset 0 -2.5px 0 rgba(0,0,0,0.25),
+                    inset 0 2px 0 rgba(255,255,255,0.3) !important;
+        transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+        line-height: 1;
+        margin: 0 !important;
+    }
+
+    .mobile-preview-close-btn:hover {
+        transform: translateY(-2px) scale(1.05) !important;
+        box-shadow: 0 6px 20px rgba(239, 68, 68, 0.6),
+                    inset 0 -2.5px 0 rgba(0,0,0,0.25),
+                    inset 0 2px 0 rgba(255,255,255,0.3) !important;
+        color: white !important;
+        background: linear-gradient(135deg, var(--ui-danger, #ef4444) 0%, #f43f5e 100%) !important;
+    }
+
+    .mobile-preview-close-btn:active {
+        transform: translateY(1px) scale(0.95) !important;
+    }
+
+    .preview-header {
+        padding: 10px 16px !important;
+        gap: 8px;
+    }
+
+    .preview-header h2 {
+        font-size: 12px !important;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* Disable normal page scroll when drawer is open */
+    body.mobile-drawer-active {
+        overflow: hidden !important;
+    }
+
+    /* Position stats inline next to the title on small mobile portrait screens */
+    .header-stats {
+        position: static !important;
+        transform: none !important;
+        margin-left: 8px !important;
+    }
+
+    /* ── Design Tab Cards: Mobile Responsive ── */
+    .design-tabs-grid {
+        /* On narrow screens, 3 columns may be too tight — keep 3 but tighten gap */
+        gap: 4px !important;
+        padding: 4px 3px !important;
+    }
+
+    .design-tab-card {
+        /* Ensure minimum touch target of 44px (Apple/Google HIG guidelines) */
+        min-width: 44px;
+        min-height: 44px;
+        /* Slightly reduce border-radius on small screens */
+        border-radius: 22px !important;
+        gap: 3px !important;
+        /* Hover effects should not fire on touch (use active instead) */
+        transform: none !important;
+    }
+
+    .design-tab-card:active {
+        /* Tactile press feedback on touch */
+        transform: scale(0.93) !important;
+        box-shadow:
+            0 2px 6px rgba(0, 0, 0, 0.6),
+            inset 0 1px 0 rgba(255, 255, 255, 0.06),
+            inset 0 3px 10px rgba(0, 0, 0, 0.5) !important;
+    }
+
+    .design-tab-card .card-icon {
+        /* Slightly smaller icon on very narrow screens */
+        font-size: 24px !important;
+    }
+
+    .design-tab-card .card-label {
+        font-size: 10px !important;
+        letter-spacing: 0 !important;
+    }
+}
+
+/* Mobile/Tablet Landscape Side-by-Side Override */
+@media screen and (max-width: 950px) and (orientation: landscape) {
+    .app-container {
+        display: flex !important;
+        flex-direction: row !important;
+    }
+
+    .editor-panel {
+        width: 45vw !important;
+        max-width: 50vw !important;
+        min-width: 280px !important;
+        border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+        display: flex !important;
+    }
+
+    .preview-panel {
+        position: relative !important;
+        transform: translateX(0) !important;
+        width: 55vw !important;
+        height: 100vh !important;
+        display: flex !important;
+        box-shadow: none !important;
+        z-index: 10 !important;
+    }
+
+    .mobile-preview-toggle-btn,
+    .mobile-preview-close-btn {
+        display: none !important;
+    }
+}
+

@@ -1,0 +1,585 @@
+/* ==========================================================================
+   SAMYAK - STYLING AND THEME SYSTEM (PAGE-BY-PAGE WORKSPACE)
+   ========================================================================== */
+
+/* 1. CSS VARIABLES & SYSTEM PRESETS */
+:root {
+    /* UI Dashboard Colors (Dark Theme) - Upgraded to Premium Cyber Slate */
+    --ui-bg: #09090b;
+    --ui-sidebar-bg: #121215;
+    --ui-card-bg: #18181b;
+    --ui-border: #27272a;
+    --ui-text: #f4f4f5;
+    --ui-text-muted: #a1a1aa;
+    --ui-accent: #f59e0b; /* Premium Amber Gold */
+    --ui-accent-hover: #d97706;
+    --ui-danger: #f43f5e; /* Rose Red */
+    --ui-danger-hover: #e11d48;
+    
+    /* Theme Colors (Default Maroon & Gold) */
+    --primary-color: #850f0f;      /* Deep Maroon/Burgundy */
+    --secondary-color: #c5a353;    /* Ochre Gold from raaz.pdf */
+    --accent-color: #1d6ea5;       /* Slate Teal Blue from raaz.pdf */
+    --page-bg: #ffffff;
+    --text-color: #000000;
+    --heading-color: #000000;
+    
+    --shadow-premium: 0 10px 30px rgba(0, 0, 0, 0.3);
+    --shadow-page: 0 12px 30px rgba(0, 0, 0, 0.12);
+    --border-radius-sm: 6px;
+    --border-radius-md: 10px;
+    --border-radius-lg: 16px;
+    
+    --transition-smooth: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+    
+    --content-font-size: 16.1px;
+    --content-font-weight: 500;
+    --content-line-height: 1.45;
+    --content-letter-spacing: 0px;
+    --table-header-font-size: 12.5px;
+    --table-body-font-size: 11.5px;
+    
+    --font-ui: 'Outfit', 'Poppins', 'Noto Sans Devanagari', sans-serif;
+    --font-heading: 'Mukta', 'Poppins', sans-serif;
+    --font-body: 'Mukta', 'Poppins', sans-serif;
+    --font-cover: 'Yatra One', cursive;
+
+    /* DYNAMIC CUSTOM DESIGN CUSTOM VARIABLES (USER CONTROL PANEL DRIVEN) */
+    --custom-section-bg: var(--primary-color);
+    --custom-section-text: #ffffff;
+    --custom-section-size: calc(var(--content-font-size) + 4.5px);
+    --custom-section-border-left: var(--accent-color);
+    --custom-section-align: left;
+    --custom-section-display: inline-block;
+    --custom-section-width: max-content;
+    --custom-section-align-self: flex-start;
+    --custom-section-border-right: none;
+    --custom-section-border-radius: 0 4px 4px 0;
+    
+    --custom-chapter-num-size: 20px;
+    --custom-chapter-title-size: 22px;
+    --custom-chapter-subtitle-size: 14px;
+    
+    --custom-topic-size: calc(var(--content-font-size) + 1.5px);
+    --custom-topic-text: var(--accent-color);
+    --custom-topic-border-style: dashed;
+    --custom-topic-border-color: var(--secondary-color);
+    --custom-topic-border-thickness: 1.5px;
+    --custom-topic-margin-top: 6px;
+    --custom-topic-margin-bottom: 3px;
+    --custom-topic-alignment: flex-start; /* flex-start=left, center=center, flex-end=right */
+    
+    --custom-inner-border-thickness: 0px;
+    --custom-inner-border-color: var(--secondary-color);
+    
+    --custom-corner-size: 10px;
+    --custom-corner-color: var(--secondary-color);
+
+    --custom-divider-thickness: 1.5px;
+    --custom-divider-style: dashed;
+    --custom-divider-color: var(--secondary-color);
+
+    /* PAGE MARGINS & PADDING CUSTOMIZATIONS */
+    --custom-page-margin-x: 8mm;
+    --custom-page-margin-y: 6mm;
+    --custom-page-padding-x: 6mm;
+    --custom-page-padding-y: 4mm;
+}
+
+/* Theme overrides */
+body.theme-lokbandhu-jaipur {
+    --primary-color: #c2410c;
+    --secondary-color: #9a3412;
+    --accent-color: #ea580c;
+    --heading-color: #c2410c;
+}
+
+body.theme-royal-navy {
+    --primary-color: #0e2743;
+    --secondary-color: #c49429;
+    --accent-color: #be2e2e;
+}
+
+body.theme-emerald-cream {
+    --primary-color: #083c2a;
+    --secondary-color: #b77a20;
+    --accent-color: #2b6cb0;
+}
+
+body.theme-midnight-gold {
+    --primary-color: #151b26;
+    --secondary-color: #c99324;
+    --accent-color: #2b8c8a;
+}
+
+body.theme-minimal-compact {
+    --primary-color: #1e293b;
+    --secondary-color: #a1a1aa;
+    --accent-color: #f59e0b;
+}
+
+body.theme-maroon-compact {
+    --primary-color: #850f0f;
+    --secondary-color: #c5a353;
+    --accent-color: #1d6ea5;
+}
+
+body.theme-navy-compact {
+    --primary-color: #0e2743;
+    --secondary-color: #c49429;
+    --accent-color: #be2e2e;
+}
+
+body.theme-emerald-compact {
+    --primary-color: #083c2a;
+    --secondary-color: #b77a20;
+    --accent-color: #2b6cb0;
+}
+
+/* 7 Brand New Unique & Aesthetic Visual Themes (Both Regular and Compact Variants) */
+body.theme-sakura-plum, body.theme-sakura-compact {
+    --primary-color: #5c1d3b;      /* Deep Plum */
+    --secondary-color: #f472b6;    /* Sakura Pink */
+    --accent-color: #be185d;       /* Rich Rose Pink */
+    --page-bg: #fffbfd;            /* Light Warm Plum Tint */
+    --text-color: #2e0e1d;
+    --heading-color: #1a050f;
+}
+
+body.theme-nordic-rust, body.theme-nordic-compact {
+    --primary-color: #064e3b;      /* Deep Pine Forest Green */
+    --secondary-color: #c2410c;    /* Warm Terracotta Rust Orange */
+    --accent-color: #b45309;       /* Rich Ochre Amber */
+    --page-bg: #fafaf9;            /* Soft Linen Beige Warm Tint */
+    --text-color: #1c1917;
+    --heading-color: #0c0a09;
+}
+
+body.theme-cyber-teal, body.theme-cyber-compact {
+    --primary-color: #0f172a;      /* Deep Midnight Slate */
+    --secondary-color: #06b6d4;    /* Glowing Cyan */
+    --accent-color: #3b82f6;       /* Premium Blue */
+    --page-bg: #f4f4f5;            /* Crisp Ice Blue Tint */
+    --text-color: #1e293b;
+    --heading-color: #0f172a;
+}
+
+body.theme-crimson-luxury, body.theme-crimson-compact {
+    --primary-color: #991b1b;      /* Deep Ruby Crimson */
+    --secondary-color: #4b5563;    /* Cool Platinum Slate */
+    --accent-color: #dc2626;       /* Vibrant Ruby Red */
+    --page-bg: #ffffff;
+    --text-color: #111827;
+    --heading-color: #030712;
+}
+
+body.theme-vintage-bronze, body.theme-vintage-compact {
+    --primary-color: #451a03;      /* Deep Bronze Brown */
+    --secondary-color: #d97706;    /* Rich Ochre Gold */
+    --accent-color: #b45309;       /* Warm Amber Red */
+    --page-bg: #fffbeb;            /* Warm Antique Cream */
+    --text-color: #292524;
+    --heading-color: #1c1917;
+}
+
+body.theme-lavender-dusk, body.theme-lavender-compact {
+    --primary-color: #1e1b4b;      /* Deep Royal Indigo */
+    --secondary-color: #a78bfa;    /* Calming Lavender */
+    --accent-color: #6d28d9;       /* Vivid Violet */
+    --page-bg: #faf9ff;            /* Soft Mist Lavender */
+    --text-color: #1e1b4b;
+    --heading-color: #0f172a;
+}
+
+body.theme-sand-espresso, body.theme-espresso-compact {
+    --primary-color: #271a15;      /* Warm Rich Espresso */
+    --secondary-color: #c5a880;    /* Sleek Desert Sand Gold */
+    --accent-color: #8a5e38;       /* Deep Earthy Amber */
+    --page-bg: #fcfbf7;            /* Elegant Alabaster */
+    --text-color: #2e2521;
+    --heading-color: #1b110e;
+}
+
+/* 4 Ink-Saving Print-Friendly Visual Themes (Pure White Backgrounds) */
+body.theme-mono-classic, body.theme-mono-compact {
+    --primary-color: #111111;      /* Charcoal Black */
+    --secondary-color: #6b7280;    /* Muted Slate Grey */
+    --accent-color: #000000;       /* Pitch Black */
+    --page-bg: #ffffff;            /* Pure White (No Ink Waste) */
+    --text-color: #000000;         /* High Contrast Black */
+    --heading-color: #000000;
+}
+
+body.theme-print-navy, body.theme-print-navy-compact {
+    --primary-color: #0f172a;      /* Deep Corporate Slate Navy */
+    --secondary-color: #64748b;    /* Muted Slate Grey */
+    --accent-color: #1e3a8a;       /* Dark Royal Blue */
+    --page-bg: #ffffff;            /* Pure White */
+    --text-color: #1e293b;         /* Deep Slate Dark Text */
+    --heading-color: #0f172a;
+}
+
+body.theme-print-teal, body.theme-print-teal-compact {
+    --primary-color: #115e59;      /* Deep Forest Teal */
+    --secondary-color: #4b5563;    /* Professional Cool Grey */
+    --accent-color: #0f766e;       /* Teal Accent */
+    --page-bg: #ffffff;            /* Pure White */
+    --text-color: #1f2937;         /* High Contrast Dark Text */
+    --heading-color: #115e59;
+}
+
+body.theme-print-burgundy, body.theme-print-burgundy-compact {
+    --primary-color: #581c25;      /* Deep Burgundy Wine */
+    --secondary-color: #881337;    /* Warm Muted Rose */
+    --accent-color: #701a2c;       /* Muted Crimson */
+    --page-bg: #ffffff;            /* Pure White */
+    --text-color: #1a1a1a;         /* Near Black Dark Text */
+    --heading-color: #581c25;
+}
+
+body.theme-cyber-synth, body.theme-synth-compact {
+    --primary-color: #0c0721;      /* Midnight Purple-Blue */
+    --secondary-color: #ff007f;    /* Neon Pink */
+    --accent-color: #00f0ff;       /* Glowing Cyan */
+    --page-bg: #f5f3ff;            /* Cyber Lavender-White Tint */
+    --text-color: #120b33;
+    --heading-color: #0c0721;
+}
+
+body.theme-origami-slate, body.theme-origami-compact {
+    --primary-color: #1e293b;      /* Heavy Slate Grey */
+    --secondary-color: #a1a1aa;    /* Soft Silver Grey */
+    --accent-color: #0f766e;       /* Cool Teal Accent */
+    --page-bg: #ffffff;            /* Clean Pure White */
+    --text-color: #0f172a;
+    --heading-color: #1e293b;
+}
+
+body.theme-royal-durbar, body.theme-durbar-compact {
+    --primary-color: #7a3109;      /* Deep Burnt Amber */
+    --secondary-color: #de790f;    /* Client Brand Gold */
+    --accent-color: #b85d08;       /* Warm Rich Amber */
+    --page-bg: #fff9f0;            /* Warm Ivory Cream */
+    --text-color: #2a1505;         /* Deep Espresso */
+    --heading-color: #4a1e04;      /* Dark Amber Heading */
+}
+
+body.theme-emerald-empire, body.theme-empire-compact {
+    --primary-color: #064e3b;      /* Imperial Emerald Green */
+    --secondary-color: #d97706;    /* Indian Marigold Gold */
+    --accent-color: #059669;       /* Royal Saffron Mint */
+    --page-bg: #f0fdf4;            /* Antique Warm Mint White */
+    --text-color: #022c22;
+    --heading-color: #064e3b;
+}
+
+body.theme-gothic-velvet, body.theme-velvet-compact {
+    --primary-color: #2e1065;      /* Deep Velvet Indigo-Violet */
+    --secondary-color: #b45309;    /* Antique Gold / Bronze Gold */
+    --accent-color: #db2777;       /* Shimmering Rose Gold */
+    --page-bg: #fafaf9;            /* Vintage Alabaster Cream */
+    --text-color: #0f051d;
+    --heading-color: #1e0c3b;
+}
+
+body.theme-kyoto-zen, body.theme-zen-compact {
+    --primary-color: #991b1b;      /* Imperial Urushi Crimson Red */
+    --secondary-color: #fbcfe8;    /* Soft Kyoto Cherry Blossom Pink */
+    --accent-color: #4b5563;       /* Rich Terracotta / Stone Grey */
+    --page-bg: #fafaf6;            /* Clean Washi Paper Ivory */
+    --text-color: #1c1917;
+    --heading-color: #7f1d1d;
+}
+
+/* ==========================================
+   10 BRAND-NEW ULTRA-PREMIUM THEMES
+   ========================================== */
+
+/* 0A. Sunset Premium */
+body.theme-lokbandhu-surya, body.theme-surya-compact {
+    --primary-color: #8c1d1d;      /* Deep Royal Crimson */
+    --secondary-color: #f59e0b;    /* Sunset Amber */
+    --accent-color: #c2410c;       /* Warm Rust Orange */
+    --page-bg: #fffbeb;            /* Sun-glow Warm Alabaster */
+    --text-color: #311005;         /* Espresso Dusk */
+    --heading-color: #5f1515;      /* Deep Crimson-Mahogany */
+}
+
+/* 0B. Honey & Saffron */
+body.theme-lokbandhu-madhu, body.theme-madhu-compact {
+    --primary-color: #78350f;      /* Rich Honey-Amber Brown */
+    --secondary-color: #f97316;    /* Saffron Orange */
+    --accent-color: #eab308;       /* Saffron Yellow */
+    --page-bg: #fffdf5;            /* Delicate Cream Honey */
+    --text-color: #240f04;         /* Dark Cocoa */
+    --heading-color: #542003;      /* Rich Bronze Espresso */
+}
+
+/* 0C. Sacred Royal Ember */
+body.theme-lokbandhu-agni, body.theme-agni-compact {
+    --primary-color: #3b160b;      /* Deep Charcoal Mahogany */
+    --secondary-color: #ea580c;    /* Fiery Orange */
+    --accent-color: #d97706;       /* Blazing Fire Gold */
+    --page-bg: #fdfbf7;            /* Clean Ash Ivory */
+    --text-color: #1c0d08;         /* Obsidian Ash */
+    --heading-color: #3b160b;      /* Sacred Mahogany */
+}
+
+/* 0D. Sandalwood & Heritage Brass */
+body.theme-lokbandhu-chandan, body.theme-chandan-compact {
+    --primary-color: #5c3a21;      /* Sandalwood Dark Wood */
+    --secondary-color: #c29b53;    /* Heritage Brass Gold */
+    --accent-color: #855a30;       /* Warm Sandalwood Clay */
+    --page-bg: #fefbf5;            /* Premium Alabaster Sandalwood */
+    --text-color: #1c1109;         /* Chandan Charcoal */
+    --heading-color: #3e2614;      /* Deep Sandalwood */
+}
+
+/* 1. Gothic Royal Black */
+body.theme-gothic-royal, body.theme-royal-compact-v2 {
+    --primary-color: #4a0e17;      /* Gothic Burgundy */
+    --secondary-color: #b8860b;    /* Rich Antique Gold */
+    --accent-color: #1a1a1a;       /* Charcoal Accent */
+    --page-bg: #fffdf9;            /* Vintage Cream Parchment */
+    --text-color: #000000;         /* Jet Black Text */
+    --heading-color: #4a0e17;
+}
+
+/* 2. Zen Kyoto & Ink */
+body.theme-kyoto-ink, body.theme-kyoto-compact-ink {
+    --primary-color: #111111;      /* Sumi Ink Black */
+    --secondary-color: #b22222;    /* Lacquer Crimson Red */
+    --accent-color: #cda557;       /* Kyoto Blossom Gold */
+    --page-bg: #fdfcf7;            /* Textured Off-White Washi Paper */
+    --text-color: #000000;         /* Jet Black Text */
+    --heading-color: #111111;
+}
+
+/* 3. Athenian Temple Gold */
+body.theme-athenian-gold, body.theme-athenian-compact-v2 {
+    --primary-color: #0b2240;      /* Deep Athenian Blue */
+    --secondary-color: #c5a059;    /* Hellenic Temple Gold */
+    --accent-color: #4a5d3e;       /* Olive Accent */
+    --page-bg: #fffefa;            /* Classical Marble Ivory */
+    --text-color: #000000;         /* Jet Black Text */
+    --heading-color: #0b2240;
+}
+
+/* 4. Warm Autumn Vintage */
+body.theme-autumn-vintage, body.theme-autumn-compact-v2 {
+    --primary-color: #5c2e16;      /* Warm Copper Brown */
+    --secondary-color: #d48227;    /* Spiced Amber Gold */
+    --accent-color: #1a4329;       /* Forest Evergreen */
+    --page-bg: #fefaf4;            /* Oatmeal Cream */
+    --text-color: #000000;         /* Jet Black Text */
+    --heading-color: #5c2e16;
+}
+
+/* 5. Maharaja Palace Gold */
+body.theme-maharaja-gold, body.theme-maharaja-compact-v2 {
+    --primary-color: #800020;      /* Palace Crimson */
+    --secondary-color: #e6a100;    /* Marigold Gold */
+    --accent-color: #008080;       /* Velvet Turquoise */
+    --page-bg: #fffdf0;            /* Palace Cream */
+    --text-color: #000000;         /* Jet Black Text */
+    --heading-color: #800020;
+}
+
+/* 6. Baroque Victorian Prestige */
+body.theme-victorian-prestige, body.theme-victorian-compact-v2 {
+    --primary-color: #004743;      /* Forest Teal */
+    --secondary-color: #a3761a;    /* Antique Bronze Gold */
+    --accent-color: #8b1e3f;       /* Crimson Rose */
+    --page-bg: #fafaf8;            /* Alabaster Silk */
+    --text-color: #000000;         /* Jet Black Text */
+    --heading-color: #004743;
+}
+
+/* 7. Neo-Gothic Obsidian */
+body.theme-neo-gothic, body.theme-neo-gothic-compact {
+    --primary-color: #1a1a1a;      /* Obsidian Black */
+    --secondary-color: #e8a838;    /* Cyber Amber Gold */
+    --accent-color: #ab4b3c;       /* Muted Copper Red */
+    --page-bg: #f2f4f7;            /* Cool Stone Grey */
+    --text-color: #000000;         /* Jet Black Text */
+    --heading-color: #1a1a1a;
+}
+
+/* 8. Royal Sapphire Luxury */
+body.theme-royal-sapphire, body.theme-sapphire-compact-v2 {
+    --primary-color: #0f2b5c;      /* Royal Sapphire Blue */
+    --secondary-color: #d4af37;    /* Shimmering Gold */
+    --accent-color: #5c6b73;       /* Platinum Grey */
+    --page-bg: #f5f8fa;            /* Cool Ice White */
+    --text-color: #000000;         /* Jet Black Text */
+    --heading-color: #0f2b5c;
+}
+
+/* 9. Imperial Jade Emperor */
+body.theme-jade-emperor, body.theme-jade-compact-v2 {
+    --primary-color: #0c3d2e;      /* Imperial Jade Green */
+    --secondary-color: #d4af37;    /* Golden Seal Gold */
+    --accent-color: #5a8f7b;       /* Sage Accent */
+    --page-bg: #faf8f0;            /* Ancient Silk Parchment */
+    --text-color: #000000;         /* Jet Black Text */
+    --heading-color: #0c3d2e;
+}
+
+/* 10. Sun-Drenched Vintage Oasis */
+body.theme-vintage-oasis, body.theme-oasis-compact-v2 {
+    --primary-color: #8a4b2d;      /* Desert Clay Brown */
+    --secondary-color: #c9a25d;    /* Sand Gold */
+    --accent-color: #3a5f43;       /* Palm Sage Green */
+    --page-bg: #fefcf5;            /* Desert Sand Gold White */
+    --text-color: #000000;         /* Jet Black Text */
+    --heading-color: #8a4b2d;
+}
+
+/* Super Compact spacing overrides when compact mode is active */
+body.compact-mode .section-heading-bar {
+    padding: 3px 10px !important;
+    margin: 3px 0 !important;
+    font-size: calc(var(--custom-section-size) - 1.5px) !important;
+}
+
+body.compact-mode .topic-container {
+    margin-top: 2px !important;
+    margin-bottom: 1px !important;
+}
+
+body.compact-mode .topic-title {
+    font-size: calc(var(--custom-topic-size) - 1px) !important;
+    padding-bottom: 1px !important;
+}
+
+body.compact-mode .premium-box {
+    margin: 3px 0 !important;
+    padding: 6px 12px !important;
+}
+
+body.compact-mode .highlight-box {
+    margin: 2px 0 !important;
+    padding: 4px 8px !important;
+}
+
+body.compact-mode p.body-text {
+    margin-bottom: 2px !important;
+    line-height: 1.3 !important;
+}
+
+body.compact-mode .bullet-list {
+    gap: 2px !important;
+}
+
+body.compact-mode .bullet-item {
+    line-height: 1.3 !important;
+}
+
+/* Font Style Overrides */
+body.font-poppins-sans {
+    --font-heading: 'Poppins', 'Noto Sans Devanagari', sans-serif;
+    --font-body: 'Poppins', 'Noto Sans Devanagari', sans-serif;
+    --font-cover: 'Rozha One', serif;
+}
+
+body.font-traditional-serif {
+    --font-heading: 'Martel', 'Noto Serif Devanagari', serif;
+    --font-body: 'Martel', 'Noto Serif Devanagari', serif;
+    --font-cover: 'Martel', serif;
+}
+
+body.font-hybrid-style {
+    --font-heading: 'Rozha One', 'Noto Serif Devanagari', serif;
+    --font-body: 'Poppins', 'Noto Sans Devanagari', sans-serif;
+    --font-cover: 'Rozha One', serif;
+}
+
+/* 2. BASICS & LAYOUT RESET */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-ui);
+    background: radial-gradient(circle at 10% 20%, rgba(245, 158, 11, 0.12) 0%, transparent 45%),
+                radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.12) 0%, transparent 45%),
+                #07070c;
+    color: var(--ui-text);
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+}
+
+sup, sub {
+    font-size: 70%;
+    line-height: 0;
+    position: relative;
+    vertical-align: baseline;
+}
+
+sup {
+    top: -0.5em;
+}
+
+sub {
+    bottom: -0.25em;
+}
+
+/* 3. SPLIT-PANEL DASHBOARD */
+.app-container {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+}
+
+
+/* --- APPENDED GLOBAL SCROLLBARS --- */
+/* ==========================================================================
+   GLOBAL PREMIUM SCROLLBAR STYLING
+   ========================================================================== */
+
+/* Style all scrollbars on webkit engines (Chrome, Safari, Edge, Brave) */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    border: 1px solid transparent;
+    background-clip: padding-box;
+    transition: background 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--ui-accent, #f59e0b) !important;
+    border: 1px solid transparent;
+    background-clip: padding-box;
+}
+
+/* Light mode scrollbar thumb override */
+body.light-mode ::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.15);
+}
+
+body.light-mode ::-webkit-scrollbar-thumb:hover {
+    background: var(--ui-accent, #f59e0b) !important;
+}
+
+/* Firefox support for global scrollbar */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.12) transparent;
+}
+
+body.light-mode * {
+    scrollbar-color: rgba(0, 0, 0, 0.15) transparent;
+}
+
