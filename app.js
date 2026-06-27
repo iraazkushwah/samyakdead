@@ -4002,7 +4002,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // 4. Scroll A4 preview smoothly to corresponding page and spotlight it
-        const showCover = (pagesData[0] && pagesData[0].showCoverPage !== false);
         const pageSelectorIndex = index === 0 ? 1 : index + (showCover ? 1 : 0);
         const targetPageElement = document.querySelector(`.a4-page[data-page="${pageSelectorIndex}"]`);
         if (targetPageElement) {
@@ -10294,6 +10293,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const maxIterations = 30;
         let iteration = 0;
         let fixedCount = 0;
+        const showCover = (pagesData[0] && pagesData[0].showCoverPage !== false);
 
         while (iteration < maxIterations) {
             iteration++;
@@ -10313,7 +10313,6 @@ document.addEventListener('DOMContentLoaded', () => {
             
             for (let page of renderedPages) {
                 const pageNum = parseInt(page.getAttribute('data-page'));
-                const showCover = (pagesData[0] && pagesData[0].showCoverPage !== false);
                 const visualPageNum = showCover ? pageNum - 1 : pageNum;
                 const contentEl = page.querySelector('.page-content');
                 if (!contentEl) continue;
@@ -10380,7 +10379,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!block) break;
             
             // Check if this block is the first element on the page
-            const showCover = (pagesData[0] && pagesData[0].showCoverPage !== false);
             const dataPageNum = report.page + (showCover ? 1 : 0);
             const pageDOM = pagesContainer.querySelector(`.a4-page[data-page="${dataPageNum}"]`);
             const firstNodeOnPage = pageDOM ? pageDOM.querySelector('.page-content [data-block-id]') : null;
