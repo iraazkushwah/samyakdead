@@ -2561,7 +2561,7 @@ export function clearHeightEstimationCache() {
     export function reorderDocumentSectionsByTOC(draggedName, targetName, isBefore) {
         parserCallbacks.saveCurrentInputState(); // Capture latest text state of all inputs
 
-        export function normalizeSecName(name) {
+        function normalizeSecName(name) {
             if (!name) return '';
             return name.replace(/^#+\s*/, '')
                        .replace(/[^a-zA-Z0-9\u0900-\u097F]/g, '')
